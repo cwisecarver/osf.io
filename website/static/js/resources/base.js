@@ -5,15 +5,71 @@ var URI = require('URIjs');
 var oop = require('js/oop');
 var $ = require('jquery');
 
-var DOMAIN = '';
+var BaseModel = oop.defclass({  // jshint ignore:line
+    /** Params is the data from the server. */
+    name: null,
+    constructor: function userConstructor(params) {
+        $.extend(this, params);
+    },
+    toString: function userToString() {
+        return '[' + this.name + ' ' + this.id + ']';
+    }
+});
 
 var BaseClient = oop.defclass({
-    PREFIX: '/api',
     DEFAULT_AJAX_OPTIONS: {
-        contentType: 'application/json',
+        contentType: 'application/vnd.api+json',
         dataType: 'json'
     },
-    constructor: function() {},
+    model: null,
+    path_segment: null,
+    name: null,
+    detail: function(params) {
+        params = params || {};
+        var id = params.id;
+        var ret = $.Deferred();
+        var Model = this.model;
+        this._request({url: '/'+this.path_segment+'/'+id+'/'})
+            .done(function handleResonse(resp) {
+                    var user = new Model(resp.data);
+                    ret.resolve(user);
+                })
+            .fail(captureError('Could not fetch individual ' + this.name + '.'));
+        return ret.promise();
+    },
+    list: function(params) {
+        /**
+         * Return a promise that resolves to an Array of this.model objects.
+         * @param {object} params
+         *  {number} pageSize
+         */
+         var listingQSParams = {
+             pageSize: 'page[size]',
+             // TODO: Support filtering and other querystring enabled features.
+         };
+        params = params || {};
+        var ret = $.Deferred();
+        var queryStringObject = {};
+        for(var key in params) {
+            if(listingQSParams.hasOwnProperty(key)) {
+                queryStringObject[listingQSParams[key]] = params[key];
+            }
+        }
+
+        var Model = this.model;
+        this._request({
+                url: '/'+this.path_segment+'/',
+                query: queryStringObject
+            })
+            .done(function handleResponse(resp) {
+                var items = $.map(resp.data, function instantiateItem(data) {
+                    return new Model(data);
+                });
+                ret.resolve(items);
+            }).fail(captureError('Could not fetch ' + this.name + ' list.'));
+
+        return ret.promise();
+    },
     /**
      * Make an API request.
      * NOTE: Assumes request bodies are JSON.
@@ -26,18 +82,22 @@ var BaseClient = oop.defclass({
      *  {object} options: Additional options to pass to $.ajax
      */
     _request: function(params) {
-        var baseUrl = DOMAIN + this.PREFIX + params.url;
+        var baseUrl = $.osf.apiV2Url(params.url, {});
         var uri = URI(baseUrl)
             .query(params.query || {}).toString();
         var jsonData = JSON.stringify(params.data || {});
-        console.log(uri);
         var opts = $.extend(
             {},
-            {url: uri, data: jsonData, type: params.method || 'GET'}, this.DEFAULT_AJAX_OPTIONS,
+            {
+                url: uri,
+                data: jsonData,
+                type: params.method || 'GET',
+            },
+            this.DEFAULT_AJAX_OPTIONS,
             params.options
         );
         return $.ajax(opts);
-    }
+    },
 });
 
 /**
@@ -61,5 +121,6 @@ function captureError(message, callback) {
 
 module.exports = {
     BaseClient: BaseClient,
+    BaseModel: BaseModel,
     captureError: captureError
 };

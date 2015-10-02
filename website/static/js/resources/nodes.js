@@ -23,45 +23,17 @@ var oop = require('js/oop');
 var $ = require('jquery');
 
 /** Node model */
-var Node = oop.defclass({  // jshint ignore:line
-    /** Params is the data from the server. */
-    constructor: function(params) {
-        this.id = params.id;
-        this.title = params.title;
-        this.description = params.description;
-        this.isPublic = params.is_public;
-    },
-    toString: function() {
-        return '[Node ' + this.id + ']';
-    }
+var NodeInstance = $.extend(base.BaseModel, {
+    name: 'Node'
 });
 
-
 var NodeClient = oop.extend(base.BaseClient, {
-    /**
-     * Return a promise that resolves to an Array of Node objects.
-     * @param {object} params
-     *  {number} pageSize
-     */
-    list: function(params) {
-        params = params || {};
-        var ret = $.Deferred();
-        // TODO: page numbber, filtering etc.
-        var query = params.pageSize != null ? 'page[size]=' + params.pageSize : '';
-        this._request({url: '/nodes/',
-                      query: query})
-            .done(function(resp) {
-                var nodes = $.map(resp.data, function(nodeData) {
-                    return new Node(nodeData);
-                });
-                ret.resolve(nodes);
-            }).fail(base.captureError('Could not fetch nodes list.'));
-        return ret.promise();
-    }
-    // TODO: detail(nodeID)
+    model: NodeInstance,
+    path_segment: 'nodes',
+    name: 'node'
 });
 
 module.exports = {
-    Node: Node,
+    Node: NodeInstance,
     NodeClient: NodeClient
 };
