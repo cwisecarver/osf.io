@@ -30,6 +30,8 @@ from framework.sessions.model import Session
 from framework.sessions.utils import remove_sessions_for_user
 
 from website import mails, settings, filters, security
+from website.frozen_trees.mixins import FreezerSafe
+from website.frozen_trees.schemas import UserSchema
 
 name_formatters = {
     'long': lambda user: user.fullname,
@@ -171,7 +173,7 @@ class Auth(object):
         )
 
 
-class User(GuidStoredObject, AddonModelMixin):
+class User(GuidStoredObject, AddonModelMixin, FreezerSafe):
 
     # Node fields that trigger an update to the search engine on save
     SEARCH_UPDATE_FIELDS = {
@@ -187,6 +189,8 @@ class User(GuidStoredObject, AddonModelMixin):
         'schools',
         'social',
     }
+
+    freezer_schema = UserSchema
 
     # TODO: Add SEARCH_UPDATE_NODE_FIELDS, for fields that should trigger a
     #   search update for all nodes to which the user is a contributor.

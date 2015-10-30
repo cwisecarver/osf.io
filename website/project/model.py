@@ -5,21 +5,21 @@ import os
 import re
 import urllib
 import logging
-import pymongo
 import datetime
 import urlparse
 from collections import OrderedDict
 import warnings
 
+import pymongo
 import pytz
 from flask import request
 from django.core.urlresolvers import reverse
-
 from modularodm import Q
 from modularodm import fields
 from modularodm.validators import MaxLengthValidator
 from modularodm.exceptions import NoResultsFound
 from modularodm.exceptions import ValidationTypeError
+
 from modularodm.exceptions import ValidationValueError
 
 from api.base.utils import absolute_reverse
@@ -40,8 +40,9 @@ from framework.analytics import (
 from framework.sentry import log_exception
 from framework.transactions.context import TokuTransaction
 from framework.utils import iso8601format
-
 from website import language, mails, settings, tokens
+from website.frozen_trees import schemas
+from website.frozen_trees.mixins import FreezerSafe
 from website.util import web_url_for
 from website.util import api_url_for
 from website.util import sanitize
@@ -140,7 +141,9 @@ def validate_comment_reports(value, *args, **kwargs):
             )
 
 
-class Comment(GuidStoredObject):
+class Comment(GuidStoredObject, FreezerSafe):
+
+    freezer_schema = schemas.CommentSchema
 
     _id = fields.StringField(primary=True)
 
@@ -543,7 +546,7 @@ class NodeUpdateError(Exception):
         self.reason = reason
 
 
-class Node(GuidStoredObject, AddonModelMixin, IdentifierMixin):
+class Node(GuidStoredObject, AddonModelMixin, IdentifierMixin, FreezerSafe):
 
     #: Whether this is a pointer or not
     primary = True
@@ -573,6 +576,8 @@ class Node(GuidStoredObject, AddonModelMixin, IdentifierMixin):
         'wiki_pages_current',
         'is_retracted',
     }
+
+    freezer_schema = schemas.NodeSchema
 
     # Maps category identifier => Human-readable representation for use in
     # titles, menus, etc.
@@ -2900,6 +2905,7 @@ class Node(GuidStoredObject, AddonModelMixin, IdentifierMixin):
             'is_registration': self.is_registration,
         }
 
+
     def _initiate_retraction(self, user, justification=None):
         """Initiates the retraction process for a registration
         :param user: User who initiated the retraction
@@ -3345,8 +3351,10 @@ class EmailApprovableSanction(Sanction):
         self.save()
 
 
-class Embargo(EmailApprovableSanction):
+class Embargo(EmailApprovableSanction, FreezerSafe):
     """Embargo object for registrations waiting to go public."""
+
+    freezer_schema = schemas.EmbargoSchema
 
     COMPLETED = 'completed'
     DISPLAY_NAME = 'Embargo'
@@ -3489,8 +3497,10 @@ class Embargo(EmailApprovableSanction):
         self.approve(user, token)
 
 
-class Retraction(EmailApprovableSanction):
+class Retraction(EmailApprovableSanction, FreezerSafe):
     """Retraction object for public registrations."""
+
+    freezer_schema = schemas.RetractionSchema
 
     DISPLAY_NAME = 'Retraction'
     SHORT_NAME = 'retraction'
