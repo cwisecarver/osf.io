@@ -36,6 +36,7 @@ from website.addons.base import views as addon_views
 from website.discovery import views as discovery_views
 from website.conferences import views as conference_views
 from website.notifications import views as notification_views
+from website.frozen_trees import views as frozen_tree_views
 
 def get_globals():
     """Context variables that are available for every template rendered by
@@ -166,6 +167,10 @@ def make_url_map(app):
     process_rules(app, [
         Rule('/favicon.ico', 'get', favicon, json_renderer),
         Rule('/robots.txt', 'get', robots, json_renderer),
+    ])
+
+    process_rules(app, [
+        Rule('/freeze/<user_id>/', 'get', frozen_tree_views.display_tree, OsfWebRenderer('frozen_tree.mako')),
     ])
 
     ### Base ###

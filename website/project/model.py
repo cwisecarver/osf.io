@@ -80,6 +80,12 @@ def has_anonymous_link(node, auth):
     )
 
 
+class Freeze(StoredObject):
+    _id = fields.StringField()
+    value = fields.DictionaryField()
+    updated = fields.DateTimeField(default=datetime.datetime.now(tz=pytz.UTC))
+    name = fields.StringField()
+
 class MetaSchema(StoredObject):
 
     _id = fields.StringField(default=lambda: str(ObjectId()))
@@ -267,7 +273,9 @@ class Comment(GuidStoredObject, FreezerSafe):
 
 
 @unique_on(['params.node', '_id'])
-class NodeLog(StoredObject):
+class NodeLog(StoredObject, FreezerSafe):
+
+    freezer_schema = schemas.NodeLogSchema
 
     _id = fields.StringField(primary=True, default=lambda: str(ObjectId()))
 
