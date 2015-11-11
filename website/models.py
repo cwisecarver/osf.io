@@ -37,7 +37,7 @@ MODELS = (
     CitationStyle, ExternalAccount, Identifier,
     Embargo, Retraction, RegistrationApproval,
     ArchiveJob, ArchiveTarget, BlacklistGuid, Sanction,
-    QueuedMail, Freeze
+    QueuedMail, Freeze,
     NodeLicense, NodeLicenseRecord
 )
 
