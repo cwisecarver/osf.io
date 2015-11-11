@@ -64,7 +64,10 @@ class UserSerializer(JSONAPISerializer):
         return obj.absolute_url
 
     def profile_image_url(self, user):
-        size = self.context['request'].query_params.get('profile_image_size')
+        try:
+            size = self.context['request'].query_params.get('profile_image_size')
+        except KeyError as ex:
+            size = 100
         return user.profile_image_url(size=size)
 
     def update(self, instance, validated_data):

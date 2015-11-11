@@ -19,8 +19,14 @@ def display_tree(user_id):
         try:
             start_time[user_id] = int(time.time())
             print '{} Working on user {}'.format(start_time[user_id], user_id)
-            user_dump = json.dumps(user.freeze(model='user'), indent=4)
-            user_dumps[user_id] = user_dump
+            # user_dump = json.dumps(user.freeze(model='user'), indent=4)
+
+            stuff = list(user.contributor_to)
+            things = list(user.created)
+            yep = 'uh huh'
+
+            # for [local, model, remote], _id in user._backrefs
+            # user_dumps[user_id] = user_dump
         except Exception as ex:
             finish_time[user_id] = int(time.time())
             diff[user_id] = finish_time[user_id] - start_time[user_id]
