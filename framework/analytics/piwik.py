@@ -7,7 +7,10 @@ from urllib import urlencode
 
 import requests
 
+from framework.postcommit_tasks.handlers import run_postcommit
 from website import settings
+
+from framework.celery_tasks import app
 
 
 class PiwikException(Exception):
@@ -149,6 +152,8 @@ def _change_view_access(users, node, access):
         )
 
 
+@run_postcommit(once_per_request=False, celery=True)
+@app.task(max_retries=5, default_retry_delay=60)
 def _provision_node(node):
     response = requests.post(
         settings.PIWIK_HOST,
@@ -164,7 +169,8 @@ def _provision_node(node):
             ],
         }
     )
-
+    # we're in celery, let's just be sure
+    node.reload()
     try:
         node.piwik_site_id = json.loads(response.content)['value']
         node.save(update_piwik=False)
