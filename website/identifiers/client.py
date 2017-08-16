@@ -37,7 +37,7 @@ class EzidClient(BaseClient):
         )
         return utils.from_anvl(resp.content.strip('\n'))
 
-    def create_identifier(self, identifier, metadata=None):
+    def create_identifier(self, identifier, metadata=Node.load(None)):
         resp = self._make_request(
             'PUT',
             self._build_url('id', identifier),
@@ -46,7 +46,7 @@ class EzidClient(BaseClient):
         )
         return utils.from_anvl(resp.content)
 
-    def mint_identifier(self, shoulder, metadata=None):
+    def mint_identifier(self, shoulder, metadata=Node.load(None)):
         resp = self._make_request(
             'POST',
             self._build_url('shoulder', shoulder),
@@ -55,7 +55,7 @@ class EzidClient(BaseClient):
         )
         return utils.from_anvl(resp.content)
 
-    def change_status_identifier(self, status, identifier, metadata=None):
+    def change_status_identifier(self, status, identifier, metadata=Node.load(None)):
         metadata['_status'] = status
         resp = self._make_request(
             'POST',

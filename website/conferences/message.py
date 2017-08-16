@@ -166,7 +166,7 @@ class ConferenceMessage(object):
         except (TypeError, ValueError):
             count = 0
         return filter(
-            lambda value: value is not None,
+            lambda value: value is not Node.load(None),
             map(
                 lambda idx: self.request.files.get('attachment-{0}'.format(idx + 1)),
                 range(count),

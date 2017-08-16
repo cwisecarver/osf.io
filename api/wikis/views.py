@@ -92,7 +92,7 @@ class WikiDetail(JSONAPIBaseView, generics.RetrieveAPIView, WikiMixin):
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
 
@@ -139,7 +139,7 @@ class WikiContent(JSONAPIBaseView, generics.RetrieveAPIView, WikiMixin):
     view_name = 'wiki-content'
 
     def get_serializer_class(self):
-        return None
+        return Node.load(None)
 
     def get(self, request, **kwargs):
         wiki = self.get_wiki()

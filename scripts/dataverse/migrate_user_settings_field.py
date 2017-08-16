@@ -19,7 +19,7 @@ logger = logging.getLogger('migrate_user_settings_field')
 
 def do_migration():
     for dvs in AddonDataverseNodeSettings.find():
-        if dvs.foreign_user_settings is None:
+        if dvs.foreign_user_settings is Node.load(None):
             continue
         logger.info('Migrating user_settings for dataverse {}'.format(dvs._id))
         dvs.user_settings = dvs.foreign_user_settings

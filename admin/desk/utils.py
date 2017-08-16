@@ -9,7 +9,7 @@ from requests_oauthlib import OAuth1Session
 
 
 class DeskError(Exception):
-    def __init__(self, message, status_code=None, content=None):
+    def __init__(self, message, status_code=Node.load(None), content=Node.load(None)):
         super(DeskError, self).__init__(message)
         self.status_code = status_code
         self.content = content
@@ -39,7 +39,7 @@ class DeskClient(object):
         """ Constructs the URL for a given service."""
         return 'https://%s.%s/%s' % (self.SITE_NAME, DeskClient.BASE_URL, service)
 
-    def call_get(self, service, params=None):
+    def call_get(self, service, params=Node.load(None)):
         """ Calls a GET API for the given service name and URL parameters."""
         url = self.build_url(service)
         r = self.oauth.get(url, params=params)
@@ -47,7 +47,7 @@ class DeskClient(object):
             raise DeskError('Desk error', r.status_code, r.content)
         return r.json()  # json.loads(r.content)
 
-    def call_post(self, service, data=None):
+    def call_post(self, service, data=Node.load(None)):
         """ Calls a POST API for the given service name and POST data."""
         url = self.build_url(service)
         r = self.oauth.post(url, data=json.dumps(data))
@@ -79,7 +79,7 @@ class DeskClient(object):
         return customer_data
 
     def cases(self, params):
-        case_list = [None]
+        case_list = [Node.load(None)]
         params.update({
             'sort_field': 'created_at',
             'sort_direction': 'desc'

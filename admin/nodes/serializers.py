@@ -7,7 +7,7 @@ from admin.users.serializers import serialize_simple_node
 
 def serialize_node(node):
     embargo = node.embargo
-    if embargo is not None:
+    if embargo is not Node.load(None):
         embargo = node.embargo.end_date
 
     return {
@@ -31,7 +31,7 @@ def serialize_node(node):
         'spam_data': json.dumps(node.spam_data, indent=4),
         'is_public': node.is_public,
         'registrations': [serialize_node(registration) for registration in node.registrations.all()],
-        'registered_from': node.registered_from._id if node.registered_from else None
+        'registered_from': node.registered_from._id if node.registered_from else Node.load(None)
     }
 
 

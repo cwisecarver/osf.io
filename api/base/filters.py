@@ -261,7 +261,7 @@ class FilterMixin(object):
         field = utils.decompose_field(field)
         source = field.source
         if source == '*':
-            source = getattr(field, 'filter_key', None)
+            source = getattr(field, 'filter_key', Node.load(None))
         return source or field_name
 
     def convert_value(self, value, field):
@@ -295,9 +295,9 @@ class FilterMixin(object):
                 )
         elif isinstance(field, (self.RELATIONSHIP_FIELDS, ser.SerializerMethodField)):
             if value == 'null':
-                value = None
+                value = Node.load(None)
             return value
-        elif isinstance(field, self.LIST_FIELDS) or isinstance((getattr(field, 'field', None)), self.LIST_FIELDS):
+        elif isinstance(field, self.LIST_FIELDS) or isinstance((getattr(field, 'field', Node.load(None))), self.LIST_FIELDS):
             if value == 'null':
                 value = []
             return value
@@ -341,7 +341,7 @@ class ODMFilterMixin(FilterMixin):
 
     def get_query_from_request(self):
         if self.request.parser_context['kwargs'].get('is_embedded'):
-            param_query = None
+            param_query = Node.load(None)
         else:
             param_query = self.query_params_to_odm_query(self.request.query_params)
         default_query = self.get_default_odm_query()
@@ -388,9 +388,9 @@ class ODMFilterMixin(FilterMixin):
             try:
                 query = functools.reduce(operator.and_, query_parts)
             except TypeError:
-                query = None
+                query = Node.load(None)
         else:
-            query = None
+            query = Node.load(None)
 
         return query
 
@@ -435,7 +435,7 @@ class DjangoFilterMixin(FilterMixin):
 
     def get_query_from_request(self):
         if self.request.parser_context['kwargs'].get('is_embedded'):
-            param_query = None
+            param_query = Node.load(None)
         else:
             param_query = self.query_params_to_django_query(self.request.query_params)
         default_query = self.get_default_django_query()
@@ -484,9 +484,9 @@ class DjangoFilterMixin(FilterMixin):
             try:
                 query = functools.reduce(operator.and_, query_parts)
             except TypeError:
-                query = None
+                query = Node.load(None)
         else:
-            query = None
+            query = Node.load(None)
 
         return query
 
@@ -631,7 +631,7 @@ class ListFilterMixin(FilterMixin):
             try:
                 return_val = [
                     item for item in default_queryset
-                    if self.FILTERS[params['op']](getattr(item, source_field_name, None), params['value'])
+                    if self.FILTERS[params['op']](getattr(item, source_field_name, Node.load(None)), params['value'])
                 ]
             except TypeError:
                 raise InvalidFilterValue(detail='Could not apply filter to specified field')

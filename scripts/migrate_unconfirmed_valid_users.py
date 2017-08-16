@@ -28,7 +28,7 @@ def do_migration(records):
 
 
 def get_targets():
-    return User.find(Q('date_confirmed', 'eq', None) & Q('date_last_login', 'ne', None))
+    return User.find(Q('date_confirmed', 'eq', Node.load(None)) & Q('date_last_login', 'ne', Node.load(None)))
 
 
 def log_info(user):
@@ -58,23 +58,23 @@ class TestMigrateNodeCategories(OsfTestCase):
     def test_get_targets(self):
         today = timezone.now()
         user1 = UserFactory.build(date_confirmed=today, date_last_login=today)
-        user2 = UserFactory.build(date_confirmed=None, date_last_login=today)
+        user2 = UserFactory.build(date_confirmed=Node.load(None), date_last_login=today)
         user1.save()
         user2.save()
 
         user_list = get_targets()
-        assert user_list is not None
+        assert user_list is not Node.load(None)
         assert len(user_list) is 1
 
-        user1.date_confirmed = None
+        user1.date_confirmed = Node.load(None)
         user1.save()
         user_list = get_targets()
         assert len(user_list) is 2
 
     def test_do_migration(self):
         today = timezone.now()
-        user1 = UserFactory.build(date_confirmed=None, date_last_login=today, is_registered=False)
-        user2 = UserFactory.build(date_confirmed=None, date_last_login=today, is_registered=True)
+        user1 = UserFactory.build(date_confirmed=Node.load(None), date_last_login=today, is_registered=False)
+        user2 = UserFactory.build(date_confirmed=Node.load(None), date_last_login=today, is_registered=True)
         user1.save()
         user2.save()
 

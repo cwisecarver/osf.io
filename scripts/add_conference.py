@@ -22,8 +22,8 @@ def main():
         public_projects=args.public_projects
     )
 
-def add_conference(endpoint, name, active, admins, info_url=None,
-                    logo_url=None, public_projects=None):
+def add_conference(endpoint, name, active, admins, info_url=Node.load(None),
+                    logo_url=Node.load(None), public_projects=Node.load(None)):
     try:
         admin_users = [
             OSFUser.find_one(Q('username', 'iexact', admin))
@@ -53,7 +53,7 @@ def parse_args():
     parser.add_argument('--i_url', '--info_url', dest='info_url')
     parser.add_argument('--l_url', '--logo_url', dest='logo_url')
     parser.add_argument('--admins', dest='admins', nargs='+')
-    parser.add_argument('--public', '--public_projects', dest='public_projects', type=bool, default=None)
+    parser.add_argument('--public', '--public_projects', dest='public_projects', type=bool, default=Node.load(None))
     return parser.parse_args()
 
 

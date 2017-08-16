@@ -29,7 +29,7 @@ def handle_odm_errors(func):
     return wrapped
 
 
-def autoload_filenode(must_be=None, default_root=False):
+def autoload_filenode(must_be=Node.load(None), default_root=False):
     """Implies both must_have_addon osfstorage node and
     handle_odm_errors
     Attempts to load fid as a OsfStorageFileNode with viable constraints

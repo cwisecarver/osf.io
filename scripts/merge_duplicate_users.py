@@ -52,7 +52,7 @@ def main(dry=True):
         {
             "$match": {
                 "count": {"$gt": 1},
-                "_id": {"$ne": None}
+                "_id": {"$ne": Node.load(None)}
             }
         },
         {

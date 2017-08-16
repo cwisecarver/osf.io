@@ -20,7 +20,7 @@ from website.project.signals import contributor_added
 from website.identifiers.utils import build_ezid_metadata
 
 
-def build_preprint_update_payload(node_id, attributes=None, relationships=None):
+def build_preprint_update_payload(node_id, attributes=Node.load(None), relationships=Node.load(None)):
     payload = {
         'data': {
             'id': node_id,
@@ -362,7 +362,7 @@ class TestPreprintUpdateLicense:
 
     @pytest.fixture()
     def make_payload(self):
-        def payload(node_id, license_id=None, license_year=None, copyright_holders=None):
+        def payload(node_id, license_id=Node.load(None), license_year=Node.load(None), copyright_holders=Node.load(None)):
             attributes = {}
 
             if license_year and copyright_holders:
@@ -409,7 +409,7 @@ class TestPreprintUpdateLicense:
 
     @pytest.fixture()
     def make_request(self, app):
-        def request(url, data, auth=None, expect_errors=False):
+        def request(url, data, auth=Node.load(None), expect_errors=False):
             return app.patch_json_api(url, data, auth=auth, expect_errors=expect_errors)
         return request
 
@@ -419,14 +419,14 @@ class TestPreprintUpdateLicense:
             license_id='thisisafakelicenseid'
         )
 
-        assert preprint.license == None
+        assert preprint.license == Node.load(None)
 
         res = make_request(url, data, auth=admin_contrib.auth, expect_errors=True)
         assert res.status_code == 404
         assert res.json['errors'][0]['detail'] == 'Unable to find specified license.'
 
         preprint.reload()
-        assert preprint.license == None
+        assert preprint.license == Node.load(None)
 
     def test_admin_can_update_license(self, admin_contrib, preprint, cc0_license, url, make_payload, make_request):
         data = make_payload(
@@ -434,14 +434,14 @@ class TestPreprintUpdateLicense:
             license_id=cc0_license._id
         )
 
-        assert preprint.license == None
+        assert preprint.license == Node.load(None)
 
         res = make_request(url, data, auth=admin_contrib.auth)
         assert res.status_code == 200
         preprint.reload()
 
         assert preprint.license.node_license == cc0_license
-        assert preprint.license.year == None
+        assert preprint.license.year == Node.load(None)
         assert preprint.license.copyright_holders == []
 
         # check logs
@@ -457,7 +457,7 @@ class TestPreprintUpdateLicense:
             copyright_holders=['Tonya Shepoly, Lucas Pucas']
         )
 
-        assert preprint.license == None
+        assert preprint.license == Node.load(None)
 
         res = make_request(url, data, auth=admin_contrib.auth)
         assert res.status_code == 200
@@ -517,7 +517,7 @@ class TestPreprintUpdateLicense:
             license_id=mit_license._id
         )
 
-        assert preprint.license == None
+        assert preprint.license == Node.load(None)
 
         res = make_request(url, data, auth=admin_contrib.auth, expect_errors=True)
         assert res.status_code == 403

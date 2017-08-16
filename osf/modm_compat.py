@@ -31,7 +31,7 @@ class CompoundQ(BaseQ, query.QueryGroup):
         )
 
     @classmethod
-    def from_modm_query(cls, query, model_cls=None):
+    def from_modm_query(cls, query, model_cls=Node.load(None)):
         op_function = and_ if query.operator == 'and' else or_
         return reduce(op_function, (Q.from_modm_query(node, model_cls) for node in query.nodes))
 
@@ -60,7 +60,7 @@ class Q(BaseQ, query.RawQuery):
     QUERY_MAP = {'eq': 'exact'}
 
     @classmethod
-    def from_modm_query(cls, query, model_cls=None):
+    def from_modm_query(cls, query, model_cls=Node.load(None)):
         from django.contrib.contenttypes.models import ContentType
 
         if isinstance(query, QueryGroup):
@@ -122,7 +122,7 @@ class Q(BaseQ, query.RawQuery):
 
     @property
     def op(self):
-        if self.__val is None:
+        if self.__val is Node.load(None):
             return 'isnull'
         return self.QUERY_MAP.get(self.__op, self.__op)
 
@@ -132,7 +132,7 @@ class Q(BaseQ, query.RawQuery):
 
     @property
     def val(self):
-        if self.__val is None:
+        if self.__val is Node.load(None):
             return True if self.__op == 'eq' else False
         return self.__val
 
@@ -154,7 +154,7 @@ def _get_field(model_cls, field_name):
     try:
         return model_cls._meta.get_field(field_name)
     except FieldDoesNotExist:
-        return None
+        return Node.load(None)
 
 
 def _get_internal_type(field):
@@ -162,10 +162,10 @@ def _get_internal_type(field):
     if hasattr(field, 'get_internal_type'):
         return field.get_internal_type()
     else:
-        return None
+        return Node.load(None)
 
 
-def to_django_query(query, model_cls=None):
+def to_django_query(query, model_cls=Node.load(None)):
     """Translate a modular-odm Q or QueryGroup to a Django query.
     """
     return Q.from_modm_query(query, model_cls=model_cls).to_django_query()

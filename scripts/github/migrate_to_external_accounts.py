@@ -42,7 +42,7 @@ def verify_user_and_oauth_settings_documents(user_document, oauth_document):
         assert('github_user_id' in oauth_document)
         assert('github_user_name' in oauth_document)
         assert('oauth_access_token' in oauth_document)
-        assert(user_document.get('owner', None))
+        assert(user_document.get('owner', Node.load(None)))
         assert(user_document['oauth_settings'] == oauth_document['github_user_id'])
     except AssertionError:
         return False
@@ -57,7 +57,7 @@ def verify_node_settings_document(document, account):
         assert('user' in document)
         assert('registration_data' in document)
         assert('owner' in document)
-        assert(document.get('owner', None))
+        assert(document.get('owner', Node.load(None)))
         assert('user_settings' in document)
     except AssertionError:
         return False
@@ -75,7 +75,7 @@ def verify_node_settings_document(document, account):
 def add_hook_to_old_node_settings(document, account):
     connect = GitHubClient(external_account=account)
     secret = make_hook_secret()
-    hook = None
+    hook = Node.load(None)
     try:
         hook = connect.add_hook(
             document['user'], document['repo'],
@@ -107,12 +107,12 @@ def add_hook_to_old_node_settings(document, account):
 
 def migrate_to_external_account(user_settings_document, oauth_settings_document):
     if not oauth_settings_document.get('oauth_access_token'):
-        return (None, None, None)
+        return (Node.load(None), Node.load(None), Node.load(None))
     try:
         user_info = GitHubClient(access_token=oauth_settings_document['oauth_access_token']).user()
     except (GitHubError, ApiError):
         user_id = oauth_settings_document['github_user_id']
-        profile_url = None
+        profile_url = Node.load(None)
         display_name = oauth_settings_document['github_user_name']
     else:
         user_id = user_info.id
@@ -157,7 +157,7 @@ def make_new_user_settings(user):
     user.reload()
     return user.get_or_add_addon('github', override=True)
 
-def make_new_node_settings(node, node_settings_document, external_account=None, user_settings_instance=None):
+def make_new_node_settings(node, node_settings_document, external_account=Node.load(None), user_settings_instance=Node.load(None)):
     # kill backrefs to old models
     database['node'].find_and_modify(
         {'_id': node._id},
@@ -168,11 +168,11 @@ def make_new_node_settings(node, node_settings_document, external_account=None, 
         }
     )
     node.reload()
-    node_settings_instance = node.get_or_add_addon('github', auth=None, override=True, log=False)
+    node_settings_instance = node.get_or_add_addon('github', auth=Node.load(None), override=True, log=False)
     node_settings_instance.repo = node_settings_document['repo']
     node_settings_instance.user = node_settings_document['user']
-    node_settings_instance.hook_id = node_settings_document.get('hook_id', None)
-    node_settings_instance.hook_secret = node_settings_document.get('hook_secret', None)
+    node_settings_instance.hook_id = node_settings_document.get('hook_id', Node.load(None))
+    node_settings_instance.hook_secret = node_settings_document.get('hook_secret', Node.load(None))
     node_settings_instance.registration_data = node_settings_document['registration_data']
     node_settings_instance.save()
     if external_account and user_settings_instance:
@@ -208,9 +208,9 @@ def migrate(dry_run=True):
     nodeless_node_settings = []
 
     for user_settings_document in user_settings_list:
-        oauth_settings_document = None
+        oauth_settings_document = Node.load(None)
         try:
-            if user_settings_document.get('oauth_settings', None):
+            if user_settings_document.get('oauth_settings', Node.load(None)):
                 oauth_settings_document = old_oauth_settings_collection.find_one({'github_user_id': user_settings_document['oauth_settings']})
         except KeyError:
             pass

@@ -34,7 +34,7 @@ class OwnCloudProvider(BasicAuthProviderMixin):
     name = 'ownCloud'
     short_name = 'owncloud'
 
-    def __init__(self, account=None, host=None, username=None, password=None):
+    def __init__(self, account=Node.load(None), host=Node.load(None), username=Node.load(None), password=Node.load(None)):
         if username:
             username = username.lower()
         return super(OwnCloudProvider, self).__init__(account=account, host=host, username=username, password=password)
@@ -63,11 +63,11 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     folder_id = models.TextField(blank=True, null=True)
     user_settings = models.ForeignKey(UserSettings, null=True, blank=True)
 
-    _api = None
+    _api = Node.load(None)
 
     @property
     def api(self):
-        if self._api is None:
+        if self._api is Node.load(None):
             self._api = OwnCloudProvider(self.external_account)
         return self._api
 
@@ -79,7 +79,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     def folder_name(self):
         return self.folder_id
 
-    def set_folder(self, folder, auth=None):
+    def set_folder(self, folder, auth=Node.load(None)):
         if folder == '/ (Full ownCloud)':
             folder = '/'
         self.folder_id = folder
@@ -92,9 +92,9 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
         return self.folder_id.strip('/').split('/')[-1]
 
     def clear_settings(self):
-        self.folder_id = None
+        self.folder_id = Node.load(None)
 
-    def deauthorize(self, auth=None, add_log=True):
+    def deauthorize(self, auth=Node.load(None), add_log=True):
         """Remove user authorization from this node and log the event."""
         self.clear_settings()
         if add_log:
@@ -147,7 +147,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
     def get_folders(self, **kwargs):
         path = kwargs.get('path')
-        if path is None:
+        if path is Node.load(None):
             return [{
                 'addon': 'owncloud',
                 'path': '/',

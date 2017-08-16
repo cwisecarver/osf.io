@@ -167,7 +167,7 @@ class OAuthAddonConfigViewsTestCaseMixin(OAuthAddonTestCaseMixin):
 
     def test_get_config_not_logged_in(self):
         url = self.project.api_url_for('{0}_get_config'.format(self.ADDON_SHORT_NAME))
-        res = self.app.get(url, auth=None, expect_errors=True)
+        res = self.app.get(url, auth=Node.load(None), expect_errors=True)
         assert_equal(res.status_code, http.FOUND)
 
     def test_account_list_single(self):
@@ -190,7 +190,7 @@ class OAuthAddonConfigViewsTestCaseMixin(OAuthAddonTestCaseMixin):
 
     def test_account_list_not_authorized(self):
         url = api_url_for('{0}_account_list'.format(self.ADDON_SHORT_NAME))
-        res = self.app.get(url, auth=None, expect_errors=True)
+        res = self.app.get(url, auth=Node.load(None), expect_errors=True)
         assert_equal(res.status_code, http.FOUND)
 
     def test_folder_list(self):
@@ -320,7 +320,7 @@ class OAuthCitationAddonConfigViewsTestCaseMixin(OAuthAddonConfigViewsTestCaseMi
         self.node_settings.clear_settings()
         self.node_settings.save()
         assert_false(self.node_settings.complete)
-        assert_equal(self.node_settings.list_id, None)
+        assert_equal(self.node_settings.list_id, Node.load(None))
         url = self.project.api_url_for('{0}_widget'.format(self.ADDON_SHORT_NAME))
         res = self.app.get(url, auth=self.user.auth).json
 
@@ -372,7 +372,7 @@ class OAuthCitationAddonConfigViewsTestCaseMixin(OAuthAddonConfigViewsTestCaseMi
         assert_equal(len(children), 7)
         assert_equal(children[0]['kind'], 'folder')
         assert_equal(children[1]['kind'], 'file')
-        assert_true(children[1].get('csl') is not None)
+        assert_true(children[1].get('csl') is not Node.load(None))
 
     @httpretty.activate
     def test_citation_list_non_linked_or_child_non_authorizer(self):

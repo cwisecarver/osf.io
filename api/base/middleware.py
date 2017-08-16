@@ -31,7 +31,7 @@ class CeleryTaskMiddleware(object):
         """If an exception occurs, clear the celery task queue so process_response has nothing."""
         sentry_exception_handler(request=request)
         celery_teardown_request(error=True)
-        return None
+        return Node.load(None)
 
     def process_response(self, request, response):
         """Clear the celery task queue if the response status code is 400 or above"""
@@ -49,11 +49,11 @@ class DjangoGlobalMiddleware(object):
 
     def process_exception(self, request, exception):
         sentry_exception_handler(request=request)
-        api_globals.request = None
-        return None
+        api_globals.request = Node.load(None)
+        return Node.load(None)
 
     def process_response(self, request, response):
-        api_globals.request = None
+        api_globals.request = Node.load(None)
         if api_settings.DEBUG and len(gc.get_referents(request)) > 2:
             raise Exception('You wrote a memory leak. Stop it')
         return response
@@ -83,7 +83,7 @@ class CorsMiddleware(corsheaders.middleware.CorsMiddleware):
                         self._context.request.META.get('HTTP_ACCESS_CONTROL_REQUEST_HEADERS', '').split(',')
                     )
                 ):
-                    return None
+                    return Node.load(None)
 
         return not_found
 
@@ -92,7 +92,7 @@ class CorsMiddleware(corsheaders.middleware.CorsMiddleware):
         try:
             return super(CorsMiddleware, self).process_response(request, response)
         finally:
-            self._context.request = None
+            self._context.request = Node.load(None)
 
 
 class PostcommitTaskMiddleware(object):

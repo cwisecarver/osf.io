@@ -251,7 +251,7 @@ class OAuthAddonNodeSettingsTestSuiteMixin(OAuthAddonModelTestSuiteMixinBase):
         assert_equal(mock_revoke.call_count, 0)
 
     def test_complete_auth_false(self):
-        self.node_settings.user_settings = None
+        self.node_settings.user_settings = Node.load(None)
 
         assert_false(self.node_settings.has_auth)
         assert_false(self.node_settings.complete)
@@ -314,8 +314,8 @@ class OAuthAddonNodeSettingsTestSuiteMixin(OAuthAddonModelTestSuiteMixinBase):
         old_logs = list(self.node.logs.all())
         self.node_settings.delete()
         self.node_settings.save()
-        assert_is(self.node_settings.user_settings, None)
-        assert_is(self.node_settings.folder_id, None)
+        assert_is(self.node_settings.user_settings, Node.load(None))
+        assert_is(self.node_settings.folder_id, Node.load(None))
         assert_true(self.node_settings.deleted)
         assert_equal(list(self.node.logs.all()), list(old_logs))
 
@@ -334,8 +334,8 @@ class OAuthAddonNodeSettingsTestSuiteMixin(OAuthAddonModelTestSuiteMixinBase):
         assert_true(self.node_settings.folder_id)
         self.node_settings.deauthorize(auth=Auth(self.user))
         self.node_settings.save()
-        assert_is(self.node_settings.user_settings, None)
-        assert_is(self.node_settings.folder_id, None)
+        assert_is(self.node_settings.user_settings, Node.load(None))
+        assert_is(self.node_settings.folder_id, Node.load(None))
 
         last_log = self.node.logs.first()
         assert_equal(last_log.action, '{0}_node_deauthorized'.format(self.short_name))
@@ -383,7 +383,7 @@ class OAuthAddonNodeSettingsTestSuiteMixin(OAuthAddonModelTestSuiteMixinBase):
         assert_equal(credentials, expected)
 
     def test_serialize_credentials_not_authorized(self):
-        self.node_settings.user_settings = None
+        self.node_settings.user_settings = Node.load(None)
         self.node_settings.save()
         with assert_raises(exceptions.AddonError):
             self.node_settings.serialize_waterbutler_credentials()
@@ -433,7 +433,7 @@ class OAuthAddonNodeSettingsTestSuiteMixin(OAuthAddonModelTestSuiteMixinBase):
             node=self.node, fork=fork, user=user,
             save=True
         )
-        assert_is(clone.user_settings, None)
+        assert_is(clone.user_settings, Node.load(None))
 
     def test_before_remove_contributor_message(self):
         message = self.node_settings.before_remove_contributor(
@@ -499,7 +499,7 @@ class OAuthCitationsNodeSettingsTestSuiteMixin(
         )
 
     def test_selected_folder_name_empty(self):
-        self.node_settings.list_id = None
+        self.node_settings.list_id = Node.load(None)
 
         assert_equal(
             self.node_settings.fetch_folder_name,
@@ -509,7 +509,7 @@ class OAuthCitationsNodeSettingsTestSuiteMixin(
     def test_selected_folder_name(self):
         # Mock the return from api call to get the folder's name
         mock_folder = MockFolder()
-        name = None
+        name = Node.load(None)
 
         with mock.patch.object(self.OAuthProviderClass, '_folder_metadata', return_value=mock_folder):
             name = self.node_settings.fetch_folder_name

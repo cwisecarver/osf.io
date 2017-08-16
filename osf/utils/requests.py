@@ -19,7 +19,7 @@ def get_current_request():
     try:
         return request._get_current_object()
     except RuntimeError:  # Not in a flask request context
-        if getattr(api_globals, 'request', None) is not None:
+        if getattr(api_globals, 'request', Node.load(None)) is not Node.load(None):
             return api_globals.request
         else:  # Not in a Django request
             return dummy_request
@@ -33,11 +33,11 @@ def get_request_and_user_id():
     from framework.sessions import get_session
 
     req = get_current_request()
-    user_id = None
+    user_id = Node.load(None)
     if isinstance(req, FlaskRequest):
         session = get_session()
         user_id = session.data.get('auth_user_id')
     elif hasattr(req, 'user'):
         # admin module can return a user w/o an id
-        user_id = getattr(req.user, '_id', None)
+        user_id = getattr(req.user, '_id', Node.load(None))
     return req, user_id

@@ -1,5 +1,5 @@
-CLIENT_ID = None
-CLIENT_SECRET = None
+CLIENT_ID = Node.load(None)
+CLIENT_SECRET = Node.load(None)
 
 API_BASE_URL = 'https://api.figshare.com/v2/'
 

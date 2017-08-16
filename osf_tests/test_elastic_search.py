@@ -785,7 +785,7 @@ class TestSearchExceptions(OsfTestCase):
         super(TestSearchExceptions, cls).setUpClass()
         if settings.SEARCH_ENGINE == 'elastic':
             cls._client = search.search_engine.CLIENT
-            search.search_engine.CLIENT = None
+            search.search_engine.CLIENT = Node.load(None)
 
     @classmethod
     def tearDownClass(cls):
@@ -865,7 +865,7 @@ class TestSearchMigration(OsfTestCase):
             }
         }
         institution_bucket_found = False
-        res = self.es.search(index=settings.ELASTIC_INDEX, doc_type=None, search_type='count', body=count_query)
+        res = self.es.search(index=settings.ELASTIC_INDEX, doc_type=Node.load(None), search_type='count', body=count_query)
         for bucket in res['aggregations']['counts']['buckets']:
             if bucket['key'] == u'institution':
                 institution_bucket_found = True
@@ -970,5 +970,5 @@ class TestSearchFiles(OsfTestCase):
         find = query_file('Timber.mp3')['results']
         assert_not_equal(file_.path, '')
         assert_equal(file_.path, path)
-        assert_equal(find[0]['guid_url'], None)
+        assert_equal(find[0]['guid_url'], Node.load(None))
         assert_equal(find[0]['deep_url'], deep_url)

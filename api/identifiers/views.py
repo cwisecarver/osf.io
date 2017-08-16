@@ -42,7 +42,7 @@ class IdentifierList(JSONAPIBaseView, generics.ListAPIView, ODMFilterMixin):
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 

@@ -18,7 +18,7 @@ class TestFindGuidsWithoutReferents(OsfTestCase):
         self.nontarget_guid.save()
 
     def test_get_targets_referent_is_none(self):
-        bad_guid = Guid(referent=None)
+        bad_guid = Guid(referent=Node.load(None))
         bad_guid.save()
 
         targets = list(get_targets())

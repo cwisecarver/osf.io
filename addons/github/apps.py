@@ -22,7 +22,7 @@ def github_hgrid_data(node_settings, auth, **kwargs):
 
     # Initialize repo here in the event that it is set in the privacy check
     # below. This potentially saves an API call in _check_permissions, below.
-    repo = None
+    repo = Node.load(None)
 
     # Quit if privacy mismatch and not contributor
     node = node_settings.owner
@@ -31,11 +31,11 @@ def github_hgrid_data(node_settings, auth, **kwargs):
             repo = connection.repo(node_settings.user, node_settings.repo)
         except NotFoundError:
             logger.error('Could not access GitHub repo')
-            return None
+            return Node.load(None)
         except GitHubError:
             return
         if repo.private:
-            return None
+            return Node.load(None)
 
     try:
         branch, sha, branches = get_refs(
@@ -49,13 +49,13 @@ def github_hgrid_data(node_settings, auth, **kwargs):
         logger.error('GitHub repo not found')
         return
 
-    if branch is not None:
+    if branch is not Node.load(None):
         ref = ref_to_params(branch, sha)
         can_edit = check_permissions(
             node_settings, auth, connection, branch, sha, repo=repo,
         )
     else:
-        ref = None
+        ref = Node.load(None)
         can_edit = False
 
     name_tpl = '{user}/{repo}'.format(
@@ -86,7 +86,7 @@ def github_hgrid_data(node_settings, auth, **kwargs):
         permissions=permissions,
         branches=branch_names,
         defaultBranch=branch,
-        private_key=kwargs.get('view_only', None),
+        private_key=kwargs.get('view_only', Node.load(None)),
     )]
 
 HERE = os.path.dirname(os.path.abspath(__file__))

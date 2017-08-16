@@ -35,7 +35,7 @@ class GithubFolder(GithubFileNode, Folder):
 class GithubFile(GithubFileNode, File):
     version_identifier = 'ref'
 
-    def touch(self, auth_header, revision=None, ref=None, branch=None, **kwargs):
+    def touch(self, auth_header, revision=Node.load(None), ref=Node.load(None), branch=Node.load(None), **kwargs):
         revision = revision or ref or branch
         return super(GithubFile, self).touch(auth_header, revision=revision, **kwargs)
 
@@ -92,7 +92,7 @@ class UserSettings(BaseStorageAddon, BaseOAuthUserSettings):
         gh_accounts = self.owner.external_accounts.filter(provider=self.oauth_provider.short_name)
         if gh_accounts:
             return gh_accounts[0].display_name
-        return None
+        return Node.load(None)
 
 
 class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
@@ -108,21 +108,21 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
     @property
     def folder_id(self):
-        return self.repo or None
+        return self.repo or Node.load(None)
 
     @property
     def folder_name(self):
         if self.complete:
             return '{}/{}'.format(self.user, self.repo)
-        return None
+        return Node.load(None)
 
     @property
     def folder_path(self):
-        return self.repo or None
+        return self.repo or Node.load(None)
 
     @property
     def complete(self):
-        return self.has_auth and self.repo is not None and self.user is not None
+        return self.has_auth and self.repo is not Node.load(None) and self.user is not Node.load(None)
 
     def authorize(self, user_settings, save=False):
         self.user_settings = user_settings
@@ -138,13 +138,13 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
             self.save()
 
     def clear_settings(self):
-        self.user = None
-        self.repo = None
-        self.hook_id = None
-        self.hook_secret = None
-        self.registration_data = None
+        self.user = Node.load(None)
+        self.repo = Node.load(None)
+        self.hook_id = Node.load(None)
+        self.hook_secret = Node.load(None)
+        self.registration_data = Node.load(None)
 
-    def deauthorize(self, auth=None, log=True):
+    def deauthorize(self, auth=Node.load(None), log=True):
         self.delete_hook(save=False)
         self.clear_settings()
         if log:
@@ -248,7 +248,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
         url = self.owner.web_url_for('addon_view_or_download_file', path=path, provider='github')
 
-        sha, urls = None, {}
+        sha, urls = Node.load(None), {}
         try:
             sha = metadata['extra']['commit']['sha']
             urls = {
@@ -292,11 +292,11 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
             return messages
 
         # Quit if not configured
-        if self.user is None or self.repo is None:
+        if self.user is Node.load(None) or self.repo is Node.load(None):
             return messages
 
         # Quit if no user authorization
-        if self.user_settings is None:
+        if self.user_settings is Node.load(None):
             return messages
 
         connect = GitHubClient(external_account=self.external_account)
@@ -350,12 +350,12 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
                 url=node.api_url + 'github/tarball/'
             ))
         except TypeError:
-            # super call returned None due to lack of user auth
-            return None
+            # super call returned Node.load(None) due to lack of user auth
+            return Node.load(None)
         else:
             return message
 
-    def after_remove_contributor(self, node, removed, auth=None):
+    def after_remove_contributor(self, node, removed, auth=Node.load(None)):
         """
         :param Node node:
         :param User removed:
@@ -364,7 +364,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
         if self.user_settings and self.user_settings.owner == removed:
 
             # Delete OAuth tokens
-            self.user_settings = None
+            self.user_settings = Node.load(None)
             self.save()
             message = (
                 u'Because the GitHub add-on for {category} "{title}" was authenticated '
@@ -408,7 +408,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
         try:
             is_private = self.is_private
         except NotFoundError:
-            return None
+            return Node.load(None)
         if is_private:
             return (
                 'This {cat} is connected to a private GitHub repository. Users '
@@ -465,7 +465,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
             except (GitHubError, NotFoundError):
                 return False
             if response:
-                self.hook_id = None
+                self.hook_id = Node.load(None)
                 if save:
                     self.save()
                 return True

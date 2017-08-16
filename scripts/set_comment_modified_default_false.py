@@ -1,5 +1,5 @@
 """
-For unmodified comments, change comment.modified from None to False since the default value
+For unmodified comments, change comment.modified from Node.load(None) to False since the default value
 has been set to False on the comment model.
 """
 
@@ -24,7 +24,7 @@ def main(dry=True):
 
 
 def get_targets():
-    return Comment.find(Q('modified', 'eq', None))
+    return Comment.find(Q('modified', 'eq', Node.load(None)))
 
 
 def do_migration(records):

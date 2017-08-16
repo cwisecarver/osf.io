@@ -56,7 +56,7 @@ def parse_view_url(view_url):
 
 def migrate_draft_metadata(draft, test=False):
     for question in PREREG_QUESTIONS:
-        orig_data = None
+        orig_data = Node.load(None)
         if test:
             orig_data = deepcopy(draft.registration_metadata)
 

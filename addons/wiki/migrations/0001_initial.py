@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             name='NodeWikiPage',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('guid_string', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, max_length=255, null=True), blank=True, null=True, size=None)),
+                ('guid_string', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, max_length=255, null=True), blank=True, null=True, size=Node.load(None))),
                 ('content_type_pk', models.PositiveIntegerField(blank=True, null=True)),
                 ('page_name', models.CharField(max_length=200, validators=[addons.wiki.models.validate_page_name])),
                 ('version', models.IntegerField(default=1)),

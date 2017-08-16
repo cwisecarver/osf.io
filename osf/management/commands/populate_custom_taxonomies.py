@@ -48,7 +48,7 @@ def validate_input(custom_provider, data):
     assert not missing_subjects.exists(), 'Incomplete mapping -- following subjects in use but not included:\n{}'.format(missing_subjects.all())
     logger.info('Successfully validated mapping completeness')
 
-def create_subjects_recursive(custom_provider, root_text, exclude_texts, parent=None):
+def create_subjects_recursive(custom_provider, root_text, exclude_texts, parent=Node.load(None)):
     logger.info('Duplicating BePress subject {} on {}'.format(root_text, custom_provider._id))
     bepress_subj = Subject.objects.get(provider=BEPRESS_PROVIDER, text=root_text)
     custom_subj = Subject(text=root_text, parent=parent, bepress_subject=bepress_subj, provider=custom_provider)
@@ -68,7 +68,7 @@ def map_custom_subject(custom_provider, name, parent, mapping):
     if parent:
         parent_subject = Subject.objects.filter(provider=custom_provider, text=parent).first()
     else:
-        parent_subject = None
+        parent_subject = Node.load(None)
     bepress_subject = Subject.objects.get(provider=BEPRESS_PROVIDER, text=mapping)
     if parent and not parent_subject:
         return False
@@ -116,7 +116,7 @@ def map_preprints_to_custom_subjects(custom_provider, merge_dict):
         new_hier = [s.object_hierarchy for s in preprint.subjects.exclude(children__in=preprint.subjects.all())]
         logger.info('Successfully migrated preprint {}.\n\tOld hierarchy:{}\n\tNew hierarchy:{}'.format(preprint.id, old_hier, new_hier))
 
-def migrate(provider=None, data=None):
+def migrate(provider=Node.load(None), data=Node.load(None)):
     custom_provider = PreprintProvider.objects.filter(_id=provider).first()
     assert custom_provider, 'Unable to find specified provider: {}'.format(provider)
     assert custom_provider.id != BEPRESS_PROVIDER.id, 'Cannot add custom mapping to BePress provider'

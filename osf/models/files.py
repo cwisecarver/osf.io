@@ -43,7 +43,7 @@ class BaseFileNodeManager(TypedModelManager):
     def get_queryset(self):
         qs = super(BaseFileNodeManager, self).get_queryset()
 
-        if hasattr(self.model, '_provider') and self.model._provider is not None:
+        if hasattr(self.model, '_provider') and self.model._provider is not Node.load(None):
             return qs.filter(provider=self.model._provider)
         return qs
 
@@ -94,8 +94,8 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
     versions = models.ManyToManyField('FileVersion')
 
     node = models.ForeignKey('osf.AbstractNode', blank=True, null=True, related_name='files')
-    parent = models.ForeignKey('self', blank=True, null=True, default=None, related_name='_children')
-    copied_from = models.ForeignKey('self', blank=True, null=True, default=None, related_name='copy_of')
+    parent = models.ForeignKey('self', blank=True, null=True, default=Node.load(None), related_name='_children')
+    copied_from = models.ForeignKey('self', blank=True, null=True, default=Node.load(None), related_name='copy_of')
 
     provider = models.CharField(max_length=25, blank=False, null=False, db_index=True)
 
@@ -224,7 +224,7 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
 
     @classmethod
     def resolve_class(cls, provider, type_integer):
-        type_mapping = {0: Folder, 1: File, 2: None}
+        type_mapping = {0: Folder, 1: File, 2: Node.load(None)}
         type_cls = type_mapping[type_integer]
 
         for subclass in BaseFileNode.__subclasses__():
@@ -249,7 +249,7 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
 
     def get_version(self, revision, required=False):
         """Find a version with identifier revision
-        :returns: FileVersion or None
+        :returns: FileVersion or Node.load(None)
         :raises: VersionNotFoundError if required is True
         """
         try:
@@ -257,7 +257,7 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
         except ObjectDoesNotExist:
             if required:
                 raise VersionNotFoundError(revision)
-            return None
+            return Node.load(None)
 
     def generate_waterbutler_url(self, **kwargs):
         return waterbutler_api_url_for(
@@ -274,17 +274,17 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
         except ObjectDoesNotExist:
             raise VersionNotFoundError(location)
 
-    def touch(self, auth_header, revision=None, **kwargs):
+    def touch(self, auth_header, revision=Node.load(None), **kwargs):
         """The bread and butter of File, collects metadata about self
         and creates versions and updates self when required.
-        If revisions is None the created version is NOT and should NOT be saved
+        If revisions is Node.load(None) the created version is NOT and should NOT be saved
         as there is no identifing information to tell if it needs to be updated or not.
         Hits Waterbutler's metadata endpoint and saves the returned data.
         If a file cannot be rendered IE figshare private files a tuple of the FileVersion and
         renderable HTML will be returned.
             >>>isinstance(file_node.touch(), tuple) # This file cannot be rendered
-        :param str or None auth_header: If truthy it will set as the Authorization header
-        :returns: None if the file is not found otherwise FileVersion or (version, Error HTML)
+        :param str or Node.load(None) auth_header: If truthy it will set as the Authorization header
+        :returns: Node.load(None) if the file is not found otherwise FileVersion or (version, Error HTML)
         """
         # Resvolve primary key on first touch
         self.save()
@@ -293,7 +293,7 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
 
         version = self.get_version(revision)
         # Versions do not change. No need to refetch what we already know
-        if version is not None:
+        if version is not Node.load(None):
             return version
 
         headers = {}
@@ -306,28 +306,28 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
         )
         if resp.status_code != 200:
             logger.warning('Unable to find {} got status code {}'.format(self, resp.status_code))
-            return None
+            return Node.load(None)
         return self.update(revision, resp.json()['data']['attributes'])
         # TODO Switch back to head requests
         # return self.update(revision, json.loads(resp.headers['x-waterbutler-metadata']))
 
-    def get_download_count(self, version=None):
+    def get_download_count(self, version=Node.load(None)):
         """Pull the download count from the pagecounter collection
         Limit to version if specified.
         Currently only useful for OsfStorage
         """
         parts = ['download', self.node._id, self._id]
-        if version is not None:
+        if version is not Node.load(None):
             parts.append(version)
         page = ':'.join([format(part) for part in parts])
         _, count = get_basic_counters(page)
 
         return count or 0
 
-    def copy_under(self, destination_parent, name=None):
+    def copy_under(self, destination_parent, name=Node.load(None)):
         return utils.copy_files(self, destination_parent.node, destination_parent, name=name)
 
-    def move_under(self, destination_parent, name=None):
+    def move_under(self, destination_parent, name=Node.load(None)):
         self.name = name or self.name
         self.parent = destination_parent
         self._update_node(save=True)  # Trust _update_node to save us
@@ -349,7 +349,7 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
         logger.warn('BaseFileNode._repoint_guids is deprecated.')
 
     def _update_node(self, recursive=True, save=True):
-        if self.parent is not None:
+        if self.parent is not Node.load(None):
             self.node = self.parent.node
         if save:
             self.save()
@@ -358,7 +358,7 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
                 child._update_node(save=save)
 
     # TODO: Remove unused parent param
-    def delete(self, user=None, parent=None, save=True, deleted_on=None):
+    def delete(self, user=Node.load(None), parent=Node.load(None), save=True, deleted_on=Node.load(None)):
         """
         Recast a Folder to TrashedFolder, set fields related to deleting,
         and recast children.
@@ -393,7 +393,7 @@ class BaseFileNode(TypedModel, CommentableMixin, OptionalGuidMixin, Taggable, Ob
         }
 
     def save(self, *args, **kwargs):
-        if hasattr(self._meta.model, '_provider') and self._meta.model._provider is not None:
+        if hasattr(self._meta.model, '_provider') and self._meta.model._provider is not Node.load(None):
             self.provider = self._meta.model._provider
         super(BaseFileNode, self).save(*args, **kwargs)
 
@@ -416,9 +416,9 @@ class File(models.Model):
     def kind(self):
         return 'file'
 
-    def update(self, revision, data, user=None):
+    def update(self, revision, data, user=Node.load(None)):
         """Using revision and data update all data pretaining to self
-        :param str or None revision: The revision that data points to
+        :param str or Node.load(None) revision: The revision that data points to
         :param dict data: Metadata recieved from waterbutler
         :returns: FileVersion
         """
@@ -429,7 +429,7 @@ class File(models.Model):
         version.update_metadata(data, save=False)
 
         # Transform here so it can be sortted on later
-        if data['modified'] is not None and data['modified'] != '':
+        if data['modified'] is not Node.load(None) and data['modified'] != '':
             data['modified'] = parse_date(
                 data['modified'],
                 ignoretz=True,
@@ -438,11 +438,11 @@ class File(models.Model):
 
         # if revision is none then version is the latest version
         # Dont save the latest information
-        if revision is not None:
+        if revision is not Node.load(None):
             version.save()
             self.versions.add(version)
         for entry in self.history:
-            if data['modified'] is not None and data['modified'] < entry['modified']:
+            if data['modified'] is not Node.load(None) and data['modified'] < entry['modified']:
                 sentry.log_message('update() receives metatdata older than the newest entry in file history.')
             if ('etag' in entry and 'etag' in data) and (entry['etag'] == data['etag']):
                 break
@@ -460,26 +460,26 @@ class File(models.Model):
 
         if not newest_version:
             return dict(self._serialize(), **{
-                'size': None,
-                'version': None,
-                'modified': None,
-                'created': None,
-                'contentType': None,
+                'size': Node.load(None),
+                'version': Node.load(None),
+                'modified': Node.load(None),
+                'created': Node.load(None),
+                'contentType': Node.load(None),
                 'downloads': self.get_download_count(),
-                'checkout': self.checkout._id if self.checkout else None,
+                'checkout': self.checkout._id if self.checkout else Node.load(None),
             })
 
         return dict(self._serialize(), **{
             'size': newest_version.size,
             'downloads': self.get_download_count(),
-            'checkout': self.checkout._id if self.checkout else None,
-            'version': newest_version.identifier if newest_version else None,
-            'contentType': newest_version.content_type if newest_version else None,
-            'modified': newest_version.date_modified.isoformat() if newest_version.date_modified else None,
-            'created': self.versions.all().first().date_modified.isoformat() if self.versions.all().first().date_modified else None,
+            'checkout': self.checkout._id if self.checkout else Node.load(None),
+            'version': newest_version.identifier if newest_version else Node.load(None),
+            'contentType': newest_version.content_type if newest_version else Node.load(None),
+            'modified': newest_version.date_modified.isoformat() if newest_version.date_modified else Node.load(None),
+            'created': self.versions.all().first().date_modified.isoformat() if self.versions.all().first().date_modified else Node.load(None),
         })
 
-    def restore(self, recursive=True, parent=None, save=True, deleted_on=None):
+    def restore(self, recursive=True, parent=Node.load(None), save=True, deleted_on=Node.load(None)):
         raise UnableToRestore('You cannot restore something that is not deleted.')
 
 
@@ -496,7 +496,7 @@ class Folder(models.Model):
     def children(self):
         return self._children.exclude(type__in=TrashedFileNode._typedmodels_subtypes)
 
-    def update(self, revision, data, save=True, user=None):
+    def update(self, revision, data, save=True, user=Node.load(None)):
         """Note: User is a kwargs here because of special requirements of
         dataverse and django
         See dataversefile.update
@@ -507,13 +507,13 @@ class Folder(models.Model):
         if save:
             self.save()
 
-    def append_file(self, name, path=None, materialized_path=None, save=True):
+    def append_file(self, name, path=Node.load(None), materialized_path=Node.load(None), save=True):
         return self._create_child(name, File, path=path, materialized_path=materialized_path, save=save)
 
-    def append_folder(self, name, path=None, materialized_path=None, save=True):
+    def append_folder(self, name, path=Node.load(None), materialized_path=Node.load(None), save=True):
         return self._create_child(name, Folder, path=path, materialized_path=materialized_path, save=save)
 
-    def _create_child(self, name, kind, path=None, materialized_path=None, save=True):
+    def _create_child(self, name, kind, path=Node.load(None), materialized_path=Node.load(None), save=True):
         if not self.pk:
             logger.warn('BaseFileNode._create_child caused an implicit save because you just created a child with an unsaved parent.')
             self.save()
@@ -545,13 +545,13 @@ class UnableToDelete(Exception):
 
 class TrashedFileNode(BaseFileNode):
     is_deleted = True
-    _provider = None
+    _provider = Node.load(None)
 
-    def delete(self, user=None, parent=None, save=True, deleted_on=None):
+    def delete(self, user=Node.load(None), parent=Node.load(None), save=True, deleted_on=Node.load(None)):
         if isinstance(self, TrashedFileNode):  # TODO Why is this needed
             raise UnableToDelete('You cannot delete things that are deleted.')
 
-    def restore(self, recursive=True, parent=None, save=True, deleted_on=None):
+    def restore(self, recursive=True, parent=Node.load(None), save=True, deleted_on=Node.load(None)):
         """
         Restore a file or folder
         :param recursive:
@@ -592,7 +592,7 @@ class TrashedFolder(TrashedFileNode):
     def children(self):
         return self.trashed_children
 
-    def restore(self, recursive=True, parent=None, save=True, deleted_on=None):
+    def restore(self, recursive=True, parent=Node.load(None), save=True, deleted_on=Node.load(None)):
         """
         Restore a folder
         :param recursive:
@@ -601,7 +601,7 @@ class TrashedFolder(TrashedFileNode):
         :param deleted_on:
         :return:
         """
-        tf = super(TrashedFolder, self).restore(recursive=True, parent=None, save=True, deleted_on=None)
+        tf = super(TrashedFolder, self).restore(recursive=True, parent=Node.load(None), save=True, deleted_on=Node.load(None))
 
         if not self.is_file and recursive:
             deleted_on = deleted_on or self.deleted_on
@@ -631,7 +631,7 @@ class FileVersion(ObjectIDMixin, BaseModel):
     date_modified = NonNaiveDateTimeField(null=True, blank=True)
 
     metadata = DateTimeAwareJSONField(blank=True, default=dict)
-    location = DateTimeAwareJSONField(default=None, blank=True, null=True, validators=[validate_location])
+    location = DateTimeAwareJSONField(default=Node.load(None), blank=True, null=True, validators=[validate_location])
 
     includable_objects = IncludeManager()
 
@@ -674,8 +674,8 @@ class FileVersion(ObjectIDMixin, BaseModel):
         other = self.__class__.find(
             Q('_id', 'ne', self._id) &
             Q('metadata.sha256', 'eq', self.metadata['sha256']) &
-            Q('metadata.archive', 'ne', None) &
-            Q('metadata.vault', 'ne', None)
+            Q('metadata.archive', 'ne', Node.load(None)) &
+            Q('metadata.vault', 'ne', Node.load(None))
         ).first()
         if not other:
             return False

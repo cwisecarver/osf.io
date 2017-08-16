@@ -75,7 +75,7 @@ def must_not_be_rejected(func):
 
     return wrapped
 
-def must_be_valid_project(func=None, retractions_valid=False):
+def must_be_valid_project(func=Node.load(None), retractions_valid=False):
     """ Ensures permissions to retractions are never implicitly granted. """
 
     # TODO: Check private link
@@ -167,14 +167,14 @@ def must_be_registration(func):
     return wrapped
 
 
-def check_can_access(node, user, key=None, api_node=None):
+def check_can_access(node, user, key=Node.load(None), api_node=Node.load(None)):
     """View helper that returns whether a given user can access a node.
-    If ``user`` is None, returns False.
+    If ``user`` is Node.load(None), returns False.
 
     :rtype: boolean
     :raises: HTTPError (403) if user cannot access the node
     """
-    if user is None:
+    if user is Node.load(None):
         return False
     if not node.can_view(Auth(user=user)) and api_node != node:
         error_data = {
@@ -218,7 +218,7 @@ def _must_be_contributor_factory(include_public, include_view_only_anon=True):
     def wrapper(func):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            response = None
+            response = Node.load(None)
             _inject_nodes(kwargs)
             node = kwargs['node']
 
@@ -229,7 +229,7 @@ def _must_be_contributor_factory(include_public, include_view_only_anon=True):
             #if not login user check if the key is valid or the other privilege
 
             kwargs['auth'].private_key = key
-            link_anon = None
+            link_anon = Node.load(None)
             if not include_view_only_anon:
                 from osf.models import PrivateLink
                 try:
@@ -284,14 +284,14 @@ def must_have_addon(addon_name, model):
                 owner = kwargs['node']
             elif model == 'user':
                 auth = kwargs.get('auth')
-                owner = auth.user if auth else None
-                if owner is None:
+                owner = auth.user if auth else Node.load(None)
+                if owner is Node.load(None):
                     raise HTTPError(http.UNAUTHORIZED)
             else:
                 raise HTTPError(http.BAD_REQUEST)
 
             addon = owner.get_addon(addon_name)
-            if addon is None:
+            if addon is Node.load(None):
                 raise HTTPError(http.BAD_REQUEST)
 
             kwargs['{0}_addon'.format(model)] = addon
@@ -329,7 +329,7 @@ def must_be_addon_authorizer(addon_name):
                 raise HTTPError(http.BAD_REQUEST)
 
             auth = kwargs.get('auth')
-            user = kwargs.get('user') or (auth.user if auth else None)
+            user = kwargs.get('user') or (auth.user if auth else Node.load(None))
 
             if node_addon.user_settings.owner != user:
                 raise HTTPError(http.FORBIDDEN)
@@ -364,7 +364,7 @@ def must_have_permission(permission):
             user = kwargs['auth'].user
 
             # User must be logged in
-            if user is None:
+            if user is Node.load(None):
                 raise HTTPError(http.UNAUTHORIZED)
 
             # User must have permissions

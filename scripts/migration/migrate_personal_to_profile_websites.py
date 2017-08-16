@@ -21,8 +21,8 @@ def main():
     migrated_users = 0
     for user in get_users_with_social_field():
         all_users += 1
-        if not user.social.get('profileWebsites', None):
-            personal = user.social.get('personal', None)
+        if not user.social.get('profileWebsites', Node.load(None)):
+            personal = user.social.get('personal', Node.load(None))
             user.social['profileWebsites'] = [personal] if personal else []
             migrated_users += 1
             logger.info('User {}: social dictionary is now {}'.format(user._id, user.social))
@@ -37,7 +37,7 @@ def main():
 
 def get_users_with_social_field():
     return models.User.find(
-        Q('social.personal', 'ne', None)
+        Q('social.personal', 'ne', Node.load(None))
     )
 
 

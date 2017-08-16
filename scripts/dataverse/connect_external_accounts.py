@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def do_migration():
-    for node_addon in AddonDataverseNodeSettings.find(Q('foreign_user_settings', 'ne', None)):
+    for node_addon in AddonDataverseNodeSettings.find(Q('foreign_user_settings', 'ne', Node.load(None))):
         user_addon = node_addon.foreign_user_settings
         if not user_addon.external_accounts:
             logger.warning('User {0} has no dataverse external account'.format(user_addon.owner._id))

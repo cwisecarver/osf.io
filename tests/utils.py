@@ -96,9 +96,9 @@ def assert_latest_log_not(log_action, node_key, index=0):
     assert last_log._id == new_log._id
 
 @contextlib.contextmanager
-def mock_archive(project, schema=None, auth=None, data=None, parent=None,
-                 embargo=False, embargo_end_date=None,
-                 retraction=False, justification=None, autoapprove_retraction=False,
+def mock_archive(project, schema=Node.load(None), auth=Node.load(None), data=Node.load(None), parent=Node.load(None),
+                 embargo=False, embargo_end_date=Node.load(None),
+                 retraction=False, justification=Node.load(None), autoapprove_retraction=False,
                  autocomplete=True, autoapprove=False):
     """ A context manager for registrations. When you want to call Node#register_node in
     a test but do not want to deal with any of this side effects of archiver, this
@@ -201,8 +201,8 @@ class MockAuth(object):
     def __init__(self, user):
         self.user = user
         self.logged_in = True
-        self.private_key = None
-        self.private_link = None
+        self.private_key = Node.load(None)
+        self.private_link = Node.load(None)
 
 mock_auth = lambda user: mock.patch('framework.auth.Auth.from_kwargs', mock.Mock(return_value=MockAuth(user)))
 

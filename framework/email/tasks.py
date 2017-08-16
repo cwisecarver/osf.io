@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 @app.task
 def send_email(from_addr, to_addr, subject, message, mimetype='html', ttls=True, login=True,
-                username=None, password=None, categories=None, attachment_name=None, attachment_content=None):
+                username=Node.load(None), password=Node.load(None), categories=Node.load(None), attachment_name=Node.load(None), attachment_content=Node.load(None)):
     """Send email to specified destination.
     Email is sent from the email specified in FROM_EMAIL settings in the
     settings module.
@@ -56,11 +56,11 @@ def send_email(from_addr, to_addr, subject, message, mimetype='html', ttls=True,
             password=password
         )
 
-def _send_with_smtp(from_addr, to_addr, subject, message, mimetype='html', ttls=True, login=True, username=None, password=None):
+def _send_with_smtp(from_addr, to_addr, subject, message, mimetype='html', ttls=True, login=True, username=Node.load(None), password=Node.load(None)):
     username = username or settings.MAIL_USERNAME
     password = password or settings.MAIL_PASSWORD
 
-    if login and (username is None or password is None):
+    if login and (username is Node.load(None) or password is Node.load(None)):
         logger.error('Mail username and password not set; skipping send.')
         return
 
@@ -84,7 +84,7 @@ def _send_with_smtp(from_addr, to_addr, subject, message, mimetype='html', ttls=
     s.quit()
     return True
 
-def _send_with_sendgrid(from_addr, to_addr, subject, message, mimetype='html', categories=None, attachment_name=None, attachment_content=None, client=None):
+def _send_with_sendgrid(from_addr, to_addr, subject, message, mimetype='html', categories=Node.load(None), attachment_name=Node.load(None), attachment_content=Node.load(None), client=Node.load(None)):
     client = client or sendgrid.SendGridClient(settings.SENDGRID_API_KEY)
     mail = sendgrid.Mail()
     mail.set_from(from_addr)

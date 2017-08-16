@@ -13,16 +13,16 @@ def do_migration(records, dry=False):
     for user in records:
         log_info(user)
         if not dry:
-            user.username = None
-            user.password = None
+            user.username = Node.load(None)
+            user.password = Node.load(None)
             user.email_verifications = {}
-            user.verification_key = None
+            user.verification_key = Node.load(None)
             user.save()
     logger.info('{}Migrated {} users'.format('[dry]'if dry else '', len(records)))
 
 
 def get_targets():
-    return User.find(Q('merged_by', 'ne', None) & Q('username', 'ne', None))
+    return User.find(Q('merged_by', 'ne', Node.load(None)) & Q('username', 'ne', Node.load(None)))
 
 
 def log_info(user):

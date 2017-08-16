@@ -34,10 +34,10 @@ def main():
 def get_users_with_username_not_in_emails():
     return (
         user for user in
-        models.User.find(Q('date_confirmed', 'ne', None))
+        models.User.find(Q('date_confirmed', 'ne', Node.load(None)))
         if user.is_active and
         user.username.lower() not in [email.lower() for email in user.emails] and
-        user.username is not None
+        user.username is not Node.load(None)
     )
 
 if __name__ == '__main__':

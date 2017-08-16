@@ -52,7 +52,7 @@ def create_mock_connection(token='snowman-frosty'):
     will return none.
     """
     if not token == 'snowman-frosty':
-        return None
+        return Node.load(None)
 
     mock_connection = mock.create_autospec(Connection)
 
@@ -67,7 +67,7 @@ def create_mock_connection(token='snowman-frosty'):
     def _get_dataverse(alias):
         return next((
             dataverse for dataverse in mock_connection.get_dataverses()
-            if alias is not None and dataverse.title[-1] == alias[-1]), None
+            if alias is not Node.load(None) and dataverse.title[-1] == alias[-1]), Node.load(None)
         )
 
     mock_connection.get_dataverse = mock.MagicMock(
@@ -94,10 +94,10 @@ def create_mock_dataverse(title='Example Dataverse 0'):
         create_mock_dataset('DVN/00003'),
     ]
 
-    def _get_dataset_by_doi(doi, timeout=None):
+    def _get_dataset_by_doi(doi, timeout=Node.load(None)):
         return next((
             dataset for dataset in mock_dataverse.get_datasets(timeout=timeout)
-            if dataset.doi == doi), None
+            if dataset.doi == doi), Node.load(None)
         )
 
     mock_dataverse.get_dataset_by_doi = mock.MagicMock(

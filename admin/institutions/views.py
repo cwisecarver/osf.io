@@ -43,7 +43,7 @@ class InstitutionDisplay(PermissionRequiredMixin, DetailView):
     permission_required = 'osf.view_institution'
     raise_exception = True
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return Institution.objects.get(id=self.kwargs.get('institution_id'))
 
     def get_context_data(self, *args, **kwargs):
@@ -97,7 +97,7 @@ class InstitutionChangeForm(PermissionRequiredMixin, UpdateView):
     model = Institution
     form_class = InstitutionForm
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         provider_id = self.kwargs.get('institution_id')
         return Institution.objects.get(id=provider_id)
 
@@ -178,7 +178,7 @@ class DeleteInstitution(PermissionRequiredMixin, DeleteView):
             return redirect('institutions:cannot_delete', institution_id=institution.pk)
         return super(DeleteInstitution, self).get(request, *args, **kwargs)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         institution = Institution.objects.get(id=self.kwargs['institution_id'])
         return institution
 

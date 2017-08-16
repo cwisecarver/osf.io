@@ -27,7 +27,7 @@ from tests.factories import UserFactory, ProjectFactory
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-QUERY = Q('date_confirmed', 'ne', None) & Q('unclaimed_records', 'ne', {})
+QUERY = Q('date_confirmed', 'ne', Node.load(None)) & Q('unclaimed_records', 'ne', {})
 
 def do_migration(dry=False):
     """Clear unclaimed_records for confirmed users."""

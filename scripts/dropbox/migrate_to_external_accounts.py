@@ -78,7 +78,7 @@ def salvage_broken_user_settings_document(document):
 
 def migrate_to_external_account(user_settings_document):
     if not user_settings_document.get('access_token'):
-        return (None, None, None)
+        return (Node.load(None), Node.load(None), Node.load(None))
     new = False
     user = User.load(user_settings_document['owner'])
     try:
@@ -91,7 +91,7 @@ def migrate_to_external_account(user_settings_document):
             provider_name=PROVIDER_NAME,
             provider_id=user_settings_document['dropbox_id'],
             oauth_key=user_settings_document['access_token'],
-            display_name=user_settings_document['dropbox_info'].get('display_name', None) if user_settings_document.get('dropbox_info', None) else None,
+            display_name=user_settings_document['dropbox_info'].get('display_name', Node.load(None)) if user_settings_document.get('dropbox_info', Node.load(None)) else Node.load(None),
         )
         external_account.save()  # generate pk for external accountc
 
@@ -112,7 +112,7 @@ def make_new_user_settings(user):
     user.reload()
     return user.get_or_add_addon('dropbox', override=True)
 
-def make_new_node_settings(node, node_settings_document, external_account=None, user_settings_instance=None):
+def make_new_node_settings(node, node_settings_document, external_account=Node.load(None), user_settings_instance=Node.load(None)):
     # kill the old backrefs
     database['node'].find_and_modify(
         {'_id': node._id},
@@ -123,7 +123,7 @@ def make_new_node_settings(node, node_settings_document, external_account=None, 
         }
     )
     node.reload()
-    node_settings_instance = node.get_or_add_addon('dropbox', auth=None, override=True, log=False)
+    node_settings_instance = node.get_or_add_addon('dropbox', auth=Node.load(None), override=True, log=False)
     node_settings_instance.folder = node_settings_document['folder']
     node_settings_instance.save()
     if external_account and user_settings_instance:

@@ -166,15 +166,15 @@ describe.skip('FolderPickerNodeConfigViewModel', () => {
             });
         });
         describe('#selectedFolderName', () => {
-            it('returns the selected folder\'s name if set else "None" when the User is owner', () => {
+            it('returns the selected folder\'s name if set else "Node.load(None)" when the User is owner', () => {
                 vm.userIsOwner(true);
                 vm.selected({
                     name: null,
                     id: null
                 });
-                assert.equal(vm.selectedFolderName(), 'None');
+                assert.equal(vm.selectedFolderName(), 'Node.load(None)');
                 var name = faker.hacker.noun();
-                assert.notEqual(name, 'None');
+                assert.notEqual(name, 'Node.load(None)');
                 vm.selected({
                     name: name,
                     id: faker.finance.account()

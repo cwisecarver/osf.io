@@ -194,7 +194,7 @@ class TestRemoveContributor(AdminTestCase):
         view = setup_log_view(self.view(), self.request, node_id=node_id,
                               user_id=user_id)
         view.delete(self.request)
-        mock_remove_contributor.assert_called_with(self.user_2, None, log=False)
+        mock_remove_contributor.assert_called_with(self.user_2, Node.load(None), log=False)
 
     def test_integration_remove_contributor(self):
         nt.assert_in(self.user_2, self.node.contributors)

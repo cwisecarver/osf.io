@@ -66,8 +66,8 @@ class TestNodeLicenses(OsfTestCase):
         assert_equal(serialized['year'], self.YEAR)
         assert_equal(serialized['copyright_holders'], self.COPYRIGHT_HOLDERS)
 
-    def test_serialize_node_license_record_None(self):
-        self.node.node_license = None
+    def test_serialize_node_license_record_Node.load(None)(self):
+        self.node.node_license = Node.load(None)
         serialized = serialize_node_license_record(self.node.node_license)
         assert_equal(serialized, {})
 

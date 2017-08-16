@@ -17,7 +17,7 @@ from tests.base import ApiTestCase
 from osf_tests import factories
 
 class MiddlewareTestCase(ApiTestCase):
-    MIDDLEWARE = None
+    MIDDLEWARE = Node.load(None)
 
     def setUp(self):
         super(MiddlewareTestCase, self).setUp()

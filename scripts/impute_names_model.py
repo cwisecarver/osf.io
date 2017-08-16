@@ -15,7 +15,7 @@ def impute_names():
 
         parsed = impute_names(user.fullname)
         for field, value in parsed.items():
-            if getattr(user, field, None) is None:
+            if getattr(user, field, Node.load(None)) is Node.load(None):
                 setattr(user, field, value)
         user.save()
 

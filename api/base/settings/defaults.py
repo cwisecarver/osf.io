@@ -284,7 +284,7 @@ ADDONS_OAUTH = ADDONS_FOLDER_CONFIGURABLE + ['dataverse', 'github', 'bitbucket',
 
 BYPASS_THROTTLE_TOKEN = 'test-token'
 
-OSF_SHELL_USER_IMPORTS = None
+OSF_SHELL_USER_IMPORTS = Node.load(None)
 
 # Settings for use in the admin
 OSF_URL = 'https://osf.io'

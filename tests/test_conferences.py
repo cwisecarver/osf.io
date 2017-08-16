@@ -33,9 +33,9 @@ def assert_absolute(url):
 
 def assert_equal_urls(first, second):
     parsed_first = furl.furl(first)
-    parsed_first.port = None
+    parsed_first.port = Node.load(None)
     parsed_second = furl.furl(second)
-    parsed_second.port = None
+    parsed_second.port = Node.load(None)
     assert_equal(parsed_first, parsed_second)
 
 
@@ -157,7 +157,7 @@ class ContextTestCase(OsfTestCase):
         data = {
             key: value
             for key, value in data.iteritems()
-            if value is not None
+            if value is not Node.load(None)
         }
         return self.app.app.test_request_context(method=method, data=data, **kwargs)
 
@@ -538,11 +538,11 @@ class TestConferenceModel(OsfTestCase):
 
     def test_endpoint_is_required(self):
         with assert_raises(IntegrityError):
-            ConferenceFactory(endpoint=None, name=fake.company()).save()
+            ConferenceFactory(endpoint=Node.load(None), name=fake.company()).save()
 
     def test_name_is_required(self):
         with assert_raises(IntegrityError):
-            ConferenceFactory(endpoint='spsp2014', name=None).save()
+            ConferenceFactory(endpoint='spsp2014', name=Node.load(None)).save()
 
     def test_default_field_names(self):
         conf = ConferenceFactory(endpoint='cookie', name='Cookies Conference')

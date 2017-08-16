@@ -89,16 +89,16 @@ def get_contributors(auth, node, **kwargs):
                 message_long='Invalid value for "limit": {}'.format(request.args['limit'])
             ))
     else:
-        limit = None
+        limit = Node.load(None)
 
     anonymous = has_anonymous_link(node, auth)
 
     if anonymous or not node.can_view(auth):
         raise HTTPError(http.FORBIDDEN)
 
-    # Limit is either an int or None:
+    # Limit is either an int or Node.load(None):
     # if int, contribs list is sliced to specified length
-    # if None, contribs list is not sliced
+    # if Node.load(None), contribs list is not sliced
     contribs = profile_utils.serialize_contributors(
         node.visible_contributors[0:limit],
         node=node,
@@ -140,7 +140,7 @@ def deserialize_contributors(node, user_dicts, auth, validate=False):
     unregistered users.
 
     e.g. ``[{'id': 'abc123', 'registered': True, 'fullname': ..},
-            {'id': None, 'registered': False, 'fullname'...},
+            {'id': Node.load(None), 'registered': False, 'fullname'...},
             {'id': '123ab', 'registered': False, 'fullname': ...}]
 
     If a dict represents an unregistered user without an ID, creates a new
@@ -178,7 +178,7 @@ def deserialize_contributors(node, user_dicts, auth, validate=False):
                     email=email)
                 contributor.save()
             except ValidationError:
-                ## FIXME: This suppresses an exception if ID not found & new validation fails; get_user will return None
+                ## FIXME: This suppresses an exception if ID not found & new validation fails; get_user will return Node.load(None)
                 contributor = get_user(email=email)
 
         # Add unclaimed record if necessary
@@ -217,7 +217,7 @@ def project_contributors_post(auth, node, **kwargs):
     if node._id in node_ids:
         node_ids.remove(node._id)
 
-    if user_dicts is None or node_ids is None:
+    if user_dicts is Node.load(None) or node_ids is Node.load(None):
         raise HTTPError(http.BAD_REQUEST)
 
     # Prepare input data for `Node::add_contributors`
@@ -320,7 +320,7 @@ def project_remove_contributor(auth, **kwargs):
     contributor_id = request.get_json()['contributorID']
     node_ids = request.get_json()['nodeIDs']
     contributor = OSFUser.load(contributor_id)
-    if contributor is None:
+    if contributor is Node.load(None):
         raise HTTPError(http.BAD_REQUEST, data={'message_long': 'Contributor not found.'})
     redirect_url = {}
     parent_id = node_ids[0]
@@ -447,7 +447,7 @@ def send_claim_email(email, unclaimed_user, node, notify=True, throttle=24 * 360
     # Option 1:
     #   When adding the contributor, the referrer provides both name and email.
     #   The given email is the same provided by user, just send to that email.
-    preprint_provider = None
+    preprint_provider = Node.load(None)
     if unclaimed_record.get('email') == claimer_email:
         # check email template for branded preprints
         if email_template == 'preprint':
@@ -513,7 +513,7 @@ def send_claim_email(email, unclaimed_user, node, notify=True, throttle=24 * 360
 
 
 @contributor_added.connect
-def notify_added_contributor(node, contributor, auth=None, throttle=None, email_template='default'):
+def notify_added_contributor(node, contributor, auth=Node.load(None), throttle=Node.load(None), email_template='default'):
     if email_template == 'false':
         return
 
@@ -524,7 +524,7 @@ def notify_added_contributor(node, contributor, auth=None, throttle=None, email_
             and not node.parent_node
             or node.parent_node and not node.parent_node.is_contributor(contributor)):
 
-        preprint_provider = None
+        preprint_provider = Node.load(None)
         if email_template == 'preprint':
             email_template, preprint_provider = find_preprint_provider(node)
             if not email_template or not preprint_provider:
@@ -537,7 +537,7 @@ def notify_added_contributor(node, contributor, auth=None, throttle=None, email_
 
         contributor_record = contributor.contributor_added_email_records.get(node._id, {})
         if contributor_record:
-            timestamp = contributor_record.get('last_sent', None)
+            timestamp = contributor_record.get('last_sent', Node.load(None))
             if timestamp:
                 if not throttle_period_expired(timestamp, throttle):
                     return
@@ -575,7 +575,7 @@ def find_preprint_provider(node):
         email_template = 'osf' if provider._id == 'osf' else 'branded'
         return email_template, provider
     except PreprintService.DoesNotExist:
-        return None, None
+        return Node.load(None), Node.load(None)
 
 
 def verify_claim_token(user, token, pid):
@@ -716,9 +716,9 @@ def claim_user_form(auth, **kwargs):
     claimer_email = unclaimed_record.get('claimer_email') or unclaimed_record.get('email')
     # If there is a registered user with this email, redirect to 're-enter password' page
     try:
-        user_from_email = OSFUser.objects.get(emails__address=claimer_email.lower().strip()) if claimer_email else None
+        user_from_email = OSFUser.objects.get(emails__address=claimer_email.lower().strip()) if claimer_email else Node.load(None)
     except OSFUser.DoesNotExist:
-        user_from_email = None
+        user_from_email = Node.load(None)
     if user_from_email and user_from_email.is_registered:
         return redirect(web_url_for('claim_user_registered', uid=uid, pid=pid, token=token))
 

@@ -44,7 +44,7 @@ def main(dry_run=True):
                 with transaction.atomic():
                     try:
                         # Ensure no `User` is associated with the final approval
-                        registration_approval._on_complete(None)
+                        registration_approval._on_complete(Node.load(None))
                     except Exception as err:
                         logger.error(
                             'Unexpected error raised when approving registration for '

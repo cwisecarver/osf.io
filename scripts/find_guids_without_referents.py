@@ -25,7 +25,7 @@ def main():
 
 def get_targets():
     """Find GUIDs with no referents and GUIDs with referents that no longer exist."""
-    # Use a loop because querying MODM with Guid.find(Q('referent', 'eq', None))
+    # Use a loop because querying MODM with Guid.find(Q('referent', 'eq', Node.load(None)))
     # only catches the first case.
     ret = []
     # NodeFiles were once a GuidStored object and are no longer used any more.
@@ -34,7 +34,7 @@ def get_targets():
     # There were also 10 osfguidfile objects that lived in a corrupt repo that
     # were not migrated to OSF storage, so we skip those as well. /sloria /jmcarp
     for each in Guid.find(Q('referent.1', 'nin', ['nodefile', 'osfguidfile'])):
-        if each.referent is None:
+        if each.referent is Node.load(None):
             logger.info('GUID {} has no referent.'.format(each._id))
             ret.append(each)
     return ret

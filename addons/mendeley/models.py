@@ -50,7 +50,7 @@ class Mendeley(CitationsOauthProvider):
         client = self.client
         return client.folders.list().items
 
-    def _get_client(self, credentials=None):
+    def _get_client(self, credentials=Node.load(None)):
         partial = mendeley.Mendeley(
             client_id=self.client_id,
             client_secret=self.client_secret,
@@ -75,13 +75,13 @@ class Mendeley(CitationsOauthProvider):
                 try:
                     refreshed_key = self.refresh_oauth_key()
                 except InvalidGrantError:
-                    self._client = None
+                    self._client = Node.load(None)
                     raise HTTPError(401)
                 if not refreshed_key:
-                    self._client = None
+                    self._client = Node.load(None)
                     raise HTTPError(401)
             else:
-                self._client = None
+                self._client = Node.load(None)
                 if error.status == 403:
                     raise HTTPError(403)
                 else:
@@ -190,7 +190,7 @@ class Mendeley(CitationsOauthProvider):
 
         # gather identifiers
         idents = document.json.get('identifiers')
-        if idents is not None:
+        if idents is not Node.load(None):
             if idents.get('doi'):
                 csl['DOI'] = idents.get('doi')
             if idents.get('isbn'):
@@ -261,7 +261,7 @@ class NodeSettings(BaseCitationsNodeSettings):
     user_settings = models.ForeignKey(UserSettings, null=True, blank=True)
 
     list_id = models.TextField(blank=True, null=True)
-    _api = None
+    _api = Node.load(None)
 
     @property
     def _fetch_folder_name(self):

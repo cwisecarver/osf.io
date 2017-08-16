@@ -24,7 +24,7 @@ class DataverseFolder(DataverseFileNode, Folder):
 class DataverseFile(DataverseFileNode, File):
     version_identifier = 'version'
 
-    def update(self, revision, data, user=None):
+    def update(self, revision, data, user=Node.load(None)):
         """Note: Dataverse only has psuedo versions, don't save them
         Dataverse requires a user for the weird check below
         """
@@ -56,7 +56,7 @@ class DataverseProvider(object):
     short_name = 'dataverse'
     serializer = DataverseSerializer
 
-    def __init__(self, account=None):
+    def __init__(self, account=Node.load(None)):
         super(DataverseProvider, self).__init__()  # this does exactly nothing...
         # provide an unauthenticated session by default
         self.account = account
@@ -90,7 +90,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
     @property
     def dataset_id(self):
-        if self._dataset_id is None and (self.dataverse_alias and self.dataset_doi):
+        if self._dataset_id is Node.load(None) and (self.dataverse_alias and self.dataset_doi):
             connection = connect_from_settings_or_401(self)
             dataverse = connection.get_dataverse(self.dataverse_alias)
             dataset = dataverse.get_dataset_by_doi(self.dataset_doi)
@@ -100,7 +100,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
     @property
     def complete(self):
-        return bool(self.has_auth and self.dataset_doi is not None)
+        return bool(self.has_auth and self.dataset_doi is not Node.load(None))
 
     @property
     def folder_id(self):
@@ -113,7 +113,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     @property
     def nodelogger(self):
         # TODO: Use this for all log actions
-        auth = None
+        auth = Node.load(None)
         if self.user_settings:
             auth = Auth(self.user_settings.owner)
         return DataverseNodeLogger(
@@ -121,7 +121,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
             auth=auth
         )
 
-    def set_folder(self, dataverse, dataset, auth=None):
+    def set_folder(self, dataverse, dataset, auth=Node.load(None)):
         self.dataverse_alias = dataverse.alias
         self.dataverse = dataverse.title
 
@@ -142,7 +142,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
                 auth=auth,
             )
 
-    def _get_fileobj_child_metadata(self, filenode, user, cookie=None, version=None):
+    def _get_fileobj_child_metadata(self, filenode, user, cookie=Node.load(None), version=Node.load(None)):
         try:
             return super(NodeSettings, self)._get_fileobj_child_metadata(filenode, user, cookie=cookie, version=version)
         except HTTPError as e:
@@ -153,13 +153,13 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
     def clear_settings(self):
         """Clear selected Dataverse and dataset"""
-        self.dataverse_alias = None
-        self.dataverse = None
-        self.dataset_doi = None
-        self._dataset_id = None
-        self.dataset = None
+        self.dataverse_alias = Node.load(None)
+        self.dataverse = Node.load(None)
+        self.dataset_doi = Node.load(None)
+        self._dataset_id = Node.load(None)
+        self.dataset = Node.load(None)
 
-    def deauthorize(self, auth=None, add_log=True):
+    def deauthorize(self, auth=Node.load(None), add_log=True):
         """Remove user authorization from this node and log the event."""
         self.clear_settings()
         self.clear_auth()  # Also performs a save

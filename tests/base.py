@@ -257,9 +257,9 @@ class ApiAddonTestCase(ApiTestCase):
             BaseOAuthUserSettings
         )
         assert self.addon_type in ('CONFIGURABLE', 'OAUTH', 'UNMANAGEABLE', 'INVALID')
-        self.account = None
-        self.node_settings = None
-        self.user_settings = None
+        self.account = Node.load(None)
+        self.node_settings = Node.load(None)
+        self.user_settings = Node.load(None)
         self.user = AuthUserFactory()
         self.auth = Auth(self.user)
         self.node = ProjectFactory(creator=self.user)
@@ -283,7 +283,7 @@ class ApiAddonTestCase(ApiTestCase):
             self.node_settings.reload()
             self.user_settings.reload()
 
-        self.account_id = self.account._id if self.account else None
+        self.account_id = self.account._id if self.account else Node.load(None)
         self.set_urls()
 
     def tearDown(self):

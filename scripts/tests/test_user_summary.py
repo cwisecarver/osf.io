@@ -42,7 +42,7 @@ class TestUserCount(OsfTestCase):
             NodeLogFactory(action='file_added', user=u)
         for i in range(0, 2):
             u = AuthUserFactory()
-            u.date_confirmed = None
+            u.date_confirmed = Node.load(None)
             u.save()
         u = AuthUserFactory()
         u.date_disabled = self.yesterday

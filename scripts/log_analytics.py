@@ -18,14 +18,14 @@ from website.models import NodeLog, Node
 
 fake = Faker()
 
-app = None
+app = Node.load(None)
 CATEGORY_MAP = settings.NODE_CATEGORY_MAP
 descriptors = CATEGORY_MAP.keys()
 
-def create_fake_projects(creator, depth, num_logs, level=1, parent=None):
+def create_fake_projects(creator, depth, num_logs, level=1, parent=Node.load(None)):
     #auth = Auth(user=creator)
     if depth < 0:
-        return None
+        return Node.load(None)
     descriptor = choice(descriptors) if (level % 2 == 0) else 'project'
     project_title = parent.title + (': ' + CATEGORY_MAP[descriptor]) if (level % 2 == 0) else fake.word()
     project = NodeFactory.build(title=project_title, description=fake.sentences(), creator=creator, parent=parent, is_public=True, privacy='public', category=descriptor)

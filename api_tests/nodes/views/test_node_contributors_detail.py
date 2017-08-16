@@ -701,7 +701,7 @@ class TestNodeContributorUpdate:
                     'id': contrib_id,
                     'type': 'contributors',
                     'attributes': {
-                        'permission': None,
+                        'permission': Node.load(None),
                         'bibliographic': True
                     }
                 }

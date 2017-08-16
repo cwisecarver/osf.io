@@ -56,7 +56,7 @@ class NoHtmlCharacters(object):
     Javascript literal.
     """
     # TODO: Improve this for a post-bleach world
-    def __init__(self, message=None):
+    def __init__(self, message=Node.load(None)):
         self.message = message or u'HTML is not allowed in form field'
 
     def __call__(self, form, field):

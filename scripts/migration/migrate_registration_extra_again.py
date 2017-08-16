@@ -69,7 +69,7 @@ def migrate_extras(queryset, dry=True):
 def migrate(dry=True):
     registrations = Node.find(
         Q('is_registration', 'eq', True) &
-        Q('registered_meta', 'ne', None)
+        Q('registered_meta', 'ne', Node.load(None))
     )
     regs_migrated, reg_errored = migrate_extras(registrations, dry=dry)
 

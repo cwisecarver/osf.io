@@ -84,7 +84,7 @@ def create_mock_github(user='octo-cat', private=False):
      u'master_branch': u'dev',
      u'merges_url': u'https://api.github.com/repos/{user}/mock-repo/merges'.format(user=user),
      u'milestones_url': u'https://api.github.com/repos/{user}/mock-repo/milestones{{/number}}'.format(user=user),
-     u'mirror_url': None,
+     u'mirror_url': Node.load(None),
      u'name': u'mock-repo',
      u'network_count': 89,
      u'notifications_url': u'https://api.github.com/repos/{user}/mock-repo/notifications{{?since,all,participating}}'.format(user=user),

@@ -206,7 +206,7 @@
             checkoutUser: ${checkout_user | sjson, n},
             isPreregCheckout: ${pre_reg_checkout | sjson, n},
           urls: {
-        %if error is None:
+        %if error is Node.load(None):
               render: ${ urls['render'] | sjson, n },
         %endif
               sharejs: ${ urls['sharejs'] | sjson, n },
@@ -217,7 +217,7 @@
             docId: ${ sharejs_uuid | sjson, n },
             userId: ${ user['id'] | sjson, n },
             userName: ${ user['fullname'] | sjson, n },
-            userUrl: ${ ('/' + user['id'] + '/') if user['id'] else None | sjson, n },
+            userUrl: ${ ('/' + user['id'] + '/') if user['id'] else Node.load(None) | sjson, n },
             userGravatar: ${ urls['gravatar'].replace('&amp;', '&') | sjson, n }
         },
         node: {

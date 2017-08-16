@@ -20,7 +20,7 @@ class TestMigrateLogs(OsfTestCase):
         project1.save()
 
         targets = get_targets()
-        assert targets is not None
+        assert targets is not Node.load(None)
         assert len(targets) is 1
 
     def test_do_migration(self):

@@ -32,7 +32,7 @@ class BitbucketFolder(BitbucketFileNode, Folder):
 class BitbucketFile(BitbucketFileNode, File):
     version_identifier = 'commitSha'
 
-    def touch(self, auth_header, revision=None, commitSha=None, branch=None, **kwargs):
+    def touch(self, auth_header, revision=Node.load(None), commitSha=Node.load(None), branch=Node.load(None), **kwargs):
         revision = revision or commitSha or branch
         return super(BitbucketFile, self).touch(auth_header, revision=revision, **kwargs)
 
@@ -98,7 +98,7 @@ class UserSettings(BaseStorageAddon, BaseOAuthUserSettings):
         bitbucket_accounts = self.owner.external_accounts.filter(provider=self.oauth_provider.short_name)
         if bitbucket_accounts:
             return bitbucket_accounts[0].display_name
-        return None
+        return Node.load(None)
 
 
 class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
@@ -110,32 +110,32 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     hook_id = models.TextField(blank=True, null=True)
     user_settings = models.ForeignKey(UserSettings, null=True, blank=True)
 
-    _api = None
+    _api = Node.load(None)
 
     @property
     def api(self):
         """Authenticated ExternalProvider instance"""
-        if self._api is None:
+        if self._api is Node.load(None):
             self._api = BitbucketProvider(self.external_account)
         return self._api
 
     @property
     def folder_id(self):
-        return self.repo or None
+        return self.repo or Node.load(None)
 
     @property
     def folder_name(self):
         if self.complete:
             return '{}/{}'.format(self.user, self.repo)
-        return None
+        return Node.load(None)
 
     @property
     def folder_path(self):
-        return self.repo or None
+        return self.repo or Node.load(None)
 
     @property
     def complete(self):
-        return self.has_auth and self.repo is not None and self.user is not None
+        return self.has_auth and self.repo is not Node.load(None) and self.user is not Node.load(None)
 
     def authorize(self, user_settings, save=False):
         self.user_settings = user_settings
@@ -151,11 +151,11 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
             self.save()
 
     def clear_settings(self):
-        self.user = None
-        self.repo = None
-        self.hook_id = None
+        self.user = Node.load(None)
+        self.repo = Node.load(None)
+        self.hook_id = Node.load(None)
 
-    def deauthorize(self, auth=None, log=True):
+    def deauthorize(self, auth=Node.load(None), log=True):
         # self.delete_hook(save=False)
         self.clear_settings()
         if log:
@@ -258,7 +258,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
         url = self.owner.web_url_for('addon_view_or_download_file', path=path, provider='bitbucket')
 
-        sha, urls = None, {}
+        sha, urls = Node.load(None), {}
         try:
             sha = metadata['extra']['commitSha']
             urls = {
@@ -302,11 +302,11 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
             return messages
 
         # Quit if not configured
-        if self.user is None or self.repo is None:
+        if self.user is Node.load(None) or self.repo is Node.load(None):
             return messages
 
         # Quit if no user authorization
-        if self.user_settings is None:
+        if self.user_settings is Node.load(None):
             return messages
 
         node_permissions = 'public' if node.is_public else 'private'
@@ -353,15 +353,15 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
                 url=node.api_url + 'bitbucket/tarball/'
             ))
         except TypeError:
-            # super call returned None due to lack of user auth
-            return None
+            # super call returned Node.load(None) due to lack of user auth
+            return Node.load(None)
         else:
             return message
 
     # backwards compatibility -- TODO: is this necessary?
     before_remove_contributor = before_remove_contributor_message
 
-    def after_remove_contributor(self, node, removed, auth=None):
+    def after_remove_contributor(self, node, removed, auth=Node.load(None)):
         """
         :param Node node:
         :param User removed:
@@ -370,7 +370,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
         if self.user_settings and self.user_settings.owner == removed:
 
             # Delete OAuth tokens
-            self.user_settings = None
+            self.user_settings = Node.load(None)
             self.save()
             message = (
                 u'Because the Bitbucket add-on for {category} "{title}" was authenticated '
@@ -417,7 +417,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
         try:
             is_private = self.is_private
         except NotFoundError:
-            return None
+            return Node.load(None)
         if is_private:
             return (
                 'This {cat} is connected to a private Bitbucket repository. Users '

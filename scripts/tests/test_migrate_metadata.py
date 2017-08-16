@@ -93,7 +93,7 @@ class TestMigrateSchemas(OsfTestCase):
                         to_mongo(schema.name): json.dumps(OLD_META[schema.name])
                         for schema in schemas
                     },
-                    'registered_schema': None
+                    'registered_schema': Node.load(None)
                 }
             }
         )
@@ -137,7 +137,7 @@ class TestMigrateSchemas(OsfTestCase):
         )
         self.confirmatory = self._make_registration(self.confirmatory_schema)
 
-        self.db['node'].update({}, {'$set': {'registered_schema': None}}, multi=True)
+        self.db['node'].update({}, {'$set': {'registered_schema': Node.load(None)}}, multi=True)
 
     def tearDown(self):
         super(TestMigrateSchemas, self).tearDown()

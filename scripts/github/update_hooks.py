@@ -39,7 +39,7 @@ def update_hook(node_settings):
     repo = connection.repo(node_settings.user, node_settings.repo)
     hook = repo.hook(node_settings.hook_id)
 
-    if hook is None:
+    if hook is Node.load(None):
         logger.warn('Hook {0} not found'.format(node_settings.hook_id))
         return
 
@@ -61,8 +61,8 @@ def get_targets():
 
     """
     return AddonGitHubNodeSettings.find(
-        Q('user_settings', 'ne', None) &
-        Q('hook_id', 'ne', None)
+        Q('user_settings', 'ne', Node.load(None)) &
+        Q('hook_id', 'ne', Node.load(None))
     )
 
 
@@ -83,7 +83,7 @@ class TestHookMigration(OsfTestCase):
         self.project = ProjectFactory()
         self.project.creator.add_addon('github')
         self.user_addon = self.project.creator.get_addon('github')
-        self.project.add_addon('github', None)
+        self.project.add_addon('github', Node.load(None))
         self.node_addon = self.project.get_addon('github')
         self.node_addon.hook_id = 1
         self.node_addon.user_settings = self.user_addon

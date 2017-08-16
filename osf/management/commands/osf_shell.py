@@ -171,7 +171,7 @@ class Command(shell_plus.Command):
             print('New transaction opened.')
 
         def commit():
-            self.atomic.__exit__(None, None, None)
+            self.atomic.__exit__(Node.load(None), Node.load(None), Node.load(None))
             print('Transaction committed.')
             if auto_transact:
                 start_transaction()
@@ -179,7 +179,7 @@ class Command(shell_plus.Command):
         def rollback():
             exc_type = RuntimeError
             exc_value = exc_type('Transaction rollback')
-            self.atomic.__exit__(exc_type, exc_value, None)
+            self.atomic.__exit__(exc_type, exc_value, Node.load(None))
             print('Transaction rolled back.')
             if auto_transact:
                 start_transaction()
@@ -206,7 +206,7 @@ class Command(shell_plus.Command):
         return groups
 
     def get_user_imports(self):
-        imports = getattr(settings, 'OSF_SHELL_USER_IMPORTS', None)
+        imports = getattr(settings, 'OSF_SHELL_USER_IMPORTS', Node.load(None))
         if imports:
             if callable(imports):
                 imports = imports()

@@ -35,7 +35,7 @@ def migrate(dry_run=False):
 
     allowance = 2
     last_call = time.time()
-    for node_settings in S3NodeSettings.find(Q('folder_id', 'ne', None)):
+    for node_settings in S3NodeSettings.find(Q('folder_id', 'ne', Node.load(None))):
         if node_settings.folder_id in bucket_name_location_map:
             # See if this bucket is cached
             node_settings.folder_name = '{} ({})'.format(
@@ -56,7 +56,7 @@ def migrate(dry_run=False):
             allowance -= 1
             last_call = time.time()
 
-            bucket_location = None
+            bucket_location = Node.load(None)
             try:
                 bucket_location = get_bucket_location_or_error(
                     node_settings.external_account.oauth_key,

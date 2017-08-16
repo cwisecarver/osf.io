@@ -17,7 +17,7 @@ def find_nested_projects():
     )
     #return [node for node in Node.find()
             #if node.category == 'project'
-            #and node.parent_node is not None]
+            #and node.parent_node is not Node.load(None)]
 
 class TestFindNestedProjects(OsfTestCase):
 

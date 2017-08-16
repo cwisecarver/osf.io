@@ -17,7 +17,7 @@ def clean_up_common_errors(cit):
 
 def display_absolute_url(node):
     url = node.absolute_url
-    if url is not None:
+    if url is not Node.load(None):
         return re.sub(r'https?:', '', url).strip('/')
 
 
@@ -39,7 +39,7 @@ def preprint_csl(preprint, node):
 
 def render_citation(node, style='apa'):
     """Given a node, return a citation"""
-    csl = None
+    csl = Node.load(None)
     if isinstance(node, PreprintService):
         csl = preprint_csl(node, node.node)
         data = [csl, ]

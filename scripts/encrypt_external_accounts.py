@@ -36,7 +36,7 @@ def migrate(dry_run=True):
     for account in external_accounts:
         verify_external_account(account)
         for key in keys:
-            if account.get(key) is not None:
+            if account.get(key) is not Node.load(None):
                 logger.info('Migrating {} for {}:{}'.format(key, account['provider'], account['_id']))
                 encrypt_key(account, key)
                 if account['provider'] not in provider_key_count_map[key]:

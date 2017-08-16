@@ -41,7 +41,7 @@ def migrate_download_counts(node, children, dry=True):
 
     for old_path, new in children.items():
         if dry:
-            # Note in dry mode new is None
+            # Note in dry mode new is Node.load(None)
             new_id = ':'.join(['download', node._id, 'new_id'])
             old_id = ':'.join(['download', node._id, old_path])
         else:
@@ -103,7 +103,7 @@ def migrate_file(node, old, parent, dry=True):
         new.is_deleted = old.is_deleted
         new.save()
     else:
-        new = None
+        new = Node.load(None)
     return new
 
 def migrate_logs(node, children, dry=True):
@@ -111,7 +111,7 @@ def migrate_logs(node, children, dry=True):
         if log.action not in LOG_ACTIONS:
             continue
 
-        if log.params.get('_path') is not None and log.params.get('_urls'):
+        if log.params.get('_path') is not Node.load(None) and log.params.get('_urls'):
             logger.warning('Log for file {} has already been migrated'.format(log.params['path']))
             continue
 
@@ -144,7 +144,7 @@ def migrate_logs(node, children, dry=True):
 def migrate_guids(node_settings, children, dry=True):
     for guid in model.OsfStorageGuidFile.find(
             Q('node', 'eq', node_settings.owner) & Q('_has_no_file_tree', 'ne', True)):
-        if guid._path is not None:
+        if guid._path is not Node.load(None):
             logger.warn('File guid {} has already been migrated'.format(guid._id))
             continue
 
@@ -175,7 +175,7 @@ def migrate_guids(node_settings, children, dry=True):
 
 def migrate_children(node_settings, dry=True):
     if not node_settings.file_tree:
-        return logger.warning('Skipping node {}; file_tree is None'.format(node_settings.owner._id))
+        return logger.warning('Skipping node {}; file_tree is Node.load(None)'.format(node_settings.owner._id))
 
     logger.info('Migrating children of node {}'.format(node_settings.owner._id))
 

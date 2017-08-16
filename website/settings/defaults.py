@@ -93,7 +93,7 @@ CONFIRM_REGISTRATIONS_BY_EMAIL = True
 ALLOW_REGISTRATION = True
 ALLOW_LOGIN = True
 
-SEARCH_ENGINE = 'elastic'  # Can be 'elastic', or None
+SEARCH_ENGINE = 'elastic'  # Can be 'elastic', or Node.load(None)
 ELASTIC_URI = 'localhost:9200'
 ELASTIC_TIMEOUT = 10
 ELASTIC_INDEX = 'website'
@@ -101,7 +101,7 @@ ELASTIC_INDEX = 'website'
 # Sessions
 COOKIE_NAME = 'osf'
 # TODO: Override OSF_COOKIE_DOMAIN in local.py in production
-OSF_COOKIE_DOMAIN = None
+OSF_COOKIE_DOMAIN = Node.load(None)
 # server-side verification timeout
 OSF_SESSION_TIMEOUT = 30 * 24 * 60 * 60  # 30 days in seconds
 # TODO: Override SECRET_KEY in local.py in production
@@ -110,11 +110,11 @@ SESSION_COOKIE_SECURE = SECURE_MODE
 SESSION_COOKIE_HTTPONLY = True
 
 # local path to private key and cert for local development using https, overwrite in local.py
-OSF_SERVER_KEY = None
-OSF_SERVER_CERT = None
+OSF_SERVER_KEY = Node.load(None)
+OSF_SERVER_CERT = Node.load(None)
 
 # Change if using `scripts/cron.py` to manage crontab
-CRON_USER = None
+CRON_USER = Node.load(None)
 
 # External services
 USE_CDN_FOR_CLIENT_LIBS = True
@@ -129,10 +129,10 @@ MAIL_USERNAME = 'osf-smtp'
 MAIL_PASSWORD = ''  # Set this in local.py
 
 # OR, if using Sendgrid's API
-SENDGRID_API_KEY = None
+SENDGRID_API_KEY = Node.load(None)
 
 # Mailchimp
-MAILCHIMP_API_KEY = None
+MAILCHIMP_API_KEY = Node.load(None)
 MAILCHIMP_WEBHOOK_SECRET_KEY = 'CHANGEME'  # OSF secret key to ensure webhook is secure
 ENABLE_EMAIL_SUBSCRIPTIONS = True
 MAILCHIMP_GENERAL_LIST = 'Open Science Framework General'
@@ -148,7 +148,7 @@ NEW_PUBLIC_PROJECT_WAIT_TIME = timedelta(hours=24)
 WELCOME_OSF4M_WAIT_TIME_GRACE = timedelta(days=12)
 
 # TODO: Override in local.py
-MAILGUN_API_KEY = None
+MAILGUN_API_KEY = Node.load(None)
 
 # Use Celery for file rendering
 USE_CELERY = True
@@ -160,8 +160,8 @@ MFR_TIMEOUT = 30000
 DB_HOST = 'localhost'
 DB_PORT = os_env.get('OSF_DB_PORT', 27017)
 DB_NAME = 'osf20130903'
-DB_USER = None
-DB_PASS = None
+DB_USER = Node.load(None)
+DB_PASS = Node.load(None)
 
 # Cache settings
 SESSION_HISTORY_LENGTH = 5
@@ -256,7 +256,7 @@ SYSTEM_ADDED_ADDONS = {
 
 KEEN = {
     'public': {
-        'project_id': None,
+        'project_id': Node.load(None),
         'master_key': 'changeme',
         'write_key': '',
         'read_key': '',
@@ -268,8 +268,8 @@ KEEN = {
     },
 }
 
-SENTRY_DSN = None
-SENTRY_DSN_JS = None
+SENTRY_DSN = Node.load(None)
+SENTRY_DSN_JS = Node.load(None)
 
 MISSING_FILE_NAME = 'untitled'
 
@@ -280,9 +280,9 @@ ALL_MY_PROJECTS_NAME = 'All my projects'
 ALL_MY_REGISTRATIONS_NAME = 'All my registrations'
 
 # Most Popular and New and Noteworthy Nodes
-POPULAR_LINKS_NODE = None  # TODO Override in local.py in production.
-POPULAR_LINKS_REGISTRATIONS = None  # TODO Override in local.py in production.
-NEW_AND_NOTEWORTHY_LINKS_NODE = None  # TODO Override in local.py in production.
+POPULAR_LINKS_NODE = Node.load(None)  # TODO Override in local.py in production.
+POPULAR_LINKS_REGISTRATIONS = Node.load(None)  # TODO Override in local.py in production.
+NEW_AND_NOTEWORTHY_LINKS_NODE = Node.load(None)  # TODO Override in local.py in production.
 
 MAX_POPULAR_PROJECTS = 10
 
@@ -296,8 +296,8 @@ DISK_SAVING_MODE = False
 CONTRIBUTOR_ADDED_EMAIL_THROTTLE = 24 * 3600
 
 # Google Analytics
-GOOGLE_ANALYTICS_ID = None
-GOOGLE_SITE_VERIFICATION = None
+GOOGLE_ANALYTICS_ID = Node.load(None)
+GOOGLE_SITE_VERIFICATION = Node.load(None)
 
 DEFAULT_HMAC_SECRET = 'changeme'
 DEFAULT_HMAC_ALGORITHM = hashlib.sha256
@@ -310,14 +310,14 @@ DOI_NAMESPACE = 'doi:10.5072/FK2'
 ARK_NAMESPACE = 'ark:99999/fk4'
 
 # For creating DOIs and ARKs through the EZID service
-EZID_USERNAME = None
-EZID_PASSWORD = None
+EZID_USERNAME = Node.load(None)
+EZID_PASSWORD = Node.load(None)
 # Format for DOIs and ARKs
 EZID_FORMAT = '{namespace}osf.io/{guid}'
 
 SHARE_REGISTRATION_URL = ''
-SHARE_URL = None
-SHARE_API_TOKEN = None  # Required to send project updates to SHARE
+SHARE_URL = Node.load(None)
+SHARE_API_TOKEN = Node.load(None)  # Required to send project updates to SHARE
 
 CAS_SERVER_URL = 'http://localhost:8080'
 MFR_SERVER_URL = 'http://localhost:7778'
@@ -594,7 +594,7 @@ VARNISH_SERVERS = []  # This should be set in local.py or cache invalidation won
 ESI_MEDIA_TYPES = {'application/vnd.api+json', 'application/json'}
 
 # Used for gathering meta information about the current build
-GITHUB_API_TOKEN = None
+GITHUB_API_TOKEN = Node.load(None)
 
 # switch for disabling things that shouldn't happen during
 # the modm to django migration
@@ -1777,12 +1777,12 @@ BLACKLISTED_DOMAINS = [
 ]
 
 # reCAPTCHA API
-RECAPTCHA_SITE_KEY = None
-RECAPTCHA_SECRET_KEY = None
+RECAPTCHA_SITE_KEY = Node.load(None)
+RECAPTCHA_SECRET_KEY = Node.load(None)
 RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
 
 # akismet spam check
-AKISMET_APIKEY = None
+AKISMET_APIKEY = Node.load(None)
 SPAM_CHECK_ENABLED = False
 SPAM_CHECK_PUBLIC_ONLY = True
 SPAM_ACCOUNT_SUSPENSION_ENABLED = False
@@ -1790,7 +1790,7 @@ SPAM_ACCOUNT_SUSPENSION_THRESHOLD = timedelta(hours=24)
 SPAM_FLAGGED_MAKE_NODE_PRIVATE = False
 SPAM_FLAGGED_REMOVE_FROM_SEARCH = False
 
-SHARE_API_TOKEN = None
+SHARE_API_TOKEN = Node.load(None)
 
 # number of nodes that need to be affiliated with an institution before the institution logo is shown on the dashboard
 INSTITUTION_DISPLAY_NODE_THRESHOLD = 5
@@ -1799,12 +1799,12 @@ INSTITUTION_DISPLAY_NODE_THRESHOLD = 5
 CAMPAIGN_REFRESH_THRESHOLD = 5 * 60  # 5 minutes in seconds
 
 
-AWS_ACCESS_KEY_ID = None
-AWS_SECRET_ACCESS_KEY = None
+AWS_ACCESS_KEY_ID = Node.load(None)
+AWS_SECRET_ACCESS_KEY = Node.load(None)
 
 # sitemap default settings
 SITEMAP_TO_S3 = False
-SITEMAP_AWS_BUCKET = None
+SITEMAP_AWS_BUCKET = Node.load(None)
 SITEMAP_URL_MAX = 25000
 SITEMAP_INDEX_MAX = 50000
 SITEMAP_STATIC_URLS = [

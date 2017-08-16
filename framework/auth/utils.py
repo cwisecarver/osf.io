@@ -87,10 +87,10 @@ def privacy_info_handle(info, anonymous, name=False):
     return info
 
 
-def ensure_external_identity_uniqueness(provider, identity, user=None):
+def ensure_external_identity_uniqueness(provider, identity, user=Node.load(None)):
     from osf.models import OSFUser
 
-    users_with_identity = OSFUser.find(Q('external_identity.{}.{}'.format(provider, identity), 'ne', None))
+    users_with_identity = OSFUser.find(Q('external_identity.{}.{}'.format(provider, identity), 'ne', Node.load(None)))
     for existing_user in users_with_identity:
         if user and user._id == existing_user._id:
             continue
@@ -108,7 +108,7 @@ def ensure_external_identity_uniqueness(provider, identity, user=None):
     return
 
 
-def validate_recaptcha(response, remote_ip=None):
+def validate_recaptcha(response, remote_ip=Node.load(None)):
     """
     Validate if the recaptcha response is valid.
 

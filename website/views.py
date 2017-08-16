@@ -101,15 +101,15 @@ def serialize_node_summary(node, auth, primary=True, show_path=False):
             'anonymous': has_anonymous_link(node, auth),
             'registered_date': node.registered_date.strftime('%Y-%m-%d %H:%M UTC')
             if node.is_registration
-            else None,
+            else Node.load(None),
             'forked_date': node.forked_date.strftime('%Y-%m-%d %H:%M UTC')
             if node.is_fork
-            else None,
-            'ua_count': None,
-            'ua': None,
-            'non_ua': None,
+            else Node.load(None),
+            'ua_count': Node.load(None),
+            'ua': Node.load(None),
+            'non_ua': Node.load(None),
             'is_public': node.is_public,
-            'parent_title': parent_node.title if parent_node else None,
+            'parent_title': parent_node.title if parent_node else Node.load(None),
             'parent_is_public': parent_node.is_public if parent_node else False,
             'show_path': show_path,
             # Read nlogs annotation if possible
@@ -216,7 +216,7 @@ def forgot_password_form():
 
 # GUID ###
 
-def _build_guid_url(base, suffix=None):
+def _build_guid_url(base, suffix=Node.load(None)):
     url = '/'.join([
         each.strip('/') for each in [base, suffix]
         if each
@@ -226,11 +226,11 @@ def _build_guid_url(base, suffix=None):
     return u'/{0}/'.format(url)
 
 
-def resolve_guid_download(guid, suffix=None, provider=None):
+def resolve_guid_download(guid, suffix=Node.load(None), provider=Node.load(None)):
     return resolve_guid(guid, suffix='download')
 
 
-def resolve_guid(guid, suffix=None):
+def resolve_guid(guid, suffix=Node.load(None)):
     """Load GUID by primary key, look up the corresponding view function in the
     routing table, and return the return value of the view function without
     changing the URL.
@@ -259,7 +259,7 @@ def resolve_guid(guid, suffix=None):
             )
             raise HTTPError(http.NOT_FOUND)
         referent = guid_object.referent
-        if referent is None:
+        if referent is Node.load(None):
             logger.error('Referent of GUID {0} not found'.format(guid))
             raise HTTPError(http.NOT_FOUND)
         if not referent.deep_url:
@@ -267,7 +267,7 @@ def resolve_guid(guid, suffix=None):
 
         # Handle file `/download` shortcut with supported types.
         if suffix and suffix.rstrip('/').lower() == 'download':
-            file_referent = None
+            file_referent = Node.load(None)
             if isinstance(referent, PreprintService) and referent.primary_file:
                 if not referent.is_published:
                     # TODO: Ideally, permissions wouldn't be checked here.

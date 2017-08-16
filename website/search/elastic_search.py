@@ -65,12 +65,12 @@ ENGLISH_ANALYZER_PROPERTY = {'type': 'string', 'analyzer': 'english'}
 
 INDEX = settings.ELASTIC_INDEX
 
-CLIENT = None
+CLIENT = Node.load(None)
 
 
 def client():
     global CLIENT
-    if CLIENT is None:
+    if CLIENT is Node.load(None):
         try:
             CLIENT = Elasticsearch(
                 settings.ELASTIC_URI,
@@ -102,7 +102,7 @@ def client():
 
 def requires_search(func):
     def wrapped(*args, **kwargs):
-        if client() is not None:
+        if client() is not Node.load(None):
             try:
                 return func(*args, **kwargs)
             except ConnectionError:
@@ -161,7 +161,7 @@ def get_counts(count_query, clean=True):
         }
     }
 
-    res = client().search(index=INDEX, doc_type=None, search_type='count', body=count_query)
+    res = client().search(index=INDEX, doc_type=Node.load(None), search_type='count', body=count_query)
     counts = {x['key']: x['doc_count'] for x in res['aggregations']['counts']['buckets'] if x['key'] in ALIASES.keys()}
 
     counts['total'] = sum([val for val in counts.values()])
@@ -176,14 +176,14 @@ def get_tags(query, index):
         }
     }
 
-    results = client().search(index=index, doc_type=None, body=query)
+    results = client().search(index=index, doc_type=Node.load(None), body=query)
     tags = results['aggregations']['tag_cloud']['buckets']
 
     return tags
 
 
 @requires_search
-def search(query, index=None, doc_type='_all', raw=False):
+def search(query, index=Node.load(None), doc_type='_all', raw=False):
     """Search for a query
 
     :param query: The substring of the username/project name/tag to search for
@@ -238,8 +238,8 @@ def format_results(results):
             result['url'] = '/profile/' + result['id']
         elif result.get('category') == 'file':
             parent_info = load_parent(result.get('parent_id'))
-            result['parent_url'] = parent_info.get('url') if parent_info else None
-            result['parent_title'] = parent_info.get('title') if parent_info else None
+            result['parent_url'] = parent_info.get('url') if parent_info else Node.load(None)
+            result['parent_title'] = parent_info.get('title') if parent_info else Node.load(None)
         elif result.get('category') in {'project', 'component', 'registration', 'preprint'}:
             result = format_result(result, result.get('parent_id'))
         elif not result.get('category'):
@@ -247,7 +247,7 @@ def format_results(results):
         ret.append(result)
     return ret
 
-def format_result(result, parent_id=None):
+def format_result(result, parent_id=Node.load(None)):
     parent_info = load_parent(parent_id)
     formatted_result = {
         'contributors': result['contributors'],
@@ -255,11 +255,11 @@ def format_result(result, parent_id=None):
         # TODO: Remove unescape_entities when mako html safe comes in
         'title': sanitize.unescape_entities(result['title']),
         'url': result['url'],
-        'is_component': False if parent_info is None else True,
-        'parent_title': sanitize.unescape_entities(parent_info.get('title')) if parent_info else None,
-        'parent_url': parent_info.get('url') if parent_info is not None else None,
+        'is_component': False if parent_info is Node.load(None) else True,
+        'parent_title': sanitize.unescape_entities(parent_info.get('title')) if parent_info else Node.load(None),
+        'parent_url': parent_info.get('url') if parent_info is not Node.load(None) else Node.load(None),
         'tags': result['tags'],
-        'is_registration': (result['is_registration'] if parent_info is None
+        'is_registration': (result['is_registration'] if parent_info is Node.load(None)
                                                         else parent_info.get('is_registration')),
         'is_retracted': result['is_retracted'],
         'is_pending_retraction': result['is_pending_retraction'],
@@ -280,10 +280,10 @@ def format_result(result, parent_id=None):
 
 def load_parent(parent_id):
     parent = AbstractNode.load(parent_id)
-    if parent is None:
-        return None
+    if parent is Node.load(None):
+        return Node.load(None)
     parent_info = {}
-    if parent is not None and parent.is_public:
+    if parent is not Node.load(None) and parent.is_public:
         parent_info['title'] = parent.title
         parent_info['url'] = parent.url
         parent_info['is_registration'] = parent.is_registration
@@ -291,8 +291,8 @@ def load_parent(parent_id):
     else:
         parent_info['title'] = '-- private project --'
         parent_info['url'] = ''
-        parent_info['is_registration'] = None
-        parent_info['id'] = None
+        parent_info['is_registration'] = Node.load(None)
+        parent_info['id'] = Node.load(None)
     return parent_info
 
 
@@ -303,7 +303,7 @@ def get_doctype_from_node(node):
         return 'registration'
     elif node.is_preprint:
         return 'preprint'
-    elif node.parent_node is None:
+    elif node.parent_node is Node.load(None):
         # ElasticSearch categorizes top-level projects differently than children
         return 'project'
     elif node.category in COMPONENT_CATEGORIES:
@@ -312,7 +312,7 @@ def get_doctype_from_node(node):
         return node.category
 
 @celery_app.task(bind=True, max_retries=5, default_retry_delay=60)
-def update_node_async(self, node_id, index=None, bulk=False):
+def update_node_async(self, node_id, index=Node.load(None), bulk=False):
     AbstractNode = apps.get_model('osf.AbstractNode')
     node = AbstractNode.load(node_id)
     try:
@@ -321,7 +321,7 @@ def update_node_async(self, node_id, index=None, bulk=False):
         self.retry(exc=exc)
 
 @celery_app.task(bind=True, max_retries=5, default_retry_delay=60)
-def update_user_async(self, user_id, index=None):
+def update_user_async(self, user_id, index=Node.load(None)):
     OSFUser = apps.get_model('osf.OSFUser')
     user = OSFUser.objects.get(id=user_id)
     try:
@@ -345,7 +345,7 @@ def serialize_node(node, category):
         'contributors': [
             {
                 'fullname': x['fullname'],
-                'url': '/{}/'.format(x['guids___id']) if x['is_active'] else None
+                'url': '/{}/'.format(x['guids___id']) if x['is_active'] else Node.load(None)
             }
             for x in node._contributors.filter(contributor__visible=True).order_by('contributor___order')
             .values('fullname', 'guids___id', 'is_active')
@@ -381,7 +381,7 @@ def serialize_node(node, category):
     return elastic_document
 
 @requires_search
-def update_node(node, index=None, bulk=False, async=False):
+def update_node(node, index=Node.load(None), bulk=False, async=False):
     from addons.osfstorage.models import OsfStorageFile
     index = index or INDEX
     for file_ in paginated(OsfStorageFile, Q('node', 'eq', node)):
@@ -397,7 +397,7 @@ def update_node(node, index=None, bulk=False, async=False):
         else:
             client().index(index=index, doc_type=category, id=node._id, body=elastic_document, refresh=True)
 
-def bulk_update_nodes(serialize, nodes, index=None):
+def bulk_update_nodes(serialize, nodes, index=Node.load(None)):
     """Updates the list of input projects
 
     :param function Node-> dict serialize:
@@ -444,7 +444,7 @@ def update_contributors_async(self, user_id):
         bulk_update_contributors(p.page(page_num).object_list)
 
 @requires_search
-def update_user(user, index=None):
+def update_user(user, index=Node.load(None)):
 
     index = index or INDEX
     if not user.is_active:
@@ -464,7 +464,7 @@ def update_user(user, index=None):
 
     normalized_names = {}
     for key, val in names.items():
-        if val is not None:
+        if val is not Node.load(None):
             try:
                 val = six.u(val)
             except TypeError:
@@ -491,10 +491,10 @@ def update_user(user, index=None):
     client().index(index=index, doc_type='user', body=user_doc, id=user._id, refresh=True)
 
 @requires_search
-def update_file(file_, index=None, delete=False):
+def update_file(file_, index=Node.load(None), delete=False):
     index = index or INDEX
 
-    # TODO: Can remove 'not file_.name' if we remove all base file nodes with name=None
+    # TODO: Can remove 'not file_.name' if we remove all base file nodes with name=Node.load(None)
     if not file_.name or not file_.node.is_public or delete or file_.node.is_deleted or file_.node.archiving:
         client().delete(
             index=index,
@@ -514,7 +514,7 @@ def update_file(file_, index=None, delete=False):
     )
     node_url = '/{node_id}/'.format(node_id=file_.node._id)
 
-    guid_url = None
+    guid_url = Node.load(None)
     file_guid = file_.get_guid(create=False)
     if file_guid:
         guid_url = '/{file_guid}/'.format(file_guid=file_guid._id)
@@ -527,7 +527,7 @@ def update_file(file_, index=None, delete=False):
         'category': 'file',
         'node_url': node_url,
         'node_title': file_.node.title,
-        'parent_id': file_.node.parent_node._id if file_.node.parent_node else None,
+        'parent_id': file_.node.parent_node._id if file_.node.parent_node else Node.load(None),
         'is_registration': file_.node.is_registration,
         'is_retracted': file_.node.is_retracted,
         'extra_search_terms': clean_splitters(file_.name),
@@ -542,7 +542,7 @@ def update_file(file_, index=None, delete=False):
     )
 
 @requires_search
-def update_institution(institution, index=None):
+def update_institution(institution, index=Node.load(None)):
     index = index or INDEX
     id_ = institution._id
     if institution.is_deleted:
@@ -569,7 +569,7 @@ def delete_index(index):
 
 
 @requires_search
-def create_index(index=None):
+def create_index(index=Node.load(None)):
     '''Creates index with some specified mappings to begin with,
     all of which are applied to all projects, components, preprints, and registrations.
     '''
@@ -622,7 +622,7 @@ def create_index(index=None):
         client().indices.put_mapping(index=index, doc_type=type_, body=mapping, ignore=[400, 404])
 
 @requires_search
-def delete_doc(elastic_document_id, node, index=None, category=None):
+def delete_doc(elastic_document_id, node, index=Node.load(None), category=Node.load(None)):
     index = index or INDEX
     if not category:
         if node.is_registration:
@@ -635,7 +635,7 @@ def delete_doc(elastic_document_id, node, index=None, category=None):
 
 
 @requires_search
-def search_contributor(query, page=0, size=10, exclude=None, current_user=None):
+def search_contributor(query, page=0, size=10, exclude=Node.load(None), current_user=Node.load(None)):
     """Search for contributors to add to a project using elastic search. Request must
     include JSON data with a "query" field.
 
@@ -682,12 +682,12 @@ def search_contributor(query, page=0, size=10, exclude=None, current_user=None):
         else:
             n_projects_in_common = 0
 
-        if user is None:
+        if user is Node.load(None):
             logger.error('Could not load user {0}'.format(doc['id']))
             continue
         if user.is_active:  # exclude merged, unregistered, etc.
-            current_employment = None
-            education = None
+            current_employment = Node.load(None)
+            education = Node.load(None)
 
             if user.jobs:
                 current_employment = user.jobs[0]['institution']

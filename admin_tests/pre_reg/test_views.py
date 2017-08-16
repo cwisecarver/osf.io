@@ -367,7 +367,7 @@ class TestPreregFiles(AdminTestCase):
         view2 = setup_view(view2, request, draft_pk=self.draft._id)
         view2.checkin_files(self.draft)
         for q, f in self.d_of_qs.iteritems():
-            nt.assert_equal(None, f.checkout)
+            nt.assert_equal(Node.load(None), f.checkout)
 
     def test_get_meta_data_files(self):
         for item in get_metadata_files(self.draft):

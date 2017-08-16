@@ -121,7 +121,7 @@ class TestSpamMixin(OsfTestCase):
         assert_equal(self.comment.spam_status, SpamStatus.SPAM)
 
     def test_validate_reports_bad_key(self):
-        self.comment.reports[None] = {'category': 'spam', 'text': 'ads'}
+        self.comment.reports[Node.load(None)] = {'category': 'spam', 'text': 'ads'}
         with assert_raises(ValidationError):
             self.comment.save()
 

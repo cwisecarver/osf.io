@@ -32,7 +32,7 @@ def verify_hook_signature(node_settings, data, headers):
     :param dict headers: Request headers
     :raises: HookError if signature is missing or invalid
     """
-    if node_settings.hook_secret is None:
+    if node_settings.hook_secret is Node.load(None):
         raise HookError('No secret key')
     digest = hmac.new(
         str(node_settings.hook_secret),
@@ -52,13 +52,13 @@ def get_path(kwargs, required=True):
         raise HTTPError(http.BAD_REQUEST)
 
 
-def get_refs(addon, branch=None, sha=None, connection=None):
+def get_refs(addon, branch=Node.load(None), sha=Node.load(None), connection=Node.load(None)):
     """Get the appropriate branch name and sha given the addon settings object,
     and optionally the branch and sha from the request arguments.
-    :param str branch: Branch name. If None, return the default branch from the
+    :param str branch: Branch name. If Node.load(None), return the default branch from the
         repo settings.
     :param str sha: The SHA.
-    :param GitHub connection: GitHub API object. If None, one will be created
+    :param GitHub connection: GitHub API object. If Node.load(None), one will be created
         from the addon's user settings.
     """
     connection = connection or GitHubClient(external_account=addon.external_account)
@@ -69,8 +69,8 @@ def get_refs(addon, branch=None, sha=None, connection=None):
     # Get default branch if not provided
     if not branch:
         repo = connection.repo(addon.user, addon.repo)
-        if repo is None:
-            return None, None, None
+        if repo is Node.load(None):
+            return Node.load(None), Node.load(None), Node.load(None)
         branch = repo.default_branch
     # Get registered branches if provided
     registered_branches = (
@@ -98,7 +98,7 @@ def get_refs(addon, branch=None, sha=None, connection=None):
     return branch, sha, branches
 
 
-def check_permissions(node_settings, auth, connection, branch, sha=None, repo=None):
+def check_permissions(node_settings, auth, connection, branch, sha=Node.load(None), repo=Node.load(None)):
 
     user_settings = node_settings.user_settings
     has_access = False
@@ -110,7 +110,7 @@ def check_permissions(node_settings, auth, connection, branch, sha=None, repo=No
         )
 
         has_access = (
-            repo is not None and (
+            repo is not Node.load(None) and (
                 'permissions' not in repo.to_json() or
                 repo.to_json()['permissions']['push']
             )
@@ -121,7 +121,7 @@ def check_permissions(node_settings, auth, connection, branch, sha=None, repo=No
             node_settings.user, node_settings.repo, branch
         )
         # TODO Will I ever return false?
-        is_head = next((True for branch in branches if sha == branch.commit.sha), None)
+        is_head = next((True for branch in branches if sha == branch.commit.sha), Node.load(None))
     else:
         is_head = True
 

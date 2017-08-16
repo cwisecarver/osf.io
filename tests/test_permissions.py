@@ -13,7 +13,7 @@ def test_expand_permissions():
     result2 = permissions.expand_permissions('write')
     assert_equal(result2, ['read', 'write'])
 
-    result3 = permissions.expand_permissions(None)
+    result3 = permissions.expand_permissions(Node.load(None))
     assert_equal(result3, [])
 
 

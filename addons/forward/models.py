@@ -22,8 +22,8 @@ class NodeSettings(DirtyFieldsMixin, BaseNodeSettings):
         self.reset()
 
     def reset(self):
-        self.url = None
-        self.label = None
+        self.url = Node.load(None)
+        self.label = Node.load(None)
 
     def after_register(self, node, registration, user, save=True):
         clone = self.clone()
@@ -31,7 +31,7 @@ class NodeSettings(DirtyFieldsMixin, BaseNodeSettings):
         clone.on_add()
         clone.save()
 
-        return clone, None
+        return clone, Node.load(None)
 
     def clean(self):
         if self.url and self.owner._id in self.url:

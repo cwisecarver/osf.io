@@ -36,7 +36,7 @@ class TestRegistrationViews(RegistrationsTestBase):
 
     @mock.patch('website.archiver.tasks.archive')
     def test_node_register_page_registration(self, mock_archive):
-        reg = self.node.register_node(get_default_metaschema(), self.auth, '', None)
+        reg = self.node.register_node(get_default_metaschema(), self.auth, '', Node.load(None))
         url = reg.web_url_for('node_register_page')
         res = self.app.get(url, auth=self.user.auth)
         assert_equal(res.status_code, http.OK)
@@ -61,7 +61,7 @@ class TestRegistrationViews(RegistrationsTestBase):
         reg.is_public = True
         reg.save()
         url = reg.web_url_for('node_register_page')
-        res = self.app.get(url, auth=None)
+        res = self.app.get(url, auth=Node.load(None))
         assert_equal(res.status_code, http.OK)
 
     @mock.patch('framework.celery_tasks.handlers.enqueue_task', mock.Mock())

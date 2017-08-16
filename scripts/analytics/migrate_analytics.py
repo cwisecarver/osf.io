@@ -52,7 +52,7 @@ def validate_args(args):
     """ Go through supplied command line args an determine if you have enough to continue
 
     :param args: argparse args object, to sift through and figure out if you need more info
-    :return: None, just raise errors if it finds something wrong
+    :return: Node.load(None), just raise errors if it finds something wrong
     """
 
     if args.dry:
@@ -179,7 +179,7 @@ def get_keen_client():
     return client
 
 
-def extract_events_from_keen(client, event_collection, start_date=None, end_date=None):
+def extract_events_from_keen(client, event_collection, start_date=Node.load(None), end_date=Node.load(None)):
     """ Get analytics from keen to use as a starting point for smoothing or transferring
 
     :param client: keen client to use for connection
@@ -221,7 +221,7 @@ def transfer_events_to_another_collection(client, source_collection, destination
     :param source_collection: str, keen collection to transfer from
     :param destination_collection: str, keen collection to transfer to
     :param dry: bool, whether or not to make a dry run, aka actually send events to keen
-    :return: None
+    :return: Node.load(None)
     """
     schemas_match = make_sure_keen_schemas_match(source_collection, destination_collection, client)
     if not schemas_match:
@@ -315,7 +315,7 @@ def import_old_events_from_spreadsheet():
     for row in dictReader:
         event = {}
         for key in row:
-            equiv_key = key_map.get(key, None)
+            equiv_key = key_map.get(key, Node.load(None))
             if equiv_key:
                 event[equiv_key] = row[key]
         events.append(event)
@@ -383,7 +383,7 @@ def format_event(event, analytics_type):
         "users": {}
     }
 
-    template_to_use = None
+    template_to_use = Node.load(None)
     if analytics_type == 'user':
         template_to_use = user_event_template
 

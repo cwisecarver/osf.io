@@ -64,22 +64,22 @@ class TestFileView:
         # test_unvisited_file_has_no_guid
         res = app.get(file_url, auth=user.auth)
         assert res.status_code == 200
-        assert res.json['data']['attributes']['guid'] == None
+        assert res.json['data']['attributes']['guid'] == Node.load(None)
 
         # test_visited_file_has_guid
         guid = file.get_guid(create=True)
         res = app.get(file_url, auth=user.auth)
         assert res.status_code == 200
-        assert guid is not None
+        assert guid is not Node.load(None)
         assert res.json['data']['attributes']['guid'] == guid._id
 
     @mock.patch('api.base.throttling.CreateGuidThrottle.allow_request')
     def test_file_guid_not_created_with_basic_auth(self, mock_allow, app, user, file_url):
         res = app.get('{}?create_guid=1'.format(file_url), auth=user.auth)
-        guid = res.json['data']['attributes'].get('guid', None)
+        guid = res.json['data']['attributes'].get('guid', Node.load(None))
         assert res.status_code == 200
         assert mock_allow.call_count == 1
-        assert guid is None
+        assert guid is Node.load(None)
 
     @mock.patch('api.base.throttling.CreateGuidThrottle.allow_request')
     def test_file_guid_created_with_cookie(self, mock_allow, app, user, file_url, file):
@@ -94,8 +94,8 @@ class TestFileView:
 
         assert res.status_code == 200
 
-        guid = res.json['data']['attributes'].get('guid', None)
-        assert guid is not None
+        guid = res.json['data']['attributes'].get('guid', Node.load(None))
+        assert guid is not Node.load(None)
 
         assert guid == file.get_guid()._id
         assert mock_allow.call_count == 1
@@ -110,14 +110,14 @@ class TestFileView:
         assert attributes['kind'] == file.kind
         assert attributes['name'] == file.name
         assert attributes['materialized_path'] == file.materialized_path
-        assert attributes['last_touched'] == None
+        assert attributes['last_touched'] == Node.load(None)
         assert attributes['provider'] == file.provider
         assert attributes['size'] == file.versions.last().size
         assert attributes['current_version'] == len(file.history)
         assert attributes['date_modified'] == _dt_to_iso8601(file.versions.last().date_created.replace(tzinfo=pytz.utc))
         assert attributes['date_created'] == _dt_to_iso8601(file.versions.first().date_created.replace(tzinfo=pytz.utc))
-        assert attributes['extra']['hashes']['md5'] == None
-        assert attributes['extra']['hashes']['sha256'] == None
+        assert attributes['extra']['hashes']['md5'] == Node.load(None)
+        assert attributes['extra']['hashes']['sha256'] == Node.load(None)
         assert attributes['tags'] == []
 
     def test_file_has_rel_link_to_owning_project(self, app, user, file_url, node):
@@ -180,7 +180,7 @@ class TestFileView:
         assert can_comment is False
 
     def test_checkout(self, app, user, file, file_url, node):
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
         res = app.put_json_api(
             file_url,
             {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': user._id}}},
@@ -205,12 +205,12 @@ class TestFileView:
 
         res = app.put_json_api(
             file_url,
-            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': None}}},
+            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': Node.load(None)}}},
             auth=user.auth
         )
 
         file.reload()
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
         assert res.status_code == 200
 
     def test_checkout_file_error(self, app, user, file_url, file):
@@ -256,7 +256,7 @@ class TestFileView:
 
     def test_must_set_self(self, app, user, file, file_url):
         user_unauthorized = UserFactory()
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
         res = app.put_json_api(
             file_url,
             {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': user_unauthorized._id}}},
@@ -265,7 +265,7 @@ class TestFileView:
         )
         file.reload()
         assert res.status_code == 400
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
 
     def test_must_be_self(self, app, file, file_url):
         user = AuthUserFactory()
@@ -288,14 +288,14 @@ class TestFileView:
         file.save()
         res = app.put_json_api(
             file_url,
-            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': None}}},
+            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': Node.load(None)}}},
             auth=user.auth,
             expect_errors=True,
         )
         file.reload()
         node.reload()
         assert res.status_code == 200
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
         assert node.logs.latest().action == NodeLog.CHECKED_IN
         assert node.logs.latest().user == user
 
@@ -318,7 +318,7 @@ class TestFileView:
         assert not file.is_checked_out
         res = app.put_json_api(
             file_url,
-            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': None}}},
+            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': Node.load(None)}}},
             auth=user.auth,
             expect_errors=True,
         )
@@ -326,7 +326,7 @@ class TestFileView:
         node.reload()
         assert res.status_code == 200
         assert node.logs.count() == count
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
 
     def test_cannot_checkout_when_checked_out(self, app, user, node, file, file_url):
         user_unauthorized = UserFactory()
@@ -349,7 +349,7 @@ class TestFileView:
     def test_noncontrib_and_read_contrib_cannot_checkout(self, app, file, node, file_url):
         # test_noncontrib_cannot_checkout
         non_contrib = AuthUserFactory()
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
         assert not node.has_permission(non_contrib, 'read')
         res = app.put_json_api(
             file_url,
@@ -360,7 +360,7 @@ class TestFileView:
         file.reload()
         node.reload()
         assert res.status_code == 403
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
         assert node.logs.latest().action != NodeLog.CHECKED_OUT
 
         # test_read_contrib_cannot_checkout
@@ -370,13 +370,13 @@ class TestFileView:
         assert not node.can_edit(user=read_contrib)
         res = app.put_json_api(
             file_url,
-            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': None}}},
+            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': Node.load(None)}}},
             auth=read_contrib.auth,
             expect_errors=True
         )
         file.reload()
         assert res.status_code == 403
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
         assert node.logs.latest().action != NodeLog.CHECKED_OUT
 
     def test_write_contrib_can_checkin(self, app, node, file, file_url):
@@ -388,12 +388,12 @@ class TestFileView:
         file.save()
         res = app.put_json_api(
             file_url,
-            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': None}}},
+            {'data': {'id': file._id, 'type': 'files', 'attributes': {'checkout': Node.load(None)}}},
             auth=write_contrib.auth,
         )
         file.reload()
         assert res.status_code == 200
-        assert file.checkout == None
+        assert file.checkout == Node.load(None)
 
     def test_removed_contrib_files_checked_in(self, app, node, file):
         write_contrib = AuthUserFactory()
@@ -559,7 +559,7 @@ class TestFileTagging:
                 'type': 'files',
                 'id': file_one._id,
                 'attributes': {
-                    'checkout': None,
+                    'checkout': Node.load(None),
                     'tags': ['goofy']
                 }
             }
@@ -595,7 +595,7 @@ class TestFileTagging:
 
     def test_put_wo_tags_doesnt_remove_tags(self, app, user, url, payload):
         app.put_json_api(url, payload, auth=user.auth)
-        payload['data']['attributes'] = {'checkout': None}
+        payload['data']['attributes'] = {'checkout': Node.load(None)}
         res = app.put_json_api(url, payload, auth=user.auth)
         assert res.status_code == 200
         # Ensure adding tag data is correct from the PUT response

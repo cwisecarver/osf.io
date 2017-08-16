@@ -37,7 +37,7 @@ class Tag(BaseModel):
         try:
             return cls.all_tags.get(system=system, name=data)
         except cls.DoesNotExist:
-            return None
+            return Node.load(None)
 
     class Meta:
         unique_together = ('name', 'system')

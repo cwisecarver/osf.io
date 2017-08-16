@@ -8,7 +8,7 @@ from api.base.serializers import MaintenanceStateSerializer
 from osf.models.maintenance_state import MaintenanceState
 
 
-def set_maintenance(message, level=1, start=None, end=None):
+def set_maintenance(message, level=1, start=Node.load(None), end=Node.load(None)):
     """Creates maintenance state obj with the given params.
 
     Set the time period for the maintenance notice to be displayed.
@@ -44,10 +44,10 @@ def set_maintenance(message, level=1, start=None, end=None):
 
 def get_maintenance():
     """Get the current start and end times for the maintenance state.
-    Return None if there is no current maintenance state.
+    Return Node.load(None) if there is no current maintenance state.
     """
     maintenance = MaintenanceState.objects.all().first()
-    return MaintenanceStateSerializer(maintenance).data if maintenance else None
+    return MaintenanceStateSerializer(maintenance).data if maintenance else Node.load(None)
 
 def unset_maintenance():
     MaintenanceState.objects.all().delete()

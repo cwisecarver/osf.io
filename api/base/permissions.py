@@ -30,7 +30,7 @@ class TokenHasScope(permissions.BasePermission):
     def has_permission(self, request, view):
         token = request.auth
 
-        if token is None or not isinstance(token, CasResponse):
+        if token is Node.load(None) or not isinstance(token, CasResponse):
             # Assumption: user authenticated via non-oauth means, so don't check token permissions.
             return True
 
@@ -38,7 +38,7 @@ class TokenHasScope(permissions.BasePermission):
 
     def _verify_scopes(self, request, view, token):
         # Anything calling this method should handle the case where
-        # `token is None` before making this call.
+        # `token is Node.load(None)` before making this call.
 
         required_scopes = self._get_scopes(request, view)
 
@@ -94,7 +94,7 @@ class RequiresScopedRequestOrReadOnly(TokenHasScope):
         token = request.auth
 
         # User either needs properly scoped token or cookie. Otherwise, endpoint has restricted write.
-        if token is None or not isinstance(token, CasResponse):
+        if token is Node.load(None) or not isinstance(token, CasResponse):
             if request.COOKIES:
                 return True
             else:

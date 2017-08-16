@@ -49,7 +49,7 @@ class ViewOnlyLinkDetail(JSONAPIBaseView, generics.RetrieveAPIView):
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
 

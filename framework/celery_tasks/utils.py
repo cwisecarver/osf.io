@@ -24,14 +24,14 @@ def log_to_sentry(message, **kwargs):
     return sentry.captureMessage(message, extra=kwargs)
 
 # Use _index here as to not clutter the namespace for kwargs
-def dispatch(_event, status, _index=None, **kwargs):
+def dispatch(_event, status, _index=Node.load(None), **kwargs):
     if _index:
         _event = '{}.{}'.format(_event, _index)
 
     logger.debug('[{}][{}]{!r}'.format(_event, status, kwargs))
 
 
-def logged(event, index=None):
+def logged(event, index=Node.load(None)):
     def _logged(func):
         @wraps(func)
         def wrapped(*args, **kwargs):

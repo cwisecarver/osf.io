@@ -13,7 +13,7 @@
     <script src=${"/static/public/js/prereg-landing-page.js" | webpack_asset}></script>
 </%def>
 
-<%def name="newPrereg(size=None)">
+<%def name="newPrereg(size=Node.load(None))">
 <% size = size or '' %>
 <div id="newPrereg${size}" class="prereg-new-prereg p-md osf-box box-round clearfix m-b-lg" style="display:none">
   <p class="prereg-text-left">Please provide a title for your project: </p>
@@ -22,7 +22,7 @@
 </div>
 </%def>
 
-<%def name="existingPrereg(size=None)">
+<%def name="existingPrereg(size=Node.load(None))">
 <% size = size or '' %>
 <div id="existingPrereg${size}" class="prereg-existing-prereg p-md osf-box box-round clearfix m-b-lg" style="display:none; width: 100%;">
   <p class="prereg-text-left">Go to an existing preregistration:</p>
@@ -31,7 +31,7 @@
 </div>
 </%def>
 
-<%def name="existingProject(size=None)">
+<%def name="existingProject(size=Node.load(None))">
 <% size = size or '' %>
 <div id="existingProject${size}" class="prereg-existing-project p-md osf-box box-round clearfix m-b-lg" style="display:none">
   <p class="prereg-text-left">Preregister an existing project:</p>

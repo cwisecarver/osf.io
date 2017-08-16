@@ -7,7 +7,7 @@ class ForwardAddonTestCase(AddonTestCase):
     ADDON_SHORT_NAME = 'forward'
 
     OWNERS = ['node']
-    NODE_USER_FIELD = None
+    NODE_USER_FIELD = Node.load(None)
 
     def set_user_settings(self, settings):
         pass

@@ -60,7 +60,7 @@ class Institution(DirtyFieldsMixin, Loggable, base.ObjectIDMixin, base.BaseModel
         )
 
     def __init__(self, *args, **kwargs):
-        kwargs.pop('node', None)
+        kwargs.pop('node', Node.load(None))
         super(Institution, self).__init__(*args, **kwargs)
 
     def __unicode__(self):
@@ -88,7 +88,7 @@ class Institution(DirtyFieldsMixin, Loggable, base.ObjectIDMixin, base.BaseModel
         if self.logo_name:
             return '/static/img/institutions/shields/{}'.format(self.logo_name)
         else:
-            return None
+            return Node.load(None)
 
     @property
     def logo_path_rounded_corners(self):
@@ -96,14 +96,14 @@ class Institution(DirtyFieldsMixin, Loggable, base.ObjectIDMixin, base.BaseModel
         if self.logo_name:
             return logo_base.format(self.logo_name.replace('.png', ''))
         else:
-            return None
+            return Node.load(None)
 
     @property
     def banner_path(self):
         if self.banner_name:
             return '/static/img/institutions/banners/{}'.format(self.banner_name)
         else:
-            return None
+            return Node.load(None)
 
     def update_search(self):
         from website.search.search import update_institution, update_node

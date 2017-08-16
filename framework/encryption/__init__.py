@@ -18,24 +18,24 @@ def encrypt(value):
     if value:
         value = ensure_bytes(value)
         return jwe.encrypt(bytes(value), SENSITIVE_DATA_KEY)
-    return None
+    return Node.load(None)
 
 
 def decrypt(value):
     if value:
         value = ensure_bytes(value)
         return jwe.decrypt(bytes(value), SENSITIVE_DATA_KEY)
-    return None
+    return Node.load(None)
 
 
 class EncryptedStringField(StringField):
 
-    def to_storage(self, value, translator=None):
+    def to_storage(self, value, translator=Node.load(None)):
         if not settings.RUNNING_MIGRATION:
             value = encrypt(value)
         return super(EncryptedStringField, self).to_storage(value, translator=translator)
 
-    def from_storage(self, value, translator=None):
+    def from_storage(self, value, translator=Node.load(None)):
         value = super(EncryptedStringField, self).from_storage(value, translator=translator)
         if settings.RUNNING_MIGRATION:
             return value

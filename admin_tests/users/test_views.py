@@ -356,13 +356,13 @@ class TestRemove2Factor(AdminTestCase):
 
     def test_integration_delete_two_factor(self):
         user_addon = self.user.get_or_add_addon('twofactor')
-        nt.assert_not_equal(user_addon, None)
+        nt.assert_not_equal(user_addon, Node.load(None))
         user_settings = self.user.get_addon('twofactor')
-        nt.assert_not_equal(user_settings, None)
+        nt.assert_not_equal(user_settings, Node.load(None))
         count = AdminLogEntry.objects.count()
         self.setup_view.delete(self.request)
         post_addon = self.user.get_addon('twofactor')
-        nt.assert_equal(post_addon, None)
+        nt.assert_equal(post_addon, Node.load(None))
         nt.assert_equal(AdminLogEntry.objects.count(), count + 1)
 
     def test_no_user_permissions_raises_error(self):
@@ -396,23 +396,23 @@ class TestUserWorkshopFormView(AdminTestCase):
         self.workshop_date = timezone.now()
         self.data = [
             ['none', 'date', 'none', 'none', 'none', 'email', 'none'],
-            [None, self.workshop_date.strftime('%m/%d/%y'), None, None, None, self.user_1.username, None],
+            [Node.load(None), self.workshop_date.strftime('%m/%d/%y'), Node.load(None), Node.load(None), Node.load(None), self.user_1.username, Node.load(None)],
         ]
 
         self.user_exists_by_name_data = [
             ['number', 'date', 'location', 'topic', 'name', 'email', 'other'],
-            [None, self.workshop_date.strftime('%m/%d/%y'), None, None, self.user_1.fullname, 'unknown@example.com', None],
+            [Node.load(None), self.workshop_date.strftime('%m/%d/%y'), Node.load(None), Node.load(None), self.user_1.fullname, 'unknown@example.com', Node.load(None)],
         ]
 
         self.user_not_found_data = [
             ['none', 'date', 'none', 'none', 'none', 'email', 'none'],
-            [None, self.workshop_date.strftime('%m/%d/%y'), None, None, None, 'fake@example.com', None],
+            [Node.load(None), self.workshop_date.strftime('%m/%d/%y'), Node.load(None), Node.load(None), Node.load(None), 'fake@example.com', Node.load(None)],
         ]
 
         self.mock_data = mock.patch.object(
             csv,
             'reader',
-            # parse data into the proper format handling None values as csv reader would
+            # parse data into the proper format handling Node.load(None) values as csv reader would
             side_effect=(lambda values: [[item or '' for item in value] for value in values])
         )
         self.mock_data.start()
@@ -425,7 +425,7 @@ class TestUserWorkshopFormView(AdminTestCase):
 
         return result_csv
 
-    def _create_nodes_and_add_logs(self, first_activity_date, second_activity_date=None):
+    def _create_nodes_and_add_logs(self, first_activity_date, second_activity_date=Node.load(None)):
         node_one = ProjectFactory(creator=self.user_1)
         node_one.date_created = first_activity_date
         node_one.add_log(
@@ -548,7 +548,7 @@ class TestUserWorkshopFormView(AdminTestCase):
         request = RequestFactory().post('/fake_path')
         data = [
             ['none', 'date', 'none', 'none', 'none', 'email', 'none'],
-            [None, '9/1/16', None, None, None, self.user_1.username, None],
+            [Node.load(None), '9/1/16', Node.load(None), Node.load(None), Node.load(None), self.user_1.username, Node.load(None)],
         ]
 
         uploaded = SimpleUploadedFile('test_name', bytes(csv.reader(data)), content_type='text/csv')

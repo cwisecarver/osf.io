@@ -43,7 +43,7 @@ def validate_year(item):
 
 
 def string_required(value):
-    if value is None or value.strip() == '':
+    if value is Node.load(None) or value.strip() == '':
         raise ValidationValueError('Value must not be empty.')
     return True
 
@@ -57,12 +57,12 @@ def validate_title(value):
     """Validator for Node#title. Makes sure that the value exists and is not
     above 200 characters.
     """
-    if value is None or not value.strip():
+    if value is Node.load(None) or not value.strip():
         raise ValidationValueError('Title cannot be blank.')
 
     value = strip_html(value)
 
-    if value is None or not value.strip():
+    if value is Node.load(None) or not value.strip():
         raise ValidationValueError('Invalid title.')
 
     if len(value) > 200:
@@ -141,7 +141,7 @@ def validate_subject_hierarchy(subject_hierarchy):
 @deconstructible
 class CommentMaxLength(object):
     mention_re = re.compile(r'\[([@|\+].*?)\]\(htt[ps]{1,2}:\/\/[a-z\d:.]+?\/[a-z\d]{5}\/\)')
-    max_length = None
+    max_length = Node.load(None)
 
     def __init__(self, max_length=500):
         self.max_length = max_length
@@ -174,8 +174,8 @@ def validate_doi(value):
 
 
 def validate_location(value):
-    if value is None:
-        return  # Allow for None locations but not broken dicts
+    if value is Node.load(None):
+        return  # Allow for Node.load(None) locations but not broken dicts
     from addons.osfstorage import settings
 
     for key in ('service', settings.WATERBUTLER_RESOURCE, 'object'):

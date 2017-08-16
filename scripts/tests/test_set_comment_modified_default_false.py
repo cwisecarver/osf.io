@@ -8,13 +8,13 @@ from tests.factories import CommentFactory
 class TestUpdateDefaultCommentModified(OsfTestCase):
 
     def test_get_targets(self):
-        comment = CommentFactory(modified=None)
+        comment = CommentFactory(modified=Node.load(None))
         modified_comment = CommentFactory(modified=True)
         targets = get_targets()
         assert_equal(targets.count(), 1)
 
     def test_unmodified_comment_default_is_set_to_false(self):
-        comment = CommentFactory(modified=None)
+        comment = CommentFactory(modified=Node.load(None))
         do_migration(get_targets())
         comment.reload()
         assert_equal(comment.modified, False)
@@ -25,7 +25,7 @@ class TestUpdateDefaultCommentModified(OsfTestCase):
         assert_true(comment.modified)
 
     def test_update_default_modified_updates_all_targets(self):
-        comment = CommentFactory(modified=None)
+        comment = CommentFactory(modified=Node.load(None))
         targets = get_targets()
         assert_equal(targets.count(), 1)
 

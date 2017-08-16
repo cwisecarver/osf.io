@@ -30,7 +30,7 @@ class TestUpdateNodeWiki(OsfTestCase):
     def test_default_wiki(self):
         # There is no default wiki
         project1 = ProjectFactory()
-        assert project1.get_wiki_page('home') is None
+        assert project1.get_wiki_page('home') is Node.load(None)
 
     def test_default_is_current(self):
         assert self.project.get_wiki_page('home').is_current is True
@@ -175,14 +175,14 @@ class TestRenameNodeWiki(OsfTestCase):
         self.versions = self.project.wiki_pages_versions
 
     def test_rename_name_not_found(self):
-        for invalid_name in [None, '', '   ', 'Unknown Name']:
+        for invalid_name in [Node.load(None), '', '   ', 'Unknown Name']:
             with pytest.raises(PageNotFoundError):
-                self.project.rename_node_wiki(invalid_name, None, auth=self.auth)
+                self.project.rename_node_wiki(invalid_name, Node.load(None), auth=self.auth)
 
     def test_rename_new_name_invalid_none_or_blank(self):
         name = 'New Page'
         self.project.update_node_wiki(name, 'new content', self.auth)
-        for invalid_name in [None, '', '   ']:
+        for invalid_name in [Node.load(None), '', '   ']:
             with pytest.raises(ValidationError):
                 self.project.rename_node_wiki(name, invalid_name, auth=self.auth)
 
@@ -315,7 +315,7 @@ class TestDeleteNodeWiki(OsfTestCase):
         self.project.delete_node_wiki('home', self.auth)
 
         # page was deleted
-        assert self.project.get_wiki_page('home') is None
+        assert self.project.get_wiki_page('home') is Node.load(None)
 
         log = self.project.logs.latest()
 

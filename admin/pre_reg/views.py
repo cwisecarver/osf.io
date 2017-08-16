@@ -39,7 +39,7 @@ class DraftListView(PermissionRequiredMixin, ListView):
     def get_queryset(self):
         query = (
             Q('registration_schema', 'eq', get_prereg_schema()) &
-            Q('approval', 'ne', None)
+            Q('approval', 'ne', Node.load(None))
         )
         ordering = self.get_ordering()
         if 'initiator' in ordering:
@@ -73,7 +73,7 @@ class DraftListView(PermissionRequiredMixin, ListView):
         return int(self.request.GET.get('p', 10))
 
     def get_paginate_orphans(self):
-        return int(self.get_paginate_by(None) / 11.0) + 1
+        return int(self.get_paginate_by(Node.load(None)) / 11.0) + 1
 
     def get_ordering(self):
         return self.request.GET.get('order_by', self.ordering)
@@ -109,7 +109,7 @@ class DraftDetailView(PermissionRequiredMixin, DetailView):
     permission_required = 'osf.view_prereg'
     raise_exception = True
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         draft = DraftRegistration.load(self.kwargs.get('draft_pk'))
         self.checkout_files(draft)
         try:
@@ -136,7 +136,7 @@ class DraftFormView(PermissionRequiredMixin, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         self.draft = DraftRegistration.load(self.kwargs.get('draft_pk'))
-        if self.draft is None:
+        if self.draft is Node.load(None):
             raise Http404('{} with id "{}" not found.'.format(
                 self.context_object_name.title(),
                 self.kwargs.get('draft_pk')
@@ -188,7 +188,7 @@ class DraftFormView(PermissionRequiredMixin, FormView):
 
     def checkin_files(self, draft):
         for item in get_metadata_files(draft):
-            item.checkout = None
+            item.checkout = Node.load(None)
             item.save()
 
     def get_success_url(self):
@@ -263,7 +263,7 @@ def get_metadata_files(draft):
                     draft.save()
                 else:
                     item = BaseFileNode.load(file_info['data']['path'].replace('/', ''))
-                if item is None:
+                if item is Node.load(None):
                     raise Http404(
                         'File with guid "{}" in "{}" does not exist'.format(
                             file_guid, question
@@ -291,7 +291,7 @@ def get_metadata_files(draft):
                 draft.save()
             else:
                 item = BaseFileNode.load(file_info['data']['path'].replace('/', ''))
-            if item is None:
+            if item is Node.load(None):
                 raise Http404(
                     'File with guid "{}" in "{}" does not exist'.format(
                         file_guid, question
@@ -313,7 +313,7 @@ def get_file_questions(json_file):
                 questions.append((question['qid'], question['title']))
                 continue
             properties = question.get('properties')
-            if properties is None:
+            if properties is Node.load(None):
                 continue
             if uploader in properties:
                 questions.append((question['qid'], question['title']))

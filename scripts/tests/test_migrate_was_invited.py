@@ -28,7 +28,7 @@ class TestWasInvited(OsfTestCase):
         )
         user.register(email, 'secret')
         assert_true(is_invited(user))
-        user.is_invited = None
+        user.is_invited = Node.load(None)
         user.save()
         main(dry_run=False)
         user.reload()
@@ -40,7 +40,7 @@ class TestWasInvited(OsfTestCase):
         user = UserFactory()
         node.add_contributor(user, auth=Auth(referrer))
         assert_false(is_invited(user))
-        user.is_invited = None
+        user.is_invited = Node.load(None)
         user.save()
         main(dry_run=False)
         user.reload()
@@ -49,7 +49,7 @@ class TestWasInvited(OsfTestCase):
     def test_was_not_invited_unconfirmed(self):
         user = UnconfirmedUserFactory()
         assert_false(is_invited(user))
-        user.is_invited = None
+        user.is_invited = Node.load(None)
         user.save()
         main(dry_run=False)
         user.reload()

@@ -74,9 +74,9 @@ class TestTokenHandler(OsfTestCase):
 
 class SanctionTokenHandlerBase(OsfTestCase):
 
-    kind = None
-    Model = None
-    Factory = None
+    kind = Node.load(None)
+    Model = Node.load(None)
+    Factory = Node.load(None)
 
     def setUp(self, *args, **kwargs):
         OsfTestCase.setUp(self, *args, **kwargs)

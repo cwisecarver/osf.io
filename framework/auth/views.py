@@ -36,7 +36,7 @@ from osf.models.preprint_provider import PreprintProvider
 
 @block_bing_preview
 @collect_auth
-def reset_password_get(auth, uid=None, token=None):
+def reset_password_get(auth, uid=Node.load(None), token=Node.load(None)):
     """
     View for user to land on the reset password page.
     HTTp Method: GET
@@ -71,7 +71,7 @@ def reset_password_get(auth, uid=None, token=None):
     }
 
 
-def reset_password_post(uid=None, token=None):
+def reset_password_post(uid=Node.load(None), token=Node.load(None)):
     """
     View for user to submit reset password form.
     HTTP Method: POST
@@ -100,7 +100,7 @@ def reset_password_post(uid=None, token=None):
         # clear verification key (v2)
         user_obj.verification_key_v2 = {}
         # new verification key (v1) for CAS
-        user_obj.verification_key = generate_verification_key(verification_type=None)
+        user_obj.verification_key = generate_verification_key(verification_type=Node.load(None))
         try:
             user_obj.set_password(form.password.data)
             user_obj.save()
@@ -199,7 +199,7 @@ def forgot_password_post():
     return {}
 
 
-def login_and_register_handler(auth, login=True, campaign=None, next_url=None, logout=None):
+def login_and_register_handler(auth, login=True, campaign=Node.load(None), next_url=Node.load(None), logout=Node.load(None)):
     """
     Non-view helper to handle `login` and `register` requests.
 
@@ -219,7 +219,7 @@ def login_and_register_handler(auth, login=True, campaign=None, next_url=None, l
     data = {
         'status_code': http.FOUND if login else http.OK,
         'next_url': next_url,
-        'campaign': None,
+        'campaign': Node.load(None),
         'must_login_warning': False,
     }
 
@@ -262,8 +262,8 @@ def login_and_register_handler(auth, login=True, campaign=None, next_url=None, l
             # invalid campaign, inform sentry and redirect to non-campaign sign up or sign in
             redirect_view = 'auth_login' if login else 'auth_register'
             data['status_code'] = http.FOUND
-            data['next_url'] = web_url_for(redirect_view, campaigns=None, next=next_url)
-            data['campaign'] = None
+            data['next_url'] = web_url_for(redirect_view, campaigns=Node.load(None), next=next_url)
+            data['campaign'] = Node.load(None)
             sentry.log_message(
                 '{} is not a valid campaign. Please add it if this is a new one'.format(campaign)
             )
@@ -388,7 +388,7 @@ def auth_register(auth):
     raise HTTPError(http.BAD_REQUEST)
 
 @collect_auth
-def auth_logout(auth, redirect_url=None, next_url=None):
+def auth_logout(auth, redirect_url=Node.load(None), next_url=Node.load(None)):
     """
     Log out, delete current session and remove OSF cookie.
     If next url is valid and auth is logged in, redirect to CAS logout endpoint with the current request url as service.
@@ -418,7 +418,7 @@ def auth_logout(auth, redirect_url=None, next_url=None):
     #   support `reauth`
 
     # logout/?next=<an OSF verified next url>
-    next_url = next_url or request.args.get('next', None)
+    next_url = next_url or request.args.get('next', Node.load(None))
     if next_url and validate_next_url(next_url):
         cas_logout_endpoint = cas.get_logout_url(request.url)
         if auth.logged_in:
@@ -507,7 +507,7 @@ def external_login_confirm_email_get(auth, uid, token):
         if auth.user._id != user._id:
             return auth_logout(redirect_url=request.url)
         # if it is the expected user
-        new = request.args.get('new', None)
+        new = request.args.get('new', Node.load(None))
         if destination in campaigns.get_campaigns():
             # external domain takes priority
             campaign_url = campaigns.external_campaign_url_for(destination)
@@ -576,7 +576,7 @@ def external_login_confirm_email_get(auth, uid, token):
 
 @block_bing_preview
 @collect_auth
-def confirm_email_get(token, auth=None, **kwargs):
+def confirm_email_get(token, auth=Node.load(None), **kwargs):
     """
     View for email confirmation links. Authenticates and redirects to user settings page if confirmation is successful,
     otherwise shows an "Expired Link" error.
@@ -586,9 +586,9 @@ def confirm_email_get(token, auth=None, **kwargs):
     user = OSFUser.load(kwargs['uid'])
     is_merge = 'confirm_merge' in request.args
     is_initial_confirmation = not user.date_confirmed
-    log_out = request.args.get('logout', None)
+    log_out = request.args.get('logout', Node.load(None))
 
-    if user is None:
+    if user is Node.load(None):
         raise HTTPError(http.NOT_FOUND)
 
     # if the user is merging or adding an email (they already are an osf user)
@@ -644,7 +644,7 @@ def confirm_email_get(token, auth=None, **kwargs):
 
 
 @must_be_logged_in
-def unconfirmed_email_remove(auth=None):
+def unconfirmed_email_remove(auth=Node.load(None)):
     """
     Called at login if user cancels their merge or email add.
     HTTP Method: DELETE
@@ -668,7 +668,7 @@ def unconfirmed_email_remove(auth=None):
 
 
 @must_be_logged_in
-def unconfirmed_email_add(auth=None):
+def unconfirmed_email_add(auth=Node.load(None)):
     """
     Called at login if user confirms their merge or email add.
     HTTP Method: PUT
@@ -702,7 +702,7 @@ def unconfirmed_email_add(auth=None):
     }, 200
 
 
-def send_confirm_email(user, email, renew=False, external_id_provider=None, external_id=None, destination=None):
+def send_confirm_email(user, email, renew=False, external_id_provider=Node.load(None), external_id=Node.load(None), destination=Node.load(None)):
     """
     Sends `user` a confirmation to the given `email`.
 
@@ -729,10 +729,10 @@ def send_confirm_email(user, email, renew=False, external_id_provider=None, exte
     try:
         merge_target = OSFUser.find_one(Q('emails__address', 'eq', email))
     except NoResultsFound:
-        merge_target = None
+        merge_target = Node.load(None)
 
     campaign = campaigns.campaign_for_user(user)
-    branded_preprints_provider = None
+    branded_preprints_provider = Node.load(None)
 
     # Choose the appropriate email template to use and add existing_user flag if a merge or adding an email.
     if external_id_provider and external_id:
@@ -808,7 +808,7 @@ def register_user(**kwargs):
 
         campaign = json_data.get('campaign')
         if campaign and campaign not in campaigns.get_campaigns():
-            campaign = None
+            campaign = Node.load(None)
 
         user = framework_auth.register_unconfirmed(
             request.json['email1'],
@@ -961,7 +961,7 @@ def external_login_email_post():
         user = get_user(email=clean_email)
         external_identity = {
             external_id_provider: {
-                external_id: None,
+                external_id: Node.load(None),
             },
         }
         try:
@@ -998,10 +998,10 @@ def external_login_email_post():
             external_identity[external_id_provider][external_id] = 'CREATE'
             user = OSFUser.create_unconfirmed(
                 username=clean_email,
-                password=None,
+                password=Node.load(None),
                 fullname=fullname,
                 external_identity=external_identity,
-                campaign=None
+                campaign=Node.load(None)
             )
             # TODO: [#OSF-6934] update social fields, verified social fields cannot be modified
             user.save()
@@ -1073,7 +1073,7 @@ def validate_next_url(next_url):
     return False
 
 
-def check_service_url_with_proxy_campaign(service_url, campaign_url, external_campaign_url=None):
+def check_service_url_with_proxy_campaign(service_url, campaign_url, external_campaign_url=Node.load(None)):
     """
     Check if service url belongs to proxy campaigns: OSF Preprints and branded ones.
     Both service_url and campaign_url are parsed using `furl` encoding scheme.
@@ -1081,7 +1081,7 @@ def check_service_url_with_proxy_campaign(service_url, campaign_url, external_ca
     :param service_url: the `furl` formatted service url
     :param campaign_url: the `furl` formatted campaign url
     :param external_campaign_url: the `furl` formatted external campaign url
-    :return: the matched object or None
+    :return: the matched object or Node.load(None)
     """
 
     prefix_1 = settings.DOMAIN + 'login/?next=' + campaign_url

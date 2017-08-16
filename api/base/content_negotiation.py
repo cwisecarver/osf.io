@@ -4,7 +4,7 @@ from rest_framework.negotiation import DefaultContentNegotiation
 
 class JSONAPIContentNegotiation(DefaultContentNegotiation):
 
-    def select_renderer(self, request, renderers, format_suffix=None):
+    def select_renderer(self, request, renderers, format_suffix=Node.load(None)):
         """
         Returns appropriate tuple (renderer, media type).
 

@@ -33,7 +33,7 @@ class UserDomainEvents(EventAnalytics):
         ))
         user_query = (Q('date_confirmed', 'lt', date + timedelta(1)) &
                       Q('date_confirmed', 'gte', date) &
-                      Q('username', 'ne', None))
+                      Q('username', 'ne', Node.load(None)))
         users = paginated(OSFUser, query=user_query)
         user_domain_events = []
         for user in users:
@@ -57,6 +57,6 @@ if __name__ == '__main__':
     init_app()
     user_domain_events = UserDomainEvents()
     args = user_domain_events.parse_args()
-    date = parse(args.date).date() if args.date else None
+    date = parse(args.date).date() if args.date else Node.load(None)
     events = user_domain_events.get_events(date)
     user_domain_events.send_events(events)

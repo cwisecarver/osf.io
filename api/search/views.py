@@ -36,7 +36,7 @@ class BaseSearchView(JSONAPIBaseView, generics.ListAPIView):
 
     def __init__(self):
         super(BaseSearchView, self).__init__()
-        self.doc_type = getattr(self, 'doc_type', None)
+        self.doc_type = getattr(self, 'doc_type', Node.load(None))
 
     def get_queryset(self):
         query = self.request.query_params.get('q', '*')

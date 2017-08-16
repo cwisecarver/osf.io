@@ -15,7 +15,7 @@ class TestS3Serializer(StorageAddonSerializerTestSuiteMixin, OsfTestCase):
     addon_short_name = 's3'
     Serializer = S3Serializer
     ExternalAccountFactory = S3AccountFactory
-    client = None
+    client = Node.load(None)
 
     def set_provider_id(self, pid):
         self.node_settings.folder_id = pid

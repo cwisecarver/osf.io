@@ -234,7 +234,7 @@ class TestPreprintServicePermissions(OsfTestCase):
 class TestPreprintProvider(OsfTestCase):
     def setUp(self):
         super(TestPreprintProvider, self).setUp()
-        self.preprint = PreprintFactory(provider=None, is_published=False)
+        self.preprint = PreprintFactory(provider=Node.load(None), is_published=False)
         self.provider = PreprintProviderFactory(name='WWEArxiv')
 
     def test_add_provider(self):
@@ -247,11 +247,11 @@ class TestPreprintProvider(OsfTestCase):
         assert_equal(self.preprint.provider, self.provider)
 
     def test_remove_provider(self):
-        self.preprint.provider = None
+        self.preprint.provider = Node.load(None)
         self.preprint.save()
         self.preprint.reload()
 
-        assert_equal(self.preprint.provider, None)
+        assert_equal(self.preprint.provider, Node.load(None))
 
     def test_find_provider(self):
         self.preprint.provider = self.provider
@@ -485,8 +485,8 @@ class TestOnPreprintUpdatedTask(OsfTestCase):
 
     def test_format_preprint_nones(self):
         self.preprint.node.tags = []
-        self.preprint.date_published = None
-        self.preprint.node.preprint_article_doi = None
+        self.preprint.date_published = Node.load(None)
+        self.preprint.node.preprint_article_doi = Node.load(None)
         self.preprint.set_subjects([], auth=Auth(self.preprint.node.creator))
 
         res = format_preprint(self.preprint, self.preprint.provider.share_publish_type)
@@ -500,7 +500,7 @@ class TestOnPreprintUpdatedTask(OsfTestCase):
         assert preprint['description'] == self.preprint.node.description
         assert preprint['is_deleted'] == (not self.preprint.is_published or not self.preprint.node.is_public or self.preprint.node.is_preprint_orphan)
         assert preprint['date_updated'] == self.preprint.date_modified.isoformat()
-        assert preprint.get('date_published') is None
+        assert preprint.get('date_published') is Node.load(None)
 
         people = sorted([nodes.pop(k) for k, v in nodes.items() if v['@type'] == 'person'], key=lambda x: x['given_name'])
         expected_people = sorted([{

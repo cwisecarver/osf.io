@@ -26,13 +26,13 @@ class IdentifierMixin(models.Model):
     """
 
     def get_identifier(self, category):
-        """Returns None of no identifier matches"""
+        """Returns Node.load(None) of no identifier matches"""
         content_type = ContentType.objects.get_for_model(self)
         return Identifier.objects.filter(object_id=self.id, category=category, content_type=content_type).first()
 
     def get_identifier_value(self, category):
         identifier = self.get_identifier(category)
-        return identifier.value if identifier else None
+        return identifier.value if identifier else Node.load(None)
 
     def set_identifier_value(self, category, value):
         identifier, created = Identifier.objects.get_or_create(object_id=self.pk,

@@ -10,7 +10,7 @@ def reset_django_db_queries_and_close_connections(*args, **kwargs):
     reset_queries()
     close_old_connections()
 
-def close_old_django_db_connections(resp=None):
+def close_old_django_db_connections(resp=Node.load(None)):
     close_old_connections()
 
     return resp

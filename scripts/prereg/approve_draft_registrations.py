@@ -26,7 +26,7 @@ def main(dry_run=True):
         try:
             if not dry_run:
                 sanction.state = Sanction.APPROVED
-                sanction._on_complete(None)
+                sanction._on_complete(Node.load(None))
                 sanction.save()
             logger.warn('Approved {0}'.format(draft._id))
         except Exception as e:

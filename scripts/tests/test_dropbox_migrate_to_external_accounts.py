@@ -31,7 +31,7 @@ def fake_user_settings_document(user, deleted=False):
         "owner": user._id,
     }
 
-def fake_node_settings_document(user_settings_document=None, node=None, deleted=False):
+def fake_node_settings_document(user_settings_document=Node.load(None), node=Node.load(None), deleted=False):
     return {
         "_id": fake.credit_card_number(),
         "_version": 1,
@@ -70,7 +70,7 @@ class TestDropboxMigration(OsfTestCase):
         for i in range(3):
             node = ProjectFactory()
             self.unauthorized_node_settings_documents.append(
-                fake_node_settings_document(None, node)
+                fake_node_settings_document(Node.load(None), node)
             )
         database['dropboxnodesettings'].insert(self.unauthorized_node_settings_documents)
 

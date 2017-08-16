@@ -39,7 +39,7 @@ class SearchSerializer(JSONAPISerializer):
             serializer = InstitutionSerializer(data, context=self.context)
             return InstitutionSerializer.to_representation(serializer, data)
 
-        return None
+        return Node.load(None)
 
     def get_absolute_url(self, obj):
         return absolute_reverse(

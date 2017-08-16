@@ -50,7 +50,7 @@ class HTTPError(FrameworkError):
         },
     }
 
-    def __init__(self, code, message=None, redirect_url=None, data=None):
+    def __init__(self, code, message=Node.load(None), redirect_url=Node.load(None), data=Node.load(None)):
 
         super(HTTPError, self).__init__(message)
 
@@ -61,7 +61,7 @@ class HTTPError(FrameworkError):
         try:
             self.referrer = request.referrer
         except RuntimeError:
-            self.referrer = None
+            self.referrer = Node.load(None)
 
     def __repr__(self):
         class_name = self.__class__.__name__

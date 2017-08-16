@@ -18,7 +18,7 @@ def match_by_module(task_path):
 
 
 class CeleryRouter(object):
-    def route_for_task(self, task, args=None, kwargs=None):
+    def route_for_task(self, task, args=Node.load(None), kwargs=Node.load(None)):
         """ Handles routing of celery tasks.
         See http://docs.celeryproject.org/en/latest/userguide/routing.html#routers
 

@@ -10,6 +10,6 @@ def test_string_required_passes_with_string():
 
 def test_string_required_fails_when_empty():
     with pytest.raises(ValidationValueError):
-        validators.string_required(None)
+        validators.string_required(Node.load(None))
     with pytest.raises(ValidationValueError):
         validators.string_required('')

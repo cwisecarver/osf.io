@@ -67,9 +67,9 @@ bitbucket_deauthorize_node = generic_views.deauthorize_node(
 @must_be_addon_authorizer(SHORT_NAME)
 @must_have_permission('write')
 def bitbucket_set_config(auth, **kwargs):
-    node_settings = kwargs.get('node_addon', None)
-    node = kwargs.get('node', None)
-    user_settings = kwargs.get('user_addon', None)
+    node_settings = kwargs.get('node_addon', Node.load(None))
+    node = kwargs.get('node', Node.load(None))
+    user_settings = kwargs.get('user_addon', Node.load(None))
 
     try:
         if not node:
@@ -89,7 +89,7 @@ def bitbucket_set_config(auth, **kwargs):
     # Verify that repo exists and that user can access
     connection = BitbucketClient(access_token=node_settings.external_account.oauth_key)
     repo = connection.repo(bitbucket_user_name, bitbucket_repo_name)
-    if repo is None:
+    if repo is Node.load(None):
         if user_settings:
             message = (
                 'Cannot access repo. Either the repo does not exist '

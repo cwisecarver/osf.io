@@ -33,7 +33,7 @@ class S3Serializer(StorageAddonSerializer):
             'name': node_settings.folder_name
         }
 
-    def credentials_are_valid(self, user_settings, client=None):
+    def credentials_are_valid(self, user_settings, client=Node.load(None)):
         if user_settings:
             for account in user_settings.external_accounts.all():
                 if utils.can_list(account.oauth_key, account.oauth_secret):

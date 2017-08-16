@@ -41,7 +41,7 @@ from addons.base import utils as addon_utils
 logger = logging.getLogger(__name__)
 
 
-def get_public_projects(uid=None, user=None):
+def get_public_projects(uid=Node.load(None), user=Node.load(None)):
     user = user or OSFUser.load(uid)
     # In future redesign, should be limited for users with many projects / components
     node_ids = (
@@ -64,7 +64,7 @@ def get_public_projects(uid=None, user=None):
     ]
 
 
-def get_public_components(uid=None, user=None):
+def get_public_components(uid=Node.load(None), user=Node.load(None)):
     user = user or OSFUser.load(uid)
 
     rel_child_ids = (
@@ -97,7 +97,7 @@ def date_or_none(date):
         return parse_date(date)
     except Exception as error:
         logger.exception(error)
-        return None
+        return Node.load(None)
 
 
 def validate_user(data, user):
@@ -274,7 +274,7 @@ def _profile_view(profile, is_profile=False, embed_nodes=False, include_node_cou
             'user': {
                 '_id': profile._id,
                 'is_profile': is_profile,
-                'can_edit': None,  # necessary for rendering nodes
+                'can_edit': Node.load(None),  # necessary for rendering nodes
                 'permissions': [],  # necessary for rendering nodes
             },
         }
@@ -341,9 +341,9 @@ def user_account(auth, **kwargs):
 @must_be_logged_in
 def user_account_password(auth, **kwargs):
     user = auth.user
-    old_password = request.form.get('old_password', None)
-    new_password = request.form.get('new_password', None)
-    confirm_password = request.form.get('confirm_password', None)
+    old_password = request.form.get('old_password', Node.load(None))
+    new_password = request.form.get('new_password', Node.load(None))
+    confirm_password = request.form.get('confirm_password', Node.load(None))
 
     try:
         user.change_password(old_password, new_password, confirm_password)
@@ -604,9 +604,9 @@ def serialize_names(**kwargs):
     }
 
 
-def get_target_user(auth, uid=None):
+def get_target_user(auth, uid=Node.load(None)):
     target = OSFUser.load(uid) if uid else auth.user
-    if target is None:
+    if target is Node.load(None):
         raise HTTPError(http.NOT_FOUND)
     return target
 
@@ -620,10 +620,10 @@ def fmt_date_or_none(date, fmt='%Y-%m-%d'):
                 http.BAD_REQUEST,
                 data=dict(message_long='Year entered must be after 1900')
             )
-    return None
+    return Node.load(None)
 
 
-def append_editable(data, auth, uid=None):
+def append_editable(data, auth, uid=Node.load(None)):
     target = get_target_user(auth, uid)
     data['editable'] = auth.user == target
 
@@ -638,7 +638,7 @@ def serialize_social_addons(user):
 
 
 @collect_auth
-def serialize_social(auth, uid=None, **kwargs):
+def serialize_social(auth, uid=Node.load(None), **kwargs):
     target = get_target_user(auth, uid)
     ret = target.social
     append_editable(ret, auth, uid)
@@ -673,7 +673,7 @@ def serialize_school(school):
     }
 
 
-def serialize_contents(field, func, auth, uid=None):
+def serialize_contents(field, func, auth, uid=Node.load(None)):
     target = get_target_user(auth, uid)
     ret = {
         'contents': [
@@ -686,14 +686,14 @@ def serialize_contents(field, func, auth, uid=None):
 
 
 @collect_auth
-def serialize_jobs(auth, uid=None, **kwargs):
+def serialize_jobs(auth, uid=Node.load(None), **kwargs):
     ret = serialize_contents('jobs', serialize_job, auth, uid)
     append_editable(ret, auth, uid)
     return ret
 
 
 @collect_auth
-def serialize_schools(auth, uid=None, **kwargs):
+def serialize_schools(auth, uid=Node.load(None), **kwargs):
     ret = serialize_contents('schools', serialize_school, auth, uid)
     append_editable(ret, auth, uid)
     return ret
@@ -703,7 +703,7 @@ def serialize_schools(auth, uid=None, **kwargs):
 def unserialize_names(**kwargs):
     user = kwargs['auth'].user
     json_data = escape_html(request.get_json())
-    # json get can return None, use `or` here to ensure we always strip a string
+    # json get can return Node.load(None), use `or` here to ensure we always strip a string
     user.fullname = (json_data.get('full') or '').strip()
     user.given_name = (json_data.get('given') or '').strip()
     user.middle_names = (json_data.get('middle') or '').strip()

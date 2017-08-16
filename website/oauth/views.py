@@ -15,7 +15,7 @@ def oauth_disconnect(external_account_id, auth):
     account = ExternalAccount.load(external_account_id)
     user = auth.user
 
-    if account is None:
+    if account is Node.load(None):
         raise HTTPError(http.NOT_FOUND)
 
     if not user.external_accounts.filter(id=account.id).exists():

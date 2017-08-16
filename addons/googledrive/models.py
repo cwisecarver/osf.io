@@ -61,7 +61,7 @@ class GoogleDriveProvider(ExternalProvider):
         return {
             'provider_id': info['sub'],
             'display_name': info['name'],
-            'profile_url': info.get('profile', None)
+            'profile_url': info.get('profile', Node.load(None))
         }
 
     def fetch_access_token(self, force_refresh=False):
@@ -83,12 +83,12 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     serializer = GoogleDriveSerializer
     user_settings = models.ForeignKey(UserSettings, null=True, blank=True)
 
-    _api = None
+    _api = Node.load(None)
 
     @property
     def api(self):
         """Authenticated ExternalProvider instance"""
-        if self._api is None:
+        if self._api is Node.load(None):
             self._api = GoogleDriveProvider(self.external_account)
         return self._api
 
@@ -103,7 +103,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     @property
     def folder_name(self):
         if not self.folder_id:
-            return None
+            return Node.load(None)
 
         if self.folder_path != '/':
             return os.path.split(self.folder_path)[1]
@@ -111,13 +111,13 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
             return '/ (Full Google Drive)'
 
     def clear_settings(self):
-        self.folder_id = None
-        self.folder_path = None
+        self.folder_id = Node.load(None)
+        self.folder_path = Node.load(None)
 
     def get_folders(self, **kwargs):
         node = self.owner
 
-        #  Defaults exist when called by the API, but are `None`
+        #  Defaults exist when called by the API, but are `Node.load(None)`
         path = kwargs.get('path') or ''
         folder_id = kwargs.get('folder_id') or 'root'
 
@@ -172,14 +172,14 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
     @property
     def selected_folder_name(self):
-        if self.folder_id is None:
+        if self.folder_id is Node.load(None):
             return ''
         elif self.folder_id == 'root':
             return 'Full Google Drive'
         else:
             return self.folder_name
 
-    def deauthorize(self, auth=None, add_log=True, save=False):
+    def deauthorize(self, auth=Node.load(None), add_log=True, save=False):
         """Remove user authorization from this node and log the event."""
 
         if add_log:

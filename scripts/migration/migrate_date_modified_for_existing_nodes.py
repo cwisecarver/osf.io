@@ -24,7 +24,7 @@ def date_updated(node):
 
 def main(dry=True):
     init_app(routes=False)
-    nodes = models.Node.find(Q('date_modified', 'eq', None))
+    nodes = models.Node.find(Q('date_modified', 'eq', Node.load(None)))
     node_count = nodes.count()
     count = 0
     errored_nodes = []

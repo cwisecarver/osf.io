@@ -33,7 +33,7 @@ def main():
 
 def get_users_with_unconfirmed_emails():
     return models.User.find(
-        Q('date_confirmed', 'eq', None)
+        Q('date_confirmed', 'eq', Node.load(None))
         & Q('emails', 'ne', [])
     )
 

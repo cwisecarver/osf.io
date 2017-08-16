@@ -8,8 +8,8 @@ from osf.models.contributor import get_contributor_permissions
 from website.util.permissions import reduce_permissions
 
 
-def get_gravatar(user, size=None):
-    if size is None:
+def get_gravatar(user, size=Node.load(None)):
+    if size is Node.load(None):
         size = settings.PROFILE_IMAGE_LARGE
     return gravatar(
         user, use_ssl=True,
@@ -17,7 +17,7 @@ def get_gravatar(user, size=None):
     )
 
 
-def serialize_user(user, node=None, admin=False, full=False, is_profile=False, include_node_counts=False):
+def serialize_user(user, node=Node.load(None), admin=False, full=False, is_profile=False, include_node_counts=False):
     """
     Return a dictionary representation of a registered user.
 
@@ -25,7 +25,7 @@ def serialize_user(user, node=None, admin=False, full=False, is_profile=False, i
     :param bool full: Include complete user properties
     """
     from website.project.utils import PROJECT_QUERY
-    contrib = None
+    contrib = Node.load(None)
     if isinstance(user, Contributor):
         contrib = user
         user = contrib.user
@@ -42,7 +42,7 @@ def serialize_user(user, node=None, admin=False, full=False, is_profile=False, i
         ),
         'active': user.is_active,
     }
-    if node is not None:
+    if node is not Node.load(None):
         if admin:
             flags = {
                 'visible': False,
@@ -89,7 +89,7 @@ def serialize_user(user, node=None, admin=False, full=False, is_profile=False, i
                 'absolute_url': merger.absolute_url
             }
         else:
-            merged_by = None
+            merged_by = Node.load(None)
 
         projects = Node.find_for_user(user, PROJECT_QUERY).get_roots()
         ret.update({
@@ -124,7 +124,7 @@ def serialize_visible_contributors(node):
     ]
 
 
-def add_contributor_json(user, current_user=None):
+def add_contributor_json(user, current_user=Node.load(None)):
     """
     Generate a dictionary representation of a user, optionally including # projects shared with `current_user`
 
@@ -138,8 +138,8 @@ def add_contributor_json(user, current_user=None):
     else:
         n_projects_in_common = 0
 
-    current_employment = None
-    education = None
+    current_employment = Node.load(None)
+    education = Node.load(None)
 
     if user.jobs:
         current_employment = user.jobs[0]['institution']
@@ -167,10 +167,10 @@ def add_contributor_json(user, current_user=None):
 def serialize_unregistered(fullname, email):
     """Serializes an unregistered user."""
     user = auth.get_user(email=email)
-    if user is None:
+    if user is Node.load(None):
         serialized = {
             'fullname': fullname,
-            'id': None,
+            'id': Node.load(None),
             'registered': False,
             'active': False,
             'gravatar': gravatar(email, use_ssl=True,

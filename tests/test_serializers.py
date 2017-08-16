@@ -33,7 +33,7 @@ class TestUserSerializers(OsfTestCase):
         d = utils.serialize_user(user)
         assert_equal(d['id'], user._primary_key)
         assert_equal(d['url'], user.url)
-        assert_equal(d.get('username', None), None)
+        assert_equal(d.get('username', Node.load(None)), Node.load(None))
         assert_equal(d['fullname'], user.fullname)
         assert_equal(d['registered'], user.is_registered)
         assert_equal(d['absolute_url'], user.absolute_url)
@@ -63,7 +63,7 @@ class TestUserSerializers(OsfTestCase):
         )
         assert_equal(d['id'], user._primary_key)
         assert_equal(d['url'], user.url)
-        assert_equal(d.get('username'), None)
+        assert_equal(d.get('username'), Node.load(None))
         assert_equal(d['fullname'], user.fullname)
         assert_equal(d['registered'], user.is_registered)
         assert_equal(d['gravatar_url'], gravatar)
@@ -237,7 +237,7 @@ class TestViewProjectEmbeds(OsfTestCase):
     # Regression test for https://github.com/CenterForOpenScience/osf.io/issues/1478
     @mock.patch('website.archiver.tasks.archive')
     def test_view_project_embed_registrations_includes_contribution_count(self, mock_archive):
-        self.project.register_node(get_default_metaschema(), Auth(user=self.project.creator), '', None)
+        self.project.register_node(get_default_metaschema(), Auth(user=self.project.creator), '', Node.load(None))
         data = _view_project(node=self.project, auth=Auth(self.project.creator), embed_registrations=True)
         assert_is_not_none(data['node']['registrations'][0]['nlogs'])
 
@@ -447,8 +447,8 @@ class TestAddContributorJson(OsfTestCase):
             'institution': 'School of Lover Boys',
             'department': 'Fancy Patter',
             'title': 'Lover Boy',
-            'start': None,
-            'end': None,
+            'start': Node.load(None),
+            'end': Node.load(None),
         }]
 
         self.schools = [{
@@ -456,8 +456,8 @@ class TestAddContributorJson(OsfTestCase):
             'institution': 'Queens University',
             'department': '',
             'location': '',
-            'start': None,
-            'end': None,
+            'start': Node.load(None),
+            'end': Node.load(None),
         }]
 
     def test_add_contributor_json(self):
@@ -467,8 +467,8 @@ class TestAddContributorJson(OsfTestCase):
         assert_equal(user_info['fullname'], self.fullname)
         assert_equal(user_info['email'], self.username)
         assert_equal(user_info['id'], self.user_id)
-        assert_equal(user_info['employment'], None)
-        assert_equal(user_info['education'], None)
+        assert_equal(user_info['employment'], Node.load(None))
+        assert_equal(user_info['education'], Node.load(None))
         assert_equal(user_info['n_projects_in_common'], 0)
         assert_equal(user_info['registered'], True)
         assert_equal(user_info['active'], True)
@@ -483,7 +483,7 @@ class TestAddContributorJson(OsfTestCase):
         assert_equal(user_info['fullname'], self.fullname)
         assert_equal(user_info['email'], self.username)
         assert_equal(user_info['id'], self.user_id)
-        assert_equal(user_info['employment'], None)
+        assert_equal(user_info['employment'], Node.load(None))
         assert_equal(user_info['education'], self.user.schools[0]['institution'])
         assert_equal(user_info['n_projects_in_common'], 0)
         assert_equal(user_info['registered'], True)
@@ -500,7 +500,7 @@ class TestAddContributorJson(OsfTestCase):
         assert_equal(user_info['email'], self.username)
         assert_equal(user_info['id'], self.user_id)
         assert_equal(user_info['employment'], self.user.jobs[0]['institution'])
-        assert_equal(user_info['education'], None)
+        assert_equal(user_info['education'], Node.load(None))
         assert_equal(user_info['n_projects_in_common'], 0)
         assert_equal(user_info['registered'], True)
         assert_equal(user_info['active'], True)

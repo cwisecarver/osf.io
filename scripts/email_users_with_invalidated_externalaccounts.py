@@ -49,9 +49,9 @@ def send_mail(target, dry_run=True):
         mimetype='plain',
         ttls=ttls,
         login=login,
-        username=None,
-        password=None,
-        categories=None,
+        username=Node.load(None),
+        password=Node.load(None),
+        categories=Node.load(None),
     )
 
     EMAILS_SENT_TO[to_addr] = target['_id']
@@ -78,14 +78,14 @@ def get_targets():
         database.user.find({
             'external_accounts': {
                 '$in': list(set(ea['_id'] for ea in \
-                    list(database.externalaccount.find({'provider': {'$in': ['box', 'mendeley', 'googledrive']}, 'date_last_refreshed': None}, {'_id': 1})) + # Any Box/Mend/GD EA that hasn't been refreshed, OR
+                    list(database.externalaccount.find({'provider': {'$in': ['box', 'mendeley', 'googledrive']}, 'date_last_refreshed': Node.load(None)}, {'_id': 1})) + # Any Box/Mend/GD EA that hasn't been refreshed, OR
                     list(database.externalaccount.find({'provider': 'figshare'}, {'_id': 1}))))   # Any figshare EA
             },
-            'merged_by': None,               # Not merged   (part of .is_active definition)
-            'date_disabled': None,           # Not disabled (part of .is_active definition)
+            'merged_by': Node.load(None),               # Not merged   (part of .is_active definition)
+            'date_disabled': Node.load(None),           # Not disabled (part of .is_active definition)
             'is_registered': True,           # Registered   (part of .is_active definition)
-            'password': {'$ne': None},       # Has password (part of .is_active definition)
-            'date_confirmed': {'$ne': None}  # Confirmed    (part of .is_active definition)
+            'password': {'$ne': Node.load(None)},       # Has password (part of .is_active definition)
+            'date_confirmed': {'$ne': Node.load(None)}  # Confirmed    (part of .is_active definition)
             }, {'_id': 1, 'external_accounts': 1, 'username': 1, 'fullname': 1})
         if any_account_is_connected_to_node_for_user(u)
     ]

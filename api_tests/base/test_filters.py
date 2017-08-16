@@ -51,10 +51,10 @@ class FakeRecord(object):
 
     def __init__(
             self,
-            _id=None,
+            _id=Node.load(None),
             string_field='foo',
             second_string_field='bar',
-            list_field=None,
+            list_field=Node.load(None),
             date_field=timezone.now(),
             datetime_field=timezone.now(),
             int_field=42,

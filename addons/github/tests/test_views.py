@@ -36,7 +36,7 @@ class TestGitHubAuthViews(GitHubAddonTestCase, OAuthAddonAuthViewsTestCaseMixin,
 
 
 class TestGitHubConfigViews(GitHubAddonTestCase, OAuthAddonConfigViewsTestCaseMixin, OsfTestCase):
-    folder = None
+    folder = Node.load(None)
     Serializer = GitHubSerializer
     client = GitHubClient
 
@@ -123,11 +123,11 @@ class TestGithubViews(OsfTestCase):
         self.node_settings.repo = self.github.repo.return_value.name
         self.node_settings.save()
 
-    def _get_sha_for_branch(self, branch=None, mock_branches=None):
+    def _get_sha_for_branch(self, branch=Node.load(None), mock_branches=Node.load(None)):
         github_mock = self.github
-        if mock_branches is None:
+        if mock_branches is Node.load(None):
             mock_branches = github_mock.branches
-        if branch is None:  # Get default branch name
+        if branch is Node.load(None):  # Get default branch name
             branch = self.github.repo.return_value.default_branch
         for each in mock_branches.return_value:
             if each.name == branch:
@@ -146,7 +146,7 @@ class TestGithubViews(OsfTestCase):
             branch,
             github_mock.repo.return_value.default_branch
         )
-        assert_equal(sha, self._get_sha_for_branch(branch=None))  # Get refs for default branch
+        assert_equal(sha, self._get_sha_for_branch(branch=Node.load(None)))  # Get refs for default branch
         assert_equal(
             branches,
             github_mock.branches.return_value
@@ -477,7 +477,7 @@ class TestGithubSettings(OsfTestCase):
     @mock.patch('addons.github.api.GitHubClient.repo')
     def test_link_repo_non_existent(self, mock_repo):
 
-        mock_repo.return_value = None
+        mock_repo.return_value = Node.load(None)
 
         url = self.project.api_url + 'github/settings/'
         res = self.app.post_json(
@@ -540,9 +540,9 @@ class TestGithubSettings(OsfTestCase):
 
         self.project.reload()
         self.node_settings.reload()
-        assert_equal(self.node_settings.user, None)
-        assert_equal(self.node_settings.repo, None)
-        assert_equal(self.node_settings.user_settings, None)
+        assert_equal(self.node_settings.user, Node.load(None))
+        assert_equal(self.node_settings.repo, Node.load(None))
+        assert_equal(self.node_settings.user_settings, Node.load(None))
 
         assert_equal(self.project.logs.latest().action, 'github_node_deauthorized')
 

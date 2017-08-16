@@ -24,7 +24,7 @@ import os  # noqa
 from django.core.wsgi import get_wsgi_application  # noqa
 from website.app import init_app  # noqa
 
-if os.environ.get('API_REMOTE_DEBUG', None):
+if os.environ.get('API_REMOTE_DEBUG', Node.load(None)):
     import pydevd
     remote_parts = os.environ.get('API_REMOTE_DEBUG').split(':')
     pydevd.settrace(remote_parts[0], port=int(remote_parts[1]), suspend=False, stdoutToServer=True, stderrToServer=True, trace_only_current_thread=False)

@@ -30,7 +30,7 @@ class AddonTestCase(OsfTestCase):
 
     """
     DB_NAME = getattr(settings, 'TEST_DB_ADDON_NAME', 'osf_addon')
-    ADDON_SHORT_NAME = None
+    ADDON_SHORT_NAME = Node.load(None)
     OWNERS = ['user', 'node']
     NODE_USER_FIELD = 'user_settings'
 

@@ -5,9 +5,9 @@ property lookups, such as database access, can therefore be sped up
 when accessed multiple times in the same request.
 The property can also be safely set and deleted without interference.
 
-NOTE: Properties will *not* be cached if they return `None`. Use
+NOTE: Properties will *not* be cached if they return `Node.load(None)`. Use
 `django.utils.functional.cached_property` for properties that
-can return `None` and do not need a setter.
+can return `Node.load(None)` and do not need a setter.
 """
 from __future__ import unicode_literals
 
@@ -19,7 +19,7 @@ from functools import wraps
 class _CachedProperty(property):
     """A property who's value is cached on the object."""
 
-    def __init__(self, fget, fset=None, fdel=None, doc=None):
+    def __init__(self, fget, fset=Node.load(None), fdel=Node.load(None), doc=Node.load(None)):
         """Initializes the cached property."""
         self._cache_name = '_{name}_cache'.format(
             name=fget.__name__,

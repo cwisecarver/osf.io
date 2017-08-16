@@ -20,7 +20,7 @@ from website.search.search import update_institution
 
 logger = logging.getLogger(__name__)
 
-def migrate_nodes(index, query=None):
+def migrate_nodes(index, query=Node.load(None)):
     logger.info('Migrating nodes to index: {}'.format(index))
     node_query = Q('is_public', 'eq', True) & Q('is_deleted', 'eq', False)
     if query:
@@ -41,7 +41,7 @@ def migrate_users(index):
     logger.info('Migrating users to index: {}'.format(index))
     n_migr = 0
     n_iter = 0
-    users = paginated(OSFUser, query=None, each=True)
+    users = paginated(OSFUser, query=Node.load(None), each=True)
     for user in users:
         if user.is_active:
             search.update_user(user, index=index)
@@ -54,7 +54,7 @@ def migrate_institutions(index):
     for inst in Institution.find(Q('is_deleted', 'ne', True)):
         update_institution(inst, index)
 
-def migrate(delete, index=None, app=None):
+def migrate(delete, index=Node.load(None), app=Node.load(None)):
     index = index or settings.ELASTIC_INDEX
     app = app or init_app('website.settings', set_backends=True, routes=True)
 

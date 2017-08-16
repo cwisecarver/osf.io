@@ -40,7 +40,7 @@ class TestMigrateRegistrationExtra(OsfTestCase):
                 'data':{
                     'kind':'file',
                     'extra':{
-                        'checkout': None,
+                        'checkout': Node.load(None),
                         'hashes':{
                             'sha256':'1fffe6116ecfa778f9938060d5caab923ba4b8db60bd2dd57f16a72e5ef06292'
                         },
@@ -96,8 +96,8 @@ class TestMigrateRegistrationExtra(OsfTestCase):
         self.draft1 = DraftRegistrationFactory(
             registration_metadata=self.complex_metadata,
             registration_schema=self.schema,
-            approval=None,
-            registered_node=None
+            approval=Node.load(None),
+            registered_node=Node.load(None)
 
         )
         self.draft2 = DraftRegistrationFactory(

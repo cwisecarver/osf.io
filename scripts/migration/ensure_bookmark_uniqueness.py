@@ -28,7 +28,7 @@ def migrate():
         bookmarks = Collection.find(Q('is_bookmark_collection', 'eq', True) & Q('creator', 'eq', user))
         if sum([bool(n.nodes) for n in bookmarks]) > 1:
             logger.warn('Expected no users to have more than one bookmark with .nodes, {} violated. Selecting first one'.format(user._id))
-        bookmark_to_keep = None
+        bookmark_to_keep = Node.load(None)
         for n in bookmarks:
             if n.nodes:
                 bookmark_to_keep = n

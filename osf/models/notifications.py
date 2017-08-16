@@ -28,15 +28,15 @@ class NotificationSubscription(BaseModel):
         try:
             return cls.objects.get(_id=q)
         except cls.DoesNotExist:
-            return None
+            return Node.load(None)
 
     @property
     def owner(self):
         # ~100k have owner==user
-        if self.user is not None:
+        if self.user is not Node.load(None):
             return self.user
         # ~8k have owner=Node
-        elif self.node is not None:
+        elif self.node is not Node.load(None):
             return self.node
 
     @owner.setter

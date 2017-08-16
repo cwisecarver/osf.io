@@ -23,9 +23,9 @@ def migrate_status(records):
 
 def migrate_latest(records):
     for record in records:
-        date = None
+        date = Node.load(None)
         for user, report in record.reports.iteritems():
-            if date is None:
+            if date is Node.load(None):
                 date = report.get('date')
             elif date < report.get('date'):
                 date = report.get('date')
@@ -42,7 +42,7 @@ def get_no_status_targets():
 
 def get_no_latest_targets():
     query = (
-        Q('date_last_reported', 'eq', None) &
+        Q('date_last_reported', 'eq', Node.load(None)) &
         Q('spam_status', 'ne', SpamStatus.UNKNOWN)
     )
     return Comment.find(query)

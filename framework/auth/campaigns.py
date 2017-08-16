@@ -10,7 +10,7 @@ from website.util.time import throttle_period_expired
 
 
 mutex = threading.Lock()
-CAMPAIGNS = None
+CAMPAIGNS = Node.load(None)
 CAMPAIGNS_LAST_REFRESHED = timezone.now()
 
 
@@ -53,7 +53,7 @@ def get_campaigns():
                     template = 'osf'
                     name = 'OSF'
                     url_path = 'preprints/'
-                    external_url = None
+                    external_url = Node.load(None)
                 else:
                     template = 'branded'
                     name = provider.name
@@ -94,14 +94,14 @@ def system_tag_for_campaign(campaign):
     campaigns = get_campaigns()
     if campaign in campaigns:
         return campaigns.get(campaign).get('system_tag')
-    return None
+    return Node.load(None)
 
 
 def email_template_for_campaign(campaign):
     campaigns = get_campaigns()
     if campaign in campaigns:
         return campaigns.get(campaign).get('confirmation_email_template')
-    return None
+    return Node.load(None)
 
 
 def campaign_for_user(user):
@@ -109,35 +109,35 @@ def campaign_for_user(user):
     for campaign, config in campaigns.items():
         if config.get('system_tag') in user.system_tags:
             return campaign
-    return None
+    return Node.load(None)
 
 
 def is_institution_login(campaign):
     campaigns = get_campaigns()
     if campaign in campaigns:
         return campaigns.get(campaign).get('login_type') == 'institution'
-    return None
+    return Node.load(None)
 
 
 def is_native_login(campaign):
     campaigns = get_campaigns()
     if campaign in campaigns:
         return campaigns.get(campaign).get('login_type') == 'native'
-    return None
+    return Node.load(None)
 
 
 def is_proxy_login(campaign):
     campaigns = get_campaigns()
     if campaign in campaigns:
         return campaigns.get(campaign).get('login_type') == 'proxy'
-    return None
+    return Node.load(None)
 
 
 def get_service_provider(campaign):
     campaigns = get_campaigns()
     if campaign in campaigns:
         return campaigns.get(campaign).get('provider')
-    return None
+    return Node.load(None)
 
 
 def campaign_url_for(campaign):
@@ -151,7 +151,7 @@ def campaign_url_for(campaign):
     campaigns = get_campaigns()
     if campaign in campaigns:
         return campaigns.get(campaign).get('redirect_url')
-    return None
+    return Node.load(None)
 
 
 def external_campaign_url_for(campaign):
@@ -159,13 +159,13 @@ def external_campaign_url_for(campaign):
     Return the campaign's URL on Non-OSF domain, which is available for phase 2 branded preprints only.
 
     :param campaign: the campaign
-    :return: the external url if the campaign is hosted on Non-OSF domain, None otherwise
+    :return: the external url if the campaign is hosted on Non-OSF domain, Node.load(None) otherwise
     """
 
     campaigns = get_campaigns()
     if campaign in campaigns:
         return campaigns.get(campaign).get('external_url')
-    return None
+    return Node.load(None)
 
 
 def get_external_domains():
@@ -176,7 +176,7 @@ def get_external_domains():
     campaigns = get_campaigns()
     external_domains = []
     for campaign, config in campaigns.items():
-        external_url = config.get('external_url', None)
+        external_url = config.get('external_url', Node.load(None))
         if external_url:
             external_domains.append(external_url)
     return external_domains

@@ -24,17 +24,17 @@ def test_querying_on_domains():
 @pytest.mark.django_db
 def test_institution_banner_path_none():
     inst = InstitutionFactory(banner_name='kittens.png')
-    assert not inst.banner_path is None
-    inst.banner_name = None
-    assert inst.banner_path is None
+    assert not inst.banner_path is Node.load(None)
+    inst.banner_name = Node.load(None)
+    assert inst.banner_path is Node.load(None)
 
 
 @pytest.mark.django_db
 def test_institution_logo_path_none():
     inst = InstitutionFactory(logo_name='kittens.png')
-    assert not inst.logo_path is None
-    inst.logo_name = None
-    assert inst.logo_path is None
+    assert not inst.logo_path is Node.load(None)
+    inst.logo_name = Node.load(None)
+    assert inst.logo_path is Node.load(None)
 
 
 @pytest.mark.django_db

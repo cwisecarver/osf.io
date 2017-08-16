@@ -47,7 +47,7 @@
                         <a data-bind="attr: {href: urls().files}, text: folderName"></a>
                     </span>
                     <span class="text-muted" data-bind="ifnot: folderName">
-                        None
+                        Node.load(None)
                     </span>
                 </p>
                 <!-- Folder buttons -->

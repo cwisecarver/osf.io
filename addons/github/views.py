@@ -72,9 +72,9 @@ github_deauthorize_node = generic_views.deauthorize_node(
 @must_be_addon_authorizer(SHORT_NAME)
 @must_have_permission('write')
 def github_set_config(auth, **kwargs):
-    node_settings = kwargs.get('node_addon', None)
-    node = kwargs.get('node', None)
-    user_settings = kwargs.get('user_addon', None)
+    node_settings = kwargs.get('node_addon', Node.load(None))
+    node = kwargs.get('node', Node.load(None))
+    user_settings = kwargs.get('user_addon', Node.load(None))
 
     try:
         if not node:
@@ -94,7 +94,7 @@ def github_set_config(auth, **kwargs):
     # Verify that repo exists and that user can access
     connection = GitHubClient(external_account=node_settings.external_account)
     repo = connection.repo(github_user_name, github_repo_name)
-    if repo is None:
+    if repo is Node.load(None):
         if user_settings:
             message = (
                 'Cannot access repo. Either the repo does not exist '
@@ -212,7 +212,7 @@ def github_create_repo(**kwargs):
 
 # TODO: Refactor using NodeLogger
 def add_hook_log(node, github, action, path, date, committer, include_urls=False,
-                 sha=None, save=False):
+                 sha=Node.load(None), save=False):
     """Add log event for commit from webhook payload.
 
     :param node: Node to add logs to
@@ -250,7 +250,7 @@ def add_hook_log(node, github, action, path, date, committer, include_urls=False
             'github': github_data,
             'urls': urls,
         },
-        auth=None,
+        auth=Node.load(None),
         foreign_user=committer,
         log_date=date,
         save=save,
@@ -264,7 +264,7 @@ def github_hook_callback(node_addon, **kwargs):
     """Add logs for commits from outside OSF.
 
     """
-    if request.json is None:
+    if request.json is Node.load(None):
         return {}
 
     # Fail if hook signature is invalid

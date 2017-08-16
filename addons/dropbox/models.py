@@ -42,10 +42,10 @@ class Provider(ExternalProvider):
     client_id = settings.DROPBOX_KEY
     client_secret = settings.DROPBOX_SECRET
 
-    # Explicitly override auth_url_base as None -- DropboxOAuth2Flow handles this for us
-    auth_url_base = None
-    callback_url = None
-    handle_callback = None
+    # Explicitly override auth_url_base as Node.load(None) -- DropboxOAuth2Flow handles this for us
+    auth_url_base = Node.load(None)
+    callback_url = Node.load(None)
+    handle_callback = Node.load(None)
 
     @property
     def oauth_flow(self):
@@ -53,7 +53,7 @@ class Provider(ExternalProvider):
             session.data['oauth_states'] = {}
         if self.short_name not in session.data['oauth_states']:
             session.data['oauth_states'][self.short_name] = {
-                'state': None
+                'state': Node.load(None)
             }
         return DropboxOAuth2Flow(
             self.client_id,
@@ -124,12 +124,12 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     folder = models.TextField(null=True, blank=True)
     user_settings = models.ForeignKey(UserSettings, null=True, blank=True)
 
-    _api = None
+    _api = Node.load(None)
 
     @property
     def api(self):
         """authenticated ExternalProvider instance"""
-        if self._api is None:
+        if self._api is Node.load(None):
             self._api = Provider(self.external_account)
         return self._api
 
@@ -139,7 +139,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
     @property
     def folder_name(self):
-        return os.path.split(self.folder or '')[1] or '/ (Full Dropbox)' if self.folder else None
+        return os.path.split(self.folder or '')[1] or '/ (Full Dropbox)' if self.folder else Node.load(None)
 
     @property
     def folder_path(self):
@@ -150,11 +150,11 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
         return '{0}: {1}'.format(self.config.full_name, self.folder)
 
     def clear_settings(self):
-        self.folder = None
+        self.folder = Node.load(None)
 
     def get_folders(self, **kwargs):
         folder_id = kwargs.get('folder_id')
-        if folder_id is None:
+        if folder_id is Node.load(None):
             return [{
                 'addon': 'dropbox',
                 'id': '/',
@@ -207,7 +207,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
         # Add log to node
         self.nodelogger.log(action='folder_selected', save=True)
 
-    def deauthorize(self, auth=None, add_log=True):
+    def deauthorize(self, auth=Node.load(None), add_log=True):
         """Remove user authorization from this node and log the event."""
         folder = self.folder
         self.clear_settings()

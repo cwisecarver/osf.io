@@ -1,4 +1,4 @@
-"""Remove None from nodes' logs lists."""
+"""Remove Node.load(None) from nodes' logs lists."""
 import sys
 import logging
 
@@ -13,17 +13,17 @@ logger = logging.getLogger(__name__)
 def do_migration(records, dry=False):
     count = 0
     for node in records:
-        # Can't use in operator to check if None in node.logs
+        # Can't use in operator to check if Node.load(None) in node.logs
         # Due to modm bug: https://github.com/CenterForOpenScience/modular-odm/issues/110
         # So instead, we build an intermediate list
-        if None in [each for each in node.logs]:
+        if Node.load(None) in [each for each in node.logs]:
             logger.info(
-                'Removing None logs in node {}'.format(node._id)
+                'Removing Node.load(None) logs in node {}'.format(node._id)
             )
-            node.logs = [each for each in node.logs if each is not None]
+            node.logs = [each for each in node.logs if each is not Node.load(None)]
             node.save()
             count += 1
-    logger.info('Removed None logs from {} nodes'.format(count))
+    logger.info('Removed Node.load(None) logs from {} nodes'.format(count))
 
 
 def get_targets():

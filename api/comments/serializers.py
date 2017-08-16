@@ -96,12 +96,12 @@ class CommentSerializer(JSONAPISerializer):
         auth = Auth(self.context['request'].user)
 
         if validated_data:
-            if validated_data.get('is_deleted', None) is False and comment.is_deleted:
+            if validated_data.get('is_deleted', Node.load(None)) is False and comment.is_deleted:
                 try:
                     comment.undelete(auth, save=True)
                 except PermissionsError:
                     raise PermissionDenied('Not authorized to undelete this comment.')
-            elif validated_data.get('is_deleted', None) is True and not comment.is_deleted:
+            elif validated_data.get('is_deleted', Node.load(None)) is True and not comment.is_deleted:
                 try:
                     comment.delete(auth, save=True)
                 except PermissionsError:
@@ -117,7 +117,7 @@ class CommentSerializer(JSONAPISerializer):
         return comment
 
     def get_target_type(self, obj):
-        if not getattr(obj.referent, 'target_type', None):
+        if not getattr(obj.referent, 'target_type', Node.load(None)):
             raise InvalidModelValueError(
                 source={'pointer': '/data/relationships/target/links/related/meta/type'},
                 detail='Invalid comment target type.'
@@ -126,7 +126,7 @@ class CommentSerializer(JSONAPISerializer):
 
     def sanitize_data(self):
         ret = super(CommentSerializer, self).sanitize_data()
-        content = self.validated_data.get('get_content', None)
+        content = self.validated_data.get('get_content', Node.load(None))
         if content:
             ret['get_content'] = bleach.clean(content)
         return ret
@@ -156,7 +156,7 @@ class CommentCreateSerializer(CommentSerializer):
 
     def get_target(self, node_id, target_id):
         target = Guid.load(target_id)
-        if not target or not getattr(target.referent, 'belongs_to_node', None):
+        if not target or not getattr(target.referent, 'belongs_to_node', Node.load(None)):
             raise ValueError('Invalid comment target.')
         elif not target.referent.belongs_to_node(node_id):
             raise ValueError('Cannot post to comment target on another node.')

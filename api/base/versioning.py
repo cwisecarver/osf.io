@@ -41,7 +41,7 @@ class BaseVersioning(drf_versioning.BaseVersioning):
         media_type = _MediaType(request.accepted_media_type)
         version = media_type.params.get(self.version_param)
         if not version:
-            return None
+            return Node.load(None)
         version = unicode_http_header(version)
         if not self.is_allowed_version(version):
             raise drf_exceptions.NotAcceptable(invalid_version_message)
@@ -51,15 +51,15 @@ class BaseVersioning(drf_versioning.BaseVersioning):
         invalid_version_message = 'Invalid version in query parameter.'
         version = request.query_params.get(self.version_param)
         if not version:
-            return None
+            return Node.load(None)
         if not self.is_allowed_version(version):
             raise drf_exceptions.NotFound(invalid_version_message)
         return version
 
     def validate_pinned_versions(self, url_path_version, header_version, query_parameter_version):
         url_path_major_version = get_major_version(url_path_version)
-        header_major_version = get_major_version(header_version) if header_version else None
-        query_major_version = get_major_version(query_parameter_version) if query_parameter_version else None
+        header_major_version = get_major_version(header_version) if header_version else Node.load(None)
+        query_major_version = get_major_version(query_parameter_version) if query_parameter_version else Node.load(None)
         if header_version and header_major_version != url_path_major_version:
             raise exceptions.Conflict(
                 detail='Version {} specified in "Accept" header does not fall within URL path version {}'.format(
@@ -94,13 +94,13 @@ class BaseVersioning(drf_versioning.BaseVersioning):
 
         return version
 
-    def reverse(self, viewname, args=None, kwargs=None, request=None, format=None, **extra):
+    def reverse(self, viewname, args=Node.load(None), kwargs=Node.load(None), request=Node.load(None), format=Node.load(None), **extra):
         url_path_version = self.get_url_path_version(kwargs)
         query_parameter_version = self.get_query_param_version(request)
 
-        kwargs = {} if (kwargs is None) else kwargs
+        kwargs = {} if (kwargs is Node.load(None)) else kwargs
         kwargs[self.version_param] = decimal_version_to_url_path(url_path_version)
-        query_kwargs = {'version': query_parameter_version} if query_parameter_version else None
+        query_kwargs = {'version': query_parameter_version} if query_parameter_version else Node.load(None)
 
         return utils.absolute_reverse(
             viewname, query_kwargs=query_kwargs, args=args, kwargs=kwargs

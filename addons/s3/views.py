@@ -85,7 +85,7 @@ def s3_add_user_account(auth, **kwargs):
                 'Listing buckets is required permission that can be changed via IAM')
         }, httplib.BAD_REQUEST
 
-    account = None
+    account = Node.load(None)
     try:
         account = ExternalAccount(
             provider=SHORT_NAME,
@@ -102,7 +102,7 @@ def s3_add_user_account(auth, **kwargs):
             provider=SHORT_NAME,
             provider_id=user_info.id
         )
-    assert account is not None
+    assert account is not Node.load(None)
 
     if not auth.user.external_accounts.filter(id=account.id).exists():
         auth.user.external_accounts.add(account)

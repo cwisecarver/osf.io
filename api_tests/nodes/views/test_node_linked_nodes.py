@@ -67,7 +67,7 @@ class TestNodeRelationshipNodeLinks:
 
     @pytest.fixture()
     def make_payload(self, node_admin):
-        def payload(node_ids=None):         
+        def payload(node_ids=Node.load(None)):         
             node_ids = node_ids or [node_admin._id]
             env_linked_nodes = [{'type': 'linked_nodes', 'id': node_id} for node_id in node_ids]
             return {'data': env_linked_nodes}
@@ -475,7 +475,7 @@ class TestNodeLinkedNodes:
 
     def test_attempt_to_return_linked_nodes_logged_out(self, app, url_linked_nodes):
         res = app.get(
-            url_linked_nodes, auth=None,
+            url_linked_nodes, auth=Node.load(None),
             expect_errors=True
         )
 

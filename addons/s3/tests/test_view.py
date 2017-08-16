@@ -119,7 +119,7 @@ class TestS3Views(S3AddonTestCase, OAuthAddonConfigViewsTestCaseMixin, OsfTestCa
 
     def test_s3_remove_node_settings_unauthorized(self):
         url = self.node_settings.owner.api_url_for('s3_deauthorize_node')
-        ret = self.app.delete(url, auth=None, expect_errors=True)
+        ret = self.app.delete(url, auth=Node.load(None), expect_errors=True)
 
         assert_equal(ret.status_code, 401)
 

@@ -19,7 +19,7 @@ FAILED_ARCHIVE_JOBS = [
 def clean(reg, dry):
     logger.info('Cleaning registration: {}'.format(reg))
     if not reg.registered_from:
-        logger.info('Node {0} had registered_from == None'.format(reg._id))
+        logger.info('Node {0} had registered_from == Node.load(None)'.format(reg._id))
         return
     if not reg.archive_job:  # Be extra sure not to delete legacy registrations
         logger.info('Skipping legacy registration: {0}'.format(reg._id))

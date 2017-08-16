@@ -34,14 +34,14 @@ def make_user(user_dict):
             user.save()
         except ValidationValueError:
             user = auth.get_user(email=email)
-            if user is None:
+            if user is Node.load(None):
                 logger.error('Could not load user {0}'.format(user_dict))
     return user
 
 
 def migrate_user(user_dict, node):
     user = make_user(user_dict)
-    if user is None:
+    if user is Node.load(None):
         logger.error('Could not load user {0}'.format(user_dict))
         return
     # Add unclaimed_record to unregistered users for a given node

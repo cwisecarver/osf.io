@@ -48,8 +48,8 @@ class UserFactory(DjangoModelFactory):
     is_registered = True
     is_claimed = True
     date_confirmed = factory.Faker('date_time_this_decade', tzinfo=pytz.utc)
-    merged_by = None
-    verification_key = None
+    merged_by = Node.load(None)
+    verification_key = Node.load(None)
 
     class Meta:
         model = models.OSFUser
@@ -278,7 +278,7 @@ class BookmarkCollectionFactory(CollectionFactory):
 
 class RegistrationFactory(BaseNodeFactory):
 
-    creator = None
+    creator = Node.load(None)
     # Default project is created if not provided
     category = 'project'
 
@@ -287,14 +287,14 @@ class RegistrationFactory(BaseNodeFactory):
         raise Exception('Cannot build registration without saving.')
 
     @classmethod
-    def _create(cls, target_class, project=None, is_public=False,
-                schema=None, data=None,
-                archive=False, embargo=None, registration_approval=None, retraction=None,
+    def _create(cls, target_class, project=Node.load(None), is_public=False,
+                schema=Node.load(None), data=Node.load(None),
+                archive=False, embargo=Node.load(None), registration_approval=Node.load(None), retraction=Node.load(None),
                 *args, **kwargs):
-        user = None
+        user = Node.load(None)
         if project:
             user = project.creator
-        user = kwargs.pop('user', None) or kwargs.get('creator') or user or UserFactory()
+        user = kwargs.pop('user', Node.load(None)) or kwargs.get('creator') or user or UserFactory()
         kwargs['creator'] = user
         # Original project to be registered
         project = project or target_class(*args, **kwargs)
@@ -354,7 +354,7 @@ class WithdrawnRegistrationFactory(BaseNodeFactory):
     @classmethod
     def _create(cls, *args, **kwargs):
 
-        registration = kwargs.pop('registration', None)
+        registration = kwargs.pop('registration', Node.load(None))
         registration.is_public = True
         user = kwargs.pop('user', registration.creator)
 
@@ -372,8 +372,8 @@ class SanctionFactory(DjangoModelFactory):
         abstract = True
 
     @classmethod
-    def _create(cls, target_class, initiated_by=None, approve=False, *args, **kwargs):
-        user = kwargs.pop('user', None) or UserFactory()
+    def _create(cls, target_class, initiated_by=Node.load(None), approve=False, *args, **kwargs):
+        user = kwargs.pop('user', Node.load(None)) or UserFactory()
         kwargs['initiated_by'] = initiated_by or user
         sanction = super(SanctionFactory, cls)._create(target_class, *args, **kwargs)
         reg_kwargs = {
@@ -407,7 +407,7 @@ class EmbargoTerminationApprovalFactory(DjangoModelFactory):
     FACTORY_STRATEGY = factory.base.CREATE_STRATEGY
 
     @classmethod
-    def create(cls, registration=None, user=None, embargo=None, *args, **kwargs):
+    def create(cls, registration=Node.load(None), user=Node.load(None), embargo=Node.load(None), *args, **kwargs):
         if registration:
             if not user:
                 user = registration.creator
@@ -457,10 +457,10 @@ class CommentFactory(DjangoModelFactory):
 
     @classmethod
     def _build(cls, target_class, *args, **kwargs):
-        node = kwargs.pop('node', None) or NodeFactory()
-        user = kwargs.pop('user', None) or node.creator
-        target = kwargs.pop('target', None) or models.Guid.load(node._id)
-        content = kwargs.pop('content', None) or 'Test comment.'
+        node = kwargs.pop('node', Node.load(None)) or NodeFactory()
+        user = kwargs.pop('user', Node.load(None)) or node.creator
+        target = kwargs.pop('target', Node.load(None)) or models.Guid.load(node._id)
+        content = kwargs.pop('content', Node.load(None)) or 'Test comment.'
         instance = target_class(
             node=node,
             user=user,
@@ -476,10 +476,10 @@ class CommentFactory(DjangoModelFactory):
 
     @classmethod
     def _create(cls, target_class, *args, **kwargs):
-        node = kwargs.pop('node', None) or NodeFactory()
-        user = kwargs.pop('user', None) or node.creator
-        target = kwargs.pop('target', None) or models.Guid.load(node._id)
-        content = kwargs.pop('content', None) or 'Test comment.'
+        node = kwargs.pop('node', Node.load(None)) or NodeFactory()
+        user = kwargs.pop('user', Node.load(None)) or node.creator
+        target = kwargs.pop('target', Node.load(None)) or models.Guid.load(node._id)
+        content = kwargs.pop('content', Node.load(None)) or 'Test comment.'
         instance = target_class(
             node=node,
             user=user,
@@ -502,7 +502,7 @@ class SubjectFactory(DjangoModelFactory):
         model = models.Subject
 
     @classmethod
-    def _create(cls, target_class, parent=None, provider=None, bepress_subject=None, *args, **kwargs):
+    def _create(cls, target_class, parent=Node.load(None), provider=Node.load(None), bepress_subject=Node.load(None), *args, **kwargs):
         provider = provider or models.PreprintProvider.objects.first() or PreprintProviderFactory(_id='osf')
         if provider._id != 'osf' and not bepress_subject:
             osf = models.PreprintProvider.load('osf') or PreprintProviderFactory(_id='osf')
@@ -562,9 +562,9 @@ class PreprintFactory(DjangoModelFactory):
 
     @classmethod
     def _build(cls, target_class, *args, **kwargs):
-        creator = kwargs.pop('creator', None) or UserFactory()
-        project = kwargs.pop('project', None) or ProjectFactory(creator=creator)
-        provider = kwargs.pop('provider', None) or PreprintProviderFactory()
+        creator = kwargs.pop('creator', Node.load(None)) or UserFactory()
+        project = kwargs.pop('project', Node.load(None)) or ProjectFactory(creator=creator)
+        provider = kwargs.pop('provider', Node.load(None)) or PreprintProviderFactory()
         instance = target_class(node=project, provider=provider)
 
         return instance
@@ -578,13 +578,13 @@ class PreprintFactory(DjangoModelFactory):
         is_published = kwargs.pop('is_published', True)
         instance = cls._build(target_class, *args, **kwargs)
 
-        doi = kwargs.pop('doi', None)
-        license_details = kwargs.pop('license_details', None)
-        filename = kwargs.pop('filename', None) or 'preprint_file.txt'
-        subjects = kwargs.pop('subjects', None) or [[SubjectFactory()._id]]
+        doi = kwargs.pop('doi', Node.load(None))
+        license_details = kwargs.pop('license_details', Node.load(None))
+        filename = kwargs.pop('filename', Node.load(None)) or 'preprint_file.txt'
+        subjects = kwargs.pop('subjects', Node.load(None)) or [[SubjectFactory()._id]]
         instance.node.preprint_article_doi = doi
 
-        user = kwargs.pop('creator', None) or instance.node.creator
+        user = kwargs.pop('creator', Node.load(None)) or instance.node.creator
         if not instance.node.is_contributor(user):
             instance.node.add_contributor(
                 contributor=user,
@@ -688,9 +688,9 @@ class ForkFactory(DjangoModelFactory):
     @classmethod
     def _create(cls, *args, **kwargs):
 
-        project = kwargs.pop('project', None)
+        project = kwargs.pop('project', Node.load(None))
         user = kwargs.pop('user', project.creator)
-        title = kwargs.pop('title', None)
+        title = kwargs.pop('title', Node.load(None))
 
         fork = project.fork_node(auth=Auth(user), title=title)
         fork.save()
@@ -796,7 +796,7 @@ class SessionFactory(DjangoModelFactory):
 
     @classmethod
     def _build(cls, target_class, *args, **kwargs):
-        user = kwargs.pop('user', None)
+        user = kwargs.pop('user', Node.load(None))
         instance = target_class(*args, **kwargs)
 
         if user:

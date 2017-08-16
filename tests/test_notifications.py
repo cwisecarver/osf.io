@@ -618,7 +618,7 @@ def subscription_schema(project, structure, level=0):
     return node_schema
 
 
-def event_schema(level=None):
+def event_schema(level=Node.load(None)):
     return {
         'event': {
             'title': And(Use(str, error="event_title{} not a string".format(level)),
@@ -628,7 +628,7 @@ def event_schema(level=None):
                                Use(lambda s: s in constants.NODE_SUBSCRIPTIONS_AVAILABLE,
                                    error="event_desc{} not in list".format(level))),
             'notificationType': And(str, Or('adopt_parent', lambda s: s in constants.NOTIFICATION_TYPES)),
-            'parent_notification_type': Or(None, 'adopt_parent', lambda s: s in constants.NOTIFICATION_TYPES)
+            'parent_notification_type': Or(Node.load(None), 'adopt_parent', lambda s: s in constants.NOTIFICATION_TYPES)
         },
         'kind': 'event',
         'children': And(list, lambda l: len(l) == 0)
@@ -774,16 +774,16 @@ class TestNotificationUtils(OsfTestCase):
     def test_get_parent_notification_type_no_parent_subscriptions(self):
         node = factories.NodeFactory()
         nt = utils.get_parent_notification_type(node._id, 'comments', self.user)
-        assert_equal(nt, None)
+        assert_equal(nt, Node.load(None))
 
     def test_get_parent_notification_type_no_parent(self):
         project = factories.ProjectFactory()
         nt = utils.get_parent_notification_type(project._id, 'comments', self.user)
-        assert_equal(nt, None)
+        assert_equal(nt, Node.load(None))
 
     def test_get_parent_notification_type_handles_user_id(self):
         nt = utils.get_parent_notification_type(self.user._id, 'comments', self.user)
-        assert_equal(nt, None)
+        assert_equal(nt, Node.load(None))
 
     def test_format_data_project_settings(self):
         data = utils.format_data(self.user, [self.project])
@@ -792,7 +792,7 @@ class TestNotificationUtils(OsfTestCase):
                 'title': 'comments',
                 'description': constants.NODE_SUBSCRIPTIONS_AVAILABLE['comments'],
                 'notificationType': 'email_transactional',
-                'parent_notification_type': None
+                'parent_notification_type': Node.load(None)
             },
             'kind': 'event',
             'children': []
@@ -861,7 +861,7 @@ class TestNotificationUtils(OsfTestCase):
                 'title': 'comments',
                 'description': constants.NODE_SUBSCRIPTIONS_AVAILABLE['comments'],
                 'notificationType': 'email_transactional',
-                'parent_notification_type': None
+                'parent_notification_type': Node.load(None)
             },
             'kind': 'event',
             'children': [],
@@ -892,7 +892,7 @@ class TestNotificationUtils(OsfTestCase):
                 'title': 'comments',
                 'description': constants.NODE_SUBSCRIPTIONS_AVAILABLE['comments'],
                 'notificationType': 'email_transactional',
-                'parent_notification_type': None
+                'parent_notification_type': Node.load(None)
             },
             'kind': 'event',
             'children': [],
@@ -924,7 +924,7 @@ class TestNotificationUtils(OsfTestCase):
                 'title': 'comments',
                 'description': constants.NODE_SUBSCRIPTIONS_AVAILABLE['comments'],
                 'notificationType': 'email_transactional',
-                'parent_notification_type': None
+                'parent_notification_type': Node.load(None)
             },
             'kind': 'event',
             'children': [],
@@ -941,7 +941,7 @@ class TestNotificationUtils(OsfTestCase):
                     'title': 'global_file_updated',
                     'description': constants.USER_SUBSCRIPTIONS_AVAILABLE['global_file_updated'],
                     'notificationType': 'email_transactional',
-                    'parent_notification_type': None,
+                    'parent_notification_type': Node.load(None),
                 },
                 'kind': 'event',
                 'children': []
@@ -950,7 +950,7 @@ class TestNotificationUtils(OsfTestCase):
                     'title': 'global_comment_replies',
                     'description': constants.USER_SUBSCRIPTIONS_AVAILABLE['global_comment_replies'],
                     'notificationType': 'email_transactional',
-                    'parent_notification_type': None
+                    'parent_notification_type': Node.load(None)
                 },
                 'kind': 'event',
                 'children': []
@@ -959,7 +959,7 @@ class TestNotificationUtils(OsfTestCase):
                     'title': 'global_mentions',
                     'description': constants.USER_SUBSCRIPTIONS_AVAILABLE['global_mentions'],
                     'notificationType': 'email_transactional',
-                    'parent_notification_type': None
+                    'parent_notification_type': Node.load(None)
                 },
                 'kind': 'event',
                 'children': []
@@ -968,7 +968,7 @@ class TestNotificationUtils(OsfTestCase):
                     'title': 'global_comments',
                     'description': constants.USER_SUBSCRIPTIONS_AVAILABLE['global_comments'],
                     'notificationType': 'email_transactional',
-                    'parent_notification_type': None
+                    'parent_notification_type': Node.load(None)
                 },
                 'kind': 'event',
                 'children': []
@@ -1018,7 +1018,7 @@ class TestNotificationUtils(OsfTestCase):
 
     def test_serialize_user_level_event(self):
         user_subscriptions = [x for x in utils.get_all_user_subscriptions(self.user)]
-        user_subscription = None
+        user_subscription = Node.load(None)
         for subscription in user_subscriptions:
             if 'global_comment_replies' in getattr(subscription, 'event_name'):
                 user_subscription = subscription
@@ -1029,7 +1029,7 @@ class TestNotificationUtils(OsfTestCase):
                 'title': 'global_comment_replies',
                 'description': constants.USER_SUBSCRIPTIONS_AVAILABLE['global_comment_replies'],
                 'notificationType': 'email_transactional',
-                'parent_notification_type': None
+                'parent_notification_type': Node.load(None)
             },
             'kind': 'event',
             'children': []
@@ -1510,7 +1510,7 @@ class TestSendEmails(NotificationTestCase):
                                       self.node, time_now, target_user=user)
 
     def test_check_node_node_none(self):
-        subs = emails.check_node(None, 'comments')
+        subs = emails.check_node(Node.load(None), 'comments')
         assert_equal(subs, {'email_transactional': [], 'email_digest': [], 'none': []})
 
     def test_check_node_one(self):

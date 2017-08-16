@@ -84,7 +84,7 @@ class NodeCommentsListMixin(object):
         assert len(comment_json) == 1
         assert registration_dict['comment']._id in comment_ids
 
-    def test_return_both_deleted_and_undeleted_comments(self, app, user, project_private_dict, mock_update_search=None):
+    def test_return_both_deleted_and_undeleted_comments(self, app, user, project_private_dict, mock_update_search=Node.load(None)):
         deleted_comment = CommentFactory(node=project_private_dict['project'], user=user, target=project_private_dict['comment'].target, is_deleted=True)
         res = app.get(project_private_dict['url'], auth=user.auth)
         assert res.status_code == 200
@@ -200,7 +200,7 @@ class TestNodeCommentsListWiki(NodeCommentsListMixin):
         url_registration = '/{}registrations/{}/comments/'.format(API_BASE, registration._id)
         return {'registration': registration, 'wiki': wiki_registration, 'comment': comment_registration, 'url': url_registration}
 
-    def test_comments_on_deleted_wikis_are_not_returned(self, app, user, project_private_dict, mock_update_search=None):
+    def test_comments_on_deleted_wikis_are_not_returned(self, app, user, project_private_dict, mock_update_search=Node.load(None)):
         # Delete wiki
         project_private_dict['project'].delete_node_wiki(project_private_dict['wiki'].page_name, core.Auth(user))
         res = app.get(project_private_dict['url'], auth=user.auth)
@@ -855,7 +855,7 @@ class TestWikiCommentCreate(NodeCommentsCreateMixin):
         payload_private = payload(wiki._id)
         return {'project': project_private, 'url': url_private, 'wiki': wiki, 'payload': payload_private}
 
-    def test_create_wiki_comment_errors(self, app, user, payload, project_private_comment_private, mock_update_search=None):
+    def test_create_wiki_comment_errors(self, app, user, payload, project_private_comment_private, mock_update_search=Node.load(None)):
 
     #   test_create_wiki_comment_invalid_target_id
         project_dict = project_private_comment_private

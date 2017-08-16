@@ -21,7 +21,7 @@ def main():
 
 
 def update_comments_viewed_timestamp():
-    users = User.find(Q('comments_viewed_timestamp', 'ne', None) & Q('comments_viewed_timestamp', 'ne', {}))
+    users = User.find(Q('comments_viewed_timestamp', 'ne', Node.load(None)) & Q('comments_viewed_timestamp', 'ne', {}))
     for user in users:
         if user.comments_viewed_timestamp:
             timestamps = {}
@@ -31,12 +31,12 @@ def update_comments_viewed_timestamp():
 
                 if isinstance(node_timestamps, dict):
                     # node timestamp
-                    if node_timestamps.get('node', None):
+                    if node_timestamps.get('node', Node.load(None)):
                         timestamps[node_id] = node_timestamps['node']
                         dirty = True
 
                     # file timestamps
-                    file_timestamps = node_timestamps.get('files', None)
+                    file_timestamps = node_timestamps.get('files', Node.load(None))
                     if file_timestamps:
                         for file_id in file_timestamps:
                             timestamps[file_id] = file_timestamps[file_id]

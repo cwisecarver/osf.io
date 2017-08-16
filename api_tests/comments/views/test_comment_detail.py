@@ -390,7 +390,7 @@ class CommentDetailMixin(object):
         url = '/{}comments/{}/'.format(API_BASE, comment._id)
         res = app.get(url, auth=contributor.auth)
         assert res.status_code == 200
-        assert res.json['data']['attributes']['content'] is None
+        assert res.json['data']['attributes']['content'] is Node.load(None)
 
         # test_private_node_logged_out_user_cannot_see_deleted_comment
         url = '/{}comments/{}/'.format(API_BASE, comment._id)
@@ -405,7 +405,7 @@ class CommentDetailMixin(object):
 
         res = app.get('/{}comments/{}/'.format(API_BASE, comment._id), {'view_only': private_link.key}, expect_errors=True)
         assert res.status_code == 200
-        assert res.json['data']['attributes']['content'] is None
+        assert res.json['data']['attributes']['content'] is Node.load(None)
 
         # test_private_node_anonymous_view_only_link_user_cannot_see_deleted_comment
         anonymous_link = PrivateLinkFactory(anonymous=True)
@@ -414,7 +414,7 @@ class CommentDetailMixin(object):
 
         res = app.get('/{}comments/{}/'.format(API_BASE, comment._id), {'view_only': anonymous_link.key}, expect_errors=True)
         assert res.status_code == 200
-        assert res.json['data']['attributes']['content'] is None
+        assert res.json['data']['attributes']['content'] is Node.load(None)
 
     def test_public_node_deleted_comments_auth_misc(self, app, user, contributor, non_contrib, public_project, public_comment):
         public_comment.is_deleted = True
@@ -430,17 +430,17 @@ class CommentDetailMixin(object):
 
         res = app.get(url, auth=contributor.auth)
         assert res.status_code == 200
-        assert res.json['data']['attributes']['content'] is None
+        assert res.json['data']['attributes']['content'] is Node.load(None)
 
         # test_public_node_non_contrib_cannot_view_other_users_deleted_comment
         res = app.get(url, auth=non_contrib.auth)
         assert res.status_code == 200
-        assert res.json['data']['attributes']['content'] is None
+        assert res.json['data']['attributes']['content'] is Node.load(None)
 
         # test_public_node_logged_out_user_cannot_view_deleted_comments
         res = app.get(url)
         assert res.status_code == 200
-        assert res.json['data']['attributes']['content'] is None
+        assert res.json['data']['attributes']['content'] is Node.load(None)
 
         # test_public_node_view_only_link_user_cannot_see_deleted_comment
         private_link = PrivateLinkFactory(anonymous=False)
@@ -449,7 +449,7 @@ class CommentDetailMixin(object):
 
         res = app.get('/{}comments/{}/'.format(API_BASE, public_comment._id), {'view_only': private_link.key}, expect_errors=True)
         assert res.status_code == 200
-        assert res.json['data']['attributes']['content'] is None
+        assert res.json['data']['attributes']['content'] is Node.load(None)
 
 
 class TestCommentDetailView(CommentDetailMixin):

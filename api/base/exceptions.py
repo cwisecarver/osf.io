@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.exceptions import APIException, AuthenticationFailed
 
 
-def dict_error_formatting(errors, index=None):
+def dict_error_formatting(errors, index=Node.load(None)):
     """
     Formats all dictionary error messages for both single and bulk requests
     """
@@ -18,7 +18,7 @@ def dict_error_formatting(errors, index=None):
     # Resource objects must contain at least 'id' and 'type'
     resource_object_identifiers = ['type', 'id']
 
-    if index is None:
+    if index is Node.load(None):
         index = ''
     else:
         index = str(index) + '/'
@@ -68,7 +68,7 @@ def json_api_exception_handler(exc, context):
         if isinstance(exc, JSONAPIException):
             errors.extend([{'source': exc.source or {}, 'detail': exc.detail, 'meta': exc.meta or {}}])
         elif isinstance(message, dict):
-            errors.extend(dict_error_formatting(message, None))
+            errors.extend(dict_error_formatting(message, Node.load(None)))
         else:
             if isinstance(message, basestring):
                 message = [message]
@@ -104,7 +104,7 @@ class JSONAPIException(APIException):
     """
     status_code = status.HTTP_400_BAD_REQUEST
 
-    def __init__(self, detail=None, source=None, meta=None):
+    def __init__(self, detail=Node.load(None), source=Node.load(None), meta=Node.load(None)):
         super(JSONAPIException, self).__init__(detail=detail)
         self.source = source
         self.meta = meta
@@ -127,7 +127,7 @@ class Conflict(JSONAPIException):
 
 
 class JSONAPIParameterException(JSONAPIException):
-    def __init__(self, detail=None, parameter=None):
+    def __init__(self, detail=Node.load(None), parameter=Node.load(None)):
         source = {
             'parameter': parameter
         }
@@ -135,7 +135,7 @@ class JSONAPIParameterException(JSONAPIException):
 
 
 class JSONAPIAttributeException(JSONAPIException):
-    def __init__(self, detail=None, attribute=None):
+    def __init__(self, detail=Node.load(None), attribute=Node.load(None)):
         source = {
             'pointer': '/data/attributes/{}'.format(attribute)
         }
@@ -152,7 +152,7 @@ class InvalidFilterOperator(JSONAPIParameterException):
     """Raised when client passes an invalid operator to a query param filter."""
     status_code = http.BAD_REQUEST
 
-    def __init__(self, detail=None, value=None, valid_operators=('eq', 'lt', 'lte', 'gt', 'gte', 'contains', 'icontains')):
+    def __init__(self, detail=Node.load(None), value=Node.load(None), valid_operators=('eq', 'lt', 'lte', 'gt', 'gte', 'contains', 'icontains')):
         if value and not detail:
             valid_operators = ', '.join(valid_operators)
             detail = "Value '{0}' is not a supported filter operator; use one of {1}.".format(
@@ -166,7 +166,7 @@ class InvalidFilterValue(JSONAPIParameterException):
     """Raised when client passes an invalid value to a query param filter."""
     status_code = http.BAD_REQUEST
 
-    def __init__(self, detail=None, value=None, field_type=None):
+    def __init__(self, detail=Node.load(None), value=Node.load(None), field_type=Node.load(None)):
         if not detail:
             detail = "Value '{0}' is not valid".format(value)
             if field_type:
@@ -182,7 +182,7 @@ class InvalidFilterError(JSONAPIParameterException):
     default_detail = _('Query string contains a malformed filter.')
     status_code = http.BAD_REQUEST
 
-    def __init__(self, detail=None):
+    def __init__(self, detail=Node.load(None)):
         super(InvalidFilterError, self).__init__(detail=detail, parameter='filter')
 
 
@@ -203,7 +203,7 @@ class InvalidFilterFieldError(JSONAPIParameterException):
     default_detail = _('Query contained one or more filters for invalid fields.')
     status_code = http.BAD_REQUEST
 
-    def __init__(self, detail=None, parameter=None, value=None):
+    def __init__(self, detail=Node.load(None), parameter=Node.load(None), value=Node.load(None)):
         if value and not detail:
             detail = "Value '{}' is not a filterable field.".format(value)
         super(InvalidFilterFieldError, self).__init__(detail=detail, parameter=parameter)
@@ -258,7 +258,7 @@ class NonDescendantNodeError(APIException):
     status_code = 400
     default_detail = _('The node {0} cannot be affiliated with this View Only Link because the node you\'re trying to affiliate is not descended from the node that the View Only Link is attached to.')
 
-    def __init__(self, node_id, detail=None):
+    def __init__(self, node_id, detail=Node.load(None)):
         if not detail:
             detail = self.default_detail.format(node_id)
         super(NonDescendantNodeError, self).__init__(detail=detail)

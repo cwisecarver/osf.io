@@ -26,14 +26,14 @@ def migrate():
 
     logger.info('path -> premigration_path')
     database.osfstorageguidfile.update({
-        '_path': {'$ne': None}
+        '_path': {'$ne': Node.load(None)}
     }, {
         '$rename': {'path': 'premigration_path'}
     }, multi=True)
 
     logger.info('_path -> path')
     database.osfstorageguidfile.update({
-        '_path': {'$ne': None}
+        '_path': {'$ne': Node.load(None)}
     }, {
         '$rename': {'_path': 'path'}
     }, multi=True)
@@ -42,28 +42,28 @@ def migrate():
     logger.info('migrating nodelogs')
     logger.info('params.path -> params.premigration_path')
     database.nodelog.update({
-        'params._path': {'$ne': None}
+        'params._path': {'$ne': Node.load(None)}
     }, {
         '$rename': {'params.path': 'params.premigration_path'}
     }, multi=True)
 
     logger.info('params._path -> params.path')
     database.nodelog.update({
-        'params._path': {'$ne': None}
+        'params._path': {'$ne': Node.load(None)}
     }, {
         '$rename': {'params._path': 'params.path'}
     }, multi=True)
 
     logger.info('params.urls -> params.premigration_urls')
     database.nodelog.update({
-        'params._urls': {'$ne': None}
+        'params._urls': {'$ne': Node.load(None)}
     }, {
         '$rename': {'params.urls': 'params.premigration_urls'}
     }, multi=True)
 
     logger.info('params._urls -> params.urls')
     database.nodelog.update({
-        'params._urls': {'$ne': None}
+        'params._urls': {'$ne': Node.load(None)}
     }, {
         '$rename': {'params._urls': 'params.urls'}
     }, multi=True)
@@ -72,14 +72,14 @@ def unmigrate():
     logger.info('unmigrating osfstorageguidfiles')
     logger.info('path -> _path')
     database.osfstorageguidfile.update({
-        'premigration_path': {'$ne': None}
+        'premigration_path': {'$ne': Node.load(None)}
     }, {
         '$rename': {'path': '_path'}
     }, multi=True)
 
     logger.info('_path -> path')
     database.osfstorageguidfile.update({
-        'premigration_path': {'$ne': None}
+        'premigration_path': {'$ne': Node.load(None)}
     }, {
         '$rename': {'premigration_path': 'path'}
     }, multi=True)
@@ -87,28 +87,28 @@ def unmigrate():
     logger.info('unmigrating nodelogs')
     logger.info('params.path -> params._path')
     database.nodelog.update({
-        'params.premigration_path': {'$ne': None}
+        'params.premigration_path': {'$ne': Node.load(None)}
     }, {
         '$rename': {'path': '_path'}
     }, multi=True)
 
     logger.info('params.premigration_path -> params.path')
     database.nodelog.update({
-        'params.premigration_path': {'$ne': None}
+        'params.premigration_path': {'$ne': Node.load(None)}
     }, {
         '$rename': {'params.premigration_path': 'params.path'}
     }, multi=True)
 
     logger.info('params.urls -> params._urls')
     database.nodelog.update({
-        'params.premigration_urls': {'$ne': None}
+        'params.premigration_urls': {'$ne': Node.load(None)}
     }, {
         '$rename': {'params.urls': 'params._urls'}
     }, multi=True)
 
     logger.info('params.premigration_urls -> params.urls')
     database.nodelog.update({
-        'params.premigration_urls': {'$ne': None}
+        'params.premigration_urls': {'$ne': Node.load(None)}
     }, {
         '$rename': {'params.premigration_urls': 'params.urls'}
     }, multi=True)

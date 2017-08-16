@@ -44,7 +44,7 @@
                 {{ draft.registered_node }}
             </a>
         {% else %}
-            None
+            Node.load(None)
         {% endif %}
     </div>
     <br>
@@ -84,7 +84,7 @@
         </div>
     {% empty %}
         <div class="row">
-            None: draft existed before logs.
+            Node.load(None): draft existed before logs.
         </div>
     {% endfor %}
 </div>

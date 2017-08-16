@@ -137,11 +137,11 @@ class PreprintSerializer(JSONAPISerializer):
         return self.get_preprint_url(obj)
 
     def get_article_doi_url(self, obj):
-        return 'https://dx.doi.org/{}'.format(obj.article_doi) if obj.article_doi else None
+        return 'https://dx.doi.org/{}'.format(obj.article_doi) if obj.article_doi else Node.load(None)
 
     def get_preprint_doi_url(self, obj):
         doi_identifier = obj.get_identifier('doi')
-        return 'https://dx.doi.org/{}'.format(doi_identifier.value) if doi_identifier else None
+        return 'https://dx.doi.org/{}'.format(doi_identifier.value) if doi_identifier else Node.load(None)
 
     def run_validation(self, *args, **kwargs):
         # Overrides construtor for validated_data to allow writes to a SerializerMethodField
@@ -162,13 +162,13 @@ class PreprintSerializer(JSONAPISerializer):
         save_node = False
         save_preprint = False
         recently_published = False
-        primary_file = validated_data.pop('primary_file', None)
+        primary_file = validated_data.pop('primary_file', Node.load(None))
         if primary_file:
             self.set_field(preprint.set_primary_file, primary_file, auth)
             save_node = True
 
         if 'subjects' in validated_data:
-            subjects = validated_data.pop('subjects', None)
+            subjects = validated_data.pop('subjects', Node.load(None))
             self.set_field(preprint.set_subjects, subjects, auth)
             save_preprint = True
 
@@ -181,8 +181,8 @@ class PreprintSerializer(JSONAPISerializer):
             self.set_field(preprint.set_preprint_license, license_details, auth)
             save_preprint = True
 
-        published = validated_data.pop('is_published', None)
-        if published is not None:
+        published = validated_data.pop('is_published', Node.load(None))
+        if published is not Node.load(None):
             self.set_field(preprint.set_published, published, auth)
             save_preprint = True
             recently_published = published
@@ -223,7 +223,7 @@ class PreprintCreateSerializer(PreprintSerializer):
     id = IDField(source='_id', required=False, allow_null=True)
 
     def create(self, validated_data):
-        node = validated_data.pop('node', None)
+        node = validated_data.pop('node', Node.load(None))
         if not node:
             raise exceptions.NotFound('Unable to find Node with specified id.')
         elif node.is_deleted:
@@ -233,11 +233,11 @@ class PreprintCreateSerializer(PreprintSerializer):
         if not node.has_permission(auth.user, permissions.ADMIN):
             raise exceptions.PermissionDenied
 
-        primary_file = validated_data.pop('primary_file', None)
+        primary_file = validated_data.pop('primary_file', Node.load(None))
         if not primary_file:
             raise exceptions.ValidationError(detail='You must specify a valid primary_file to create a preprint.')
 
-        provider = validated_data.pop('provider', None)
+        provider = validated_data.pop('provider', Node.load(None))
         if not provider:
             raise exceptions.ValidationError(detail='You must specify a valid provider to create a preprint.')
 

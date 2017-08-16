@@ -37,7 +37,7 @@ def _validate_reports(value, *args, **kwargs):
 
 
 class SpamStatus(object):
-    UNKNOWN = None
+    UNKNOWN = Node.load(None)
     FLAGGED = 1
     SPAM = 2
     HAM = 4
@@ -55,7 +55,7 @@ class SpamMixin(models.Model):
     #     'spam_status',
     # }
     spam_status = models.IntegerField(default=SpamStatus.UNKNOWN, null=True, blank=True, db_index=True)
-    spam_pro_tip = models.CharField(default=None, null=True, blank=True, max_length=200)
+    spam_pro_tip = models.CharField(default=Node.load(None), null=True, blank=True, max_length=200)
     # Data representing the original spam indication
     # - author: author name
     # - author_email: email of the author
@@ -65,7 +65,7 @@ class SpamMixin(models.Model):
     #   - User-Agent: user agent from request
     #   - Referer: referrer header from request (typo +1, rtd)
     spam_data = DateTimeAwareJSONField(default=dict, blank=True)
-    date_last_reported = NonNaiveDateTimeField(default=None, null=True, blank=True, db_index=True)
+    date_last_reported = NonNaiveDateTimeField(default=Node.load(None), null=True, blank=True, db_index=True)
 
     # Reports is a dict of reports keyed on reporting user
     # Each report is a dictionary including:
@@ -115,7 +115,7 @@ class SpamMixin(models.Model):
         report = {'date': date, 'retracted': False}
         report.update(kwargs)
         if 'text' not in report:
-            report['text'] = None
+            report['text'] = Node.load(None)
         self.reports[user._id] = report
         self.date_last_reported = report['date']
         if save:

@@ -103,7 +103,7 @@ class TestParentNode:
 
     def test_top_level_node_has_parent_node_none(self):
         project = ProjectFactory()
-        assert project.parent_node is None
+        assert project.parent_node is Node.load(None)
 
     def test_component_has_parent_node(self):
         project = ProjectFactory()
@@ -303,7 +303,7 @@ class TestParentNode:
         assert node.license == license_record
 
     def test_top_level_project_has_no_parent(self, project):
-        assert project.parent_node is None
+        assert project.parent_node is Node.load(None)
 
     def test_child_project_has_correct_parent(self, child, project):
         assert child.parent_node._id == project._id
@@ -313,7 +313,7 @@ class TestParentNode:
         assert grandchild.parent_node._id == child._id
 
     def test_registration_has_no_parent(self, registration):
-        assert registration.parent_node is None
+        assert registration.parent_node is Node.load(None)
 
     def test_registration_child_has_correct_parent(self, registration):
         registration_child = NodeFactory(parent=registration)
@@ -326,7 +326,7 @@ class TestParentNode:
 
     def test_fork_has_no_parent(self, project, auth):
         fork = project.fork_node(auth=auth)
-        assert fork.parent_node is None
+        assert fork.parent_node is Node.load(None)
 
     def test_fork_child_has_parent(self, project, auth):
         fork = project.fork_node(auth=auth)
@@ -340,7 +340,7 @@ class TestParentNode:
         assert fork_grandchild.parent_node._id == fork_child._id
 
     def test_template_has_no_parent(self, template):
-        assert template.parent_node is None
+        assert template.parent_node is Node.load(None)
 
     def test_teplate_project_child_has_correct_parent(self, template):
         template_child = NodeFactory(parent=template)
@@ -362,7 +362,7 @@ class TestParentNode:
         linker.add_node_link(project, auth=Auth(linker.creator), save=True)
         # Prevent cached parent_node property from being used
         project = Node.objects.get(id=project.id)
-        assert project.parent_node is None
+        assert project.parent_node is Node.load(None)
 
 
 class TestRoot:
@@ -586,7 +586,7 @@ class TestProject:
 
     def test_no_parent(self):
         node = ProjectFactory()
-        assert node.parent_node is None
+        assert node.parent_node is Node.load(None)
 
     def test_node_factory(self):
         node = NodeFactory()
@@ -859,7 +859,7 @@ class TestContributorMethods:
 
         assert node.is_contributor(contrib) is True
         assert node.is_contributor(noncontrib) is False
-        assert node.is_contributor(None) is False
+        assert node.is_contributor(Node.load(None)) is False
 
     def test_visible_contributor_ids(self, node, user):
         visible_contrib = UserFactory()
@@ -911,7 +911,7 @@ class TestContributorMethods:
 
     def test_set_visible_contributor_with_only_one_contributor(self, node, user):
         with pytest.raises(ValueError) as excinfo:
-            node.set_visible(user=user, visible=False, auth=None)
+            node.set_visible(user=user, visible=False, auth=Node.load(None))
         assert excinfo.value.message == 'Must have at least one visible contributor'
 
     def test_set_visible_missing(self, node):
@@ -1060,7 +1060,7 @@ class TestContributorMethods:
         with pytest.raises(PermissionsError):
             node.update_contributor(
                 non_admin,
-                None,
+                Node.load(None),
                 False,
                 auth=Auth(non_admin)
             )
@@ -1163,7 +1163,7 @@ class TestContributorAddedSignal:
     # Override disconnected signals from conftest
     @pytest.fixture(autouse=True)
     def disconnected_signals(self):
-        return None
+        return Node.load(None)
 
     @mock.patch('website.project.views.contributor.mails.send_mail')
     def test_add_contributors_sends_contributor_added_signal(self, mock_send_mail, node, auth):
@@ -1508,13 +1508,13 @@ class TestPermissionMethods:
     def test_raises_permissions_error_if_not_a_contributor(self, project):
         user = UserFactory()
         with pytest.raises(PermissionsError):
-            project.register_node(None, Auth(user=user), '', None)
+            project.register_node(Node.load(None), Auth(user=user), '', Node.load(None))
 
     def test_admin_can_register_private_children(self, project, user, auth):
         project.set_permissions(user, ['admin', 'write', 'read'])
         child = NodeFactory(parent=project, is_public=False)
         assert child.can_edit(auth=auth) is False  # sanity check
-        with mock_archive(project, None, auth, '', None) as registration:
+        with mock_archive(project, Node.load(None), auth, '', Node.load(None)) as registration:
             # child was registered
             child_registration = registration.nodes[0]
             assert child_registration.registered_from == child
@@ -1599,7 +1599,7 @@ class TestRegisterNode:
 
     def test_register_node_creates_new_registration(self, node, auth):
         with disconnected_from_listeners(after_create_registration):
-            registration = node.register_node(get_default_metaschema(), auth, '', None)
+            registration = node.register_node(get_default_metaschema(), auth, '', Node.load(None))
             assert type(registration) is Registration
             assert node._id != registration._id
 
@@ -1608,9 +1608,9 @@ class TestRegisterNode:
         node.save()
         with pytest.raises(NodeStateError) as err:
             node.register_node(
-                schema=None,
+                schema=Node.load(None),
                 auth=auth,
-                data=None
+                data=Node.load(None)
             )
         assert err.value.message == 'Cannot register deleted node.'
 
@@ -1620,7 +1620,7 @@ class TestRegisterNode:
         node = NodeFactory(creator=user)
         node.is_public = True
         node.save()
-        registration = node.register_node(get_default_metaschema(), Auth(user), '', None)
+        registration = node.register_node(get_default_metaschema(), Auth(user), '', Node.load(None))
         assert registration.is_public is False
 
     @mock.patch('website.project.signals.after_create_registration')
@@ -1635,7 +1635,7 @@ class TestRegisterNode:
         childchild = NodeFactory(parent=child)
         childchild.is_public = True
         childchild.save()
-        registration = node.register_node(get_default_metaschema(), Auth(user), '', None)
+        registration = node.register_node(get_default_metaschema(), Auth(user), '', Node.load(None))
         for node in registration.node_and_primary_descendants():
             assert node.is_public is False
 
@@ -1870,7 +1870,7 @@ class TestNodeSpam:
         with mock.patch('osf.models.node.Node._get_spam_content', mock.Mock(return_value='some content!')):
             with mock.patch('osf.models.node.Node.do_check_spam', mock.Mock(side_effect=Exception('should not get here'))):
                 project.set_privacy('public')
-                assert project.check_spam(user, None, None) is False
+                assert project.check_spam(user, Node.load(None), Node.load(None)) is False
 
     @mock.patch.object(settings, 'SPAM_CHECK_ENABLED', True)
     def test_check_spam_only_public_node_by_default(self, project, user):
@@ -1878,7 +1878,7 @@ class TestNodeSpam:
         with mock.patch('osf.models.node.Node._get_spam_content', mock.Mock(return_value='some content!')):
             with mock.patch('osf.models.node.Node.do_check_spam', mock.Mock(side_effect=Exception('should not get here'))):
                 project.set_privacy('private')
-                assert project.check_spam(user, None, None) is False
+                assert project.check_spam(user, Node.load(None), Node.load(None)) is False
 
     @mock.patch.object(settings, 'SPAM_CHECK_ENABLED', True)
     def test_check_spam_skips_ham_user(self, project, user):
@@ -1886,7 +1886,7 @@ class TestNodeSpam:
             with mock.patch('osf.models.AbstractNode.do_check_spam', mock.Mock(side_effect=Exception('should not get here'))):
                 user.add_system_tag('ham_confirmed')
                 project.set_privacy('public')
-                assert project.check_spam(user, None, None) is False
+                assert project.check_spam(user, Node.load(None), Node.load(None)) is False
 
     @mock.patch.object(settings, 'SPAM_CHECK_ENABLED', True)
     @mock.patch.object(settings, 'SPAM_CHECK_PUBLIC_ONLY', False)
@@ -1896,7 +1896,7 @@ class TestNodeSpam:
         with mock.patch('osf.models.node.Node._get_spam_content', mock.Mock(return_value='some content!')):
             with mock.patch('osf.models.node.Node.do_check_spam', mock.Mock(return_value=True)):
                 project.set_privacy('private')
-                assert project.check_spam(user, None, None) is True
+                assert project.check_spam(user, Node.load(None), Node.load(None)) is True
 
     @mock.patch('osf.models.node.mails.send_mail')
     @mock.patch.object(settings, 'SPAM_CHECK_ENABLED', True)
@@ -1917,7 +1917,7 @@ class TestNodeSpam:
                 project3.add_contributor(user2)
                 project3.save()
 
-                assert project.check_spam(user, None, None) is True
+                assert project.check_spam(user, Node.load(None), Node.load(None)) is True
 
                 assert user.is_disabled is True
                 assert project.is_public is False
@@ -1936,7 +1936,7 @@ class TestNodeSpam:
             with mock.patch('osf.models.AbstractNode.do_check_spam', mock.Mock(return_value=True)):
                 project.creator.date_confirmed = timezone.now() - datetime.timedelta(days=9001)
                 project.set_privacy('public')
-                assert project.check_spam(user, None, None) is True
+                assert project.check_spam(user, Node.load(None), Node.load(None)) is True
                 assert project.is_public is True
 
     def test_flag_spam_make_node_private(self, project):
@@ -2086,8 +2086,8 @@ class TestManageContributors:
         )
         print(node.visible_contributor_ids)
         with pytest.raises(ValueError) as e:
-            node.set_visible(user=reg_user1, visible=False, auth=None)
-            node.set_visible(user=user, visible=False, auth=None)
+            node.set_visible(user=reg_user1, visible=False, auth=Node.load(None))
+            node.set_visible(user=user, visible=False, auth=Node.load(None))
             assert e.value.message == 'Must have at least one visible contributor'
 
     def test_manage_contributors_cannot_remove_last_admin_contributor(self, auth, node):
@@ -2315,7 +2315,7 @@ class TestNodeTraversals:
         reg.delete_registration_tree(save=True)
 
         dr.reload()
-        assert dr.approval is None
+        assert dr.approval is Node.load(None)
 
     @mock.patch('osf.models.node.AbstractNode.update_search')
     def test_delete_registration_tree_deletes_backrefs(self, mock_update_search):
@@ -2537,7 +2537,7 @@ class TestPointerMethods:
         node2 = NodeFactory(creator=user)
         node_relation = node.add_pointer(node2, auth=auth)
         node.rm_pointer(node_relation, auth=auth)
-        # assert Pointer.load(pointer._id) is None
+        # assert Pointer.load(pointer._id) is Node.load(None)
         # assert len(node.nodes) == 0
         assert len(node2.get_points()) == 0
         assert (
@@ -2628,7 +2628,7 @@ class TestForkNode:
         assert original.logs.latest().action != NodeLog.NODE_FORKED
         assert fork.logs.latest().action == NodeLog.NODE_FORKED
         assert list(original.tags.values_list('name', flat=True)) == list(fork.tags.values_list('name', flat=True))
-        assert (original.parent_node is None) == (fork.parent_node is None)
+        assert (original.parent_node is Node.load(None)) == (fork.parent_node is Node.load(None))
 
         # Test modified fields
         assert fork.is_fork is True
@@ -2738,7 +2738,7 @@ class TestForkNode:
         )
         user2 = UserFactory()
         user2_auth = Auth(user=user2)
-        fork = None
+        fork = Node.load(None)
         # New user forks the project
         fork = node.fork_node(user2_auth)
 
@@ -3358,8 +3358,8 @@ class TestOnNodeUpdate:
         assert task.args[2] is False
         assert 'title' in task.args[3]
 
-    @mock.patch('website.project.tasks.settings.SHARE_URL', None)
-    @mock.patch('website.project.tasks.settings.SHARE_API_TOKEN', None)
+    @mock.patch('website.project.tasks.settings.SHARE_URL', Node.load(None))
+    @mock.patch('website.project.tasks.settings.SHARE_API_TOKEN', Node.load(None))
     @mock.patch('website.project.tasks.requests')
     def test_skips_no_settings(self, requests, node, user, request_context):
         on_node_updated(node._id, user._id, False, {'is_public'})
@@ -3407,8 +3407,8 @@ class TestOnNodeUpdate:
             graph = kwargs['json']['data']['attributes']['data']['@graph']
             assert graph[1]['is_deleted'] == case['is_deleted']
 
-    @mock.patch('website.project.tasks.settings.SHARE_URL', None)
-    @mock.patch('website.project.tasks.settings.SHARE_API_TOKEN', None)
+    @mock.patch('website.project.tasks.settings.SHARE_URL', Node.load(None))
+    @mock.patch('website.project.tasks.settings.SHARE_API_TOKEN', Node.load(None))
     @mock.patch('website.project.tasks.requests')
     def test_skips_no_settings(self, requests, node, user, request_context):
         on_node_updated(node._id, user._id, False, {'is_public'})
@@ -3825,10 +3825,10 @@ class TestAddonCallbacks:
     """
 
     callbacks = {
-        'after_remove_contributor': None,
-        'after_set_privacy': None,
-        'after_fork': (None, None),
-        'after_register': (None, None),
+        'after_remove_contributor': Node.load(None),
+        'after_set_privacy': Node.load(None),
+        'after_fork': (Node.load(None), Node.load(None)),
+        'after_register': (Node.load(None), Node.load(None)),
     }
 
     @pytest.fixture()
@@ -3844,7 +3844,7 @@ class TestAddonCallbacks:
         def mock_get_addon(addon_name, deleted=False):
             # Overrides AddonModelMixin.get_addon -- without backrefs,
             # no longer guaranteed to return the same set of objects-in-memory
-            return self.patched_addons.get(addon_name, None)
+            return self.patched_addons.get(addon_name, Node.load(None))
 
         self.patches = []
         self.patched_addons = {}

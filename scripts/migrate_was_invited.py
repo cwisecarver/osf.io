@@ -23,7 +23,7 @@ def is_invited(user):
     if user.date_confirmed:
         query = (
             query &
-            Q('date', 'ne', None) &
+            Q('date', 'ne', Node.load(None)) &
             Q('date', 'lt', user.date_confirmed)
         )
     logs = models.NodeLog.find(query)
@@ -31,7 +31,7 @@ def is_invited(user):
 
 
 def main(dry_run=True):
-    users = models.User.find(Q('is_invited', 'eq', None))
+    users = models.User.find(Q('is_invited', 'eq', Node.load(None)))
     for user in users:
         invited = is_invited(user)
         logger.info('Setting `is_invited` field of user {0} to {1}'.format(user._id, invited))

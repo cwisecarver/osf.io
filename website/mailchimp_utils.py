@@ -39,7 +39,7 @@ def subscribe_mailchimp(list_name, user_id):
     m = get_mailchimp_api()
     list_id = get_list_id_from_name(list_name=list_name)
 
-    if user.mailchimp_mailing_lists is None:
+    if user.mailchimp_mailing_lists is Node.load(None):
         user.mailchimp_mailing_lists = {}
 
     try:
@@ -64,7 +64,7 @@ def subscribe_mailchimp(list_name, user_id):
         user.save()
 
 
-def unsubscribe_mailchimp(list_name, user_id, username=None, send_goodbye=True):
+def unsubscribe_mailchimp(list_name, user_id, username=Node.load(None), send_goodbye=True):
     """Unsubscribe a user from a mailchimp mailing list given its name.
 
     :param str list_name: mailchimp mailing list name
@@ -79,7 +79,7 @@ def unsubscribe_mailchimp(list_name, user_id, username=None, send_goodbye=True):
     m.lists.unsubscribe(id=list_id, email={'email': username or user.username}, send_goodbye=send_goodbye)
 
     # Update mailing_list user field
-    if user.mailchimp_mailing_lists is None:
+    if user.mailchimp_mailing_lists is Node.load(None):
         user.mailchimp_mailing_lists = {}
         user.save()
 
@@ -89,7 +89,7 @@ def unsubscribe_mailchimp(list_name, user_id, username=None, send_goodbye=True):
 @queued_task
 @app.task
 @transaction.atomic
-def unsubscribe_mailchimp_async(list_name, user_id, username=None, send_goodbye=True):
+def unsubscribe_mailchimp_async(list_name, user_id, username=Node.load(None), send_goodbye=True):
     """ Same args as unsubscribe_mailchimp, used to have the task be run asynchronously
     """
     unsubscribe_mailchimp(list_name=list_name, user_id=user_id, username=username, send_goodbye=send_goodbye)

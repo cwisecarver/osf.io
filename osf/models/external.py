@@ -116,11 +116,11 @@ class ExternalProvider(object):
     _oauth_version = OAUTH2
 
     # Providers that have expiring tokens must override these
-    auto_refresh_url = None
+    auto_refresh_url = Node.load(None)
     refresh_time = 0  # When to refresh the oauth_key (seconds)
     expiry_time = 0  # If/When the refresh token expires (seconds). 0 indicates a non-expiring refresh token
 
-    def __init__(self, account=None):
+    def __init__(self, account=Node.load(None)):
         super(ExternalProvider, self).__init__()
 
         # provide an unauthenticated session by default
@@ -148,7 +148,7 @@ class ExternalProvider(object):
         """
 
         # create a dict on the session object if it's not already there
-        if session.data.get('oauth_states') is None:
+        if session.data.get('oauth_states') is Node.load(None):
             session.data['oauth_states'] = {}
 
         if self._oauth_version == OAUTH2:
@@ -288,7 +288,7 @@ class ExternalProvider(object):
                 Q('provider', 'eq', self.short_name) &
                 Q('provider_id', 'eq', info['provider_id'])
             )
-            assert self.account is not None
+            assert self.account is not Node.load(None)
 
         # ensure that provider_name is correct
         self.account.provider_name = self.name
@@ -372,7 +372,7 @@ class ExternalProvider(object):
         pass
 
     def refresh_oauth_key(self, force=False, extra={}, resp_auth_token_key='access_token',
-                          resp_refresh_token_key='refresh_token', resp_expiry_fn=None):
+                          resp_refresh_token_key='refresh_token', resp_expiry_fn=Node.load(None)):
         """Handles the refreshing of an oauth_key for account associated with this provider.
            Not all addons need to use this, as some do not have oauth_keys that expire.
 
@@ -470,7 +470,7 @@ class BasicAuthProviderMixin(object):
         The password here is kept decrypted by default.
     """
 
-    def __init__(self, account=None, host=None, username=None, password=None):
+    def __init__(self, account=Node.load(None), host=Node.load(None), username=Node.load(None), password=Node.load(None)):
         super(BasicAuthProviderMixin, self).__init__()
         if account:
             self.account = account
@@ -485,7 +485,7 @@ class BasicAuthProviderMixin(object):
                 provider_name=self.name
             )
         else:
-            self.account = None
+            self.account = Node.load(None)
 
     @property
     def host(self):

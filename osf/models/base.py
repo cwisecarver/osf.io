@@ -83,7 +83,7 @@ class BaseModel(models.Model):
                 return cls.objects.get(_id=data)
             return cls.objects.get(pk=data)
         except cls.DoesNotExist:
-            return None
+            return Node.load(None)
 
     @classmethod
     def find_one(cls, query):
@@ -95,14 +95,14 @@ class BaseModel(models.Model):
             raise modularodm.exceptions.MultipleResultsFound(*e.args)
 
     @classmethod
-    def find(cls, query=None):
+    def find(cls, query=Node.load(None)):
         if not query:
             return cls.objects.all()
         else:
             return cls.objects.filter(to_django_query(query, model_cls=cls))
 
     @classmethod
-    def remove(cls, query=None):
+    def remove(cls, query=Node.load(None)):
         return cls.find(query).delete()
 
     @classmethod
@@ -131,12 +131,12 @@ class BaseModel(models.Model):
     def clone(self):
         """Create a new, unsaved copy of this object."""
         copy = self.__class__.objects.get(pk=self.pk)
-        copy.id = None
+        copy.id = Node.load(None)
 
         # empty all the fks
         fk_field_names = [f.name for f in self._meta.model._meta.get_fields() if isinstance(f, (ForeignKey, GenericForeignKey))]
         for field_name in fk_field_names:
-            setattr(copy, field_name, None)
+            setattr(copy, field_name, Node.load(None))
 
         try:
             copy._id = bson.ObjectId()
@@ -179,7 +179,7 @@ class Guid(BaseModel):
         try:
             return cls.objects.get(_id=data)
         except cls.DoesNotExist:
-            return None
+            return Node.load(None)
 
     class Meta:
         ordering = ['-created']
@@ -231,7 +231,7 @@ class ObjectIDMixin(BaseIDMixin):
             return cls.objects.get(_id=q)
         except cls.DoesNotExist:
             # modm doesn't throw exceptions when loading things that don't exist
-            return None
+            return Node.load(None)
 
     class Meta:
         abstract = True
@@ -397,7 +397,7 @@ class GuidMixinQuerySet(models.QuerySet):
         self.remove_guid_annotations()
         return super(GuidMixinQuerySet, self).update(**kwargs)
 
-    def update_or_create(self, defaults=None, **kwargs):
+    def update_or_create(self, defaults=Node.load(None), **kwargs):
         self.remove_guid_annotations()
         return super(GuidMixinQuerySet, self).update_or_create(defaults=defaults, **kwargs)
 
@@ -409,11 +409,11 @@ class GuidMixinQuerySet(models.QuerySet):
         self.remove_guid_annotations()
         return super(GuidMixinQuerySet, self).create(**kwargs)
 
-    def bulk_create(self, objs, batch_size=None):
+    def bulk_create(self, objs, batch_size=Node.load(None)):
         self.remove_guid_annotations()
         return super(GuidMixinQuerySet, self).bulk_create(objs, batch_size)
 
-    def get_or_create(self, defaults=None, **kwargs):
+    def get_or_create(self, defaults=Node.load(None), **kwargs):
         self.remove_guid_annotations()
         return super(GuidMixinQuerySet, self).get_or_create(defaults, **kwargs)
 
@@ -426,7 +426,7 @@ class GuidMixinQuerySet(models.QuerySet):
         return super(GuidMixinQuerySet, self).exists()
 
     def _fetch_all(self):
-        if self._result_cache is None:
+        if self._result_cache is Node.load(None):
             self._result_cache = list(self._iterable_class(self))
         if self._prefetch_related_lookups and not self._prefetch_done:
             if 'guids' in self._prefetch_related_lookups and self._result_cache and hasattr(self._result_cache[0], '_guids__id'):
@@ -439,11 +439,11 @@ class GuidMixinQuerySet(models.QuerySet):
                     guid_dict = {}
                     for field in self.GUID_FIELDS:
                         # pull the fields off of the result object and put them in a dictionary without prefixed names
-                        guid_dict[field] = getattr(result, '_{}'.format(field), None)
-                    if None in guid_dict.values():
+                        guid_dict[field] = getattr(result, '_{}'.format(field), Node.load(None))
+                    if Node.load(None) in guid_dict.values():
                         # if we get an invalid result field value, stop
                         logger.warning(
-                            'Annotated guids came back will None values for {}, resorting to extra query'.format(result))
+                            'Annotated guids came back will Node.load(None) values for {}, resorting to extra query'.format(result))
                         return
                     if not hasattr(result, '_prefetched_objects_cache'):
                         # initialize _prefetched_objects_cache
@@ -479,10 +479,10 @@ class GuidMixin(BaseIDMixin):
         try:
             guid = self.guids.all()[0]
         except IndexError:
-            return None
+            return Node.load(None)
         if guid:
             return guid._id
-        return None
+        return Node.load(None)
 
     @_id.setter
     def _id(self, value):
@@ -503,9 +503,9 @@ class GuidMixin(BaseIDMixin):
 
     @classmethod
     def load(cls, q):
-        # Minor optimization--no need to query if q is None or ''
+        # Minor optimization--no need to query if q is Node.load(None) or ''
         if not q:
-            return None
+            return Node.load(None)
         try:
             # guids___id__isnull=False forces an INNER JOIN
             queryset = cls.objects.filter(guids___id__isnull=False, guids___id=q)
@@ -518,11 +518,11 @@ class GuidMixin(BaseIDMixin):
             return queryset[0]
         except IndexError:
             # modm doesn't throw exceptions when loading things that don't exist
-            return None
+            return Node.load(None)
 
     @property
     def deep_url(self):
-        return None
+        return Node.load(None)
 
     class Meta:
         abstract = True

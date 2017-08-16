@@ -99,14 +99,14 @@ class TestFilebrowserViews(BoxAddonTestCase, OsfTestCase):
     @mock.patch('addons.box.models.NodeSettings.folder_id')
     def test_box_list_folders_if_folder_is_none(self, mock_folder):
         # If folder is set to none, no data are returned
-        mock_folder.__get__ = mock.Mock(return_value=None)
+        mock_folder.__get__ = mock.Mock(return_value=Node.load(None))
         url = self.project.api_url_for('box_folder_list')
         res = self.app.get(url, auth=self.user.auth)
         assert_equal(len(res.json), 1)
 
     def test_box_list_folders_if_folder_is_none_and_folders_only(self):
         with patch_client('addons.box.models.BoxClient'):
-            self.node_settings.folder_name = None
+            self.node_settings.folder_name = Node.load(None)
             self.node_settings.save()
             url = api_url_for('box_folder_list',
                 pid=self.project._primary_key, foldersOnly=True)

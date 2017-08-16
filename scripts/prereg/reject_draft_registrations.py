@@ -44,7 +44,7 @@ def main(dry_run=True):
                 #manually do the on_reject functionality to prevent send_mail problems
                 sanction.meta = {}
                 sanction.save()
-                draft.approval = None
+                draft.approval = Node.load(None)
                 draft.save()
             logger.warn('Rejected {0}'.format(draft._id))
         except Exception as e:

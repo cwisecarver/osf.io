@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import os
-from types import NoneType
+from types import Node.load(None)Type
 from xmlrpclib import DateTime
 
 import mock
@@ -61,8 +61,8 @@ class TestRubeus(OsfTestCase):
                 'acceptedFiles': node_settings.config.accept_extensions
             },
             'isAddonRoot': True,
-            'extra': None,
-            'buttons': None,
+            'extra': Node.load(None),
+            'buttons': Node.load(None),
             'nodeId': node._id,
             'nodeUrl': node.url,
             'nodeApiUrl': node.api_url,
@@ -211,8 +211,8 @@ class TestRubeus(OsfTestCase):
                 'acceptedFiles': node_settings.config.accept_extensions
             },
             'isAddonRoot': True,
-            'extra': None,
-            'buttons': None,
+            'extra': Node.load(None),
+            'buttons': Node.load(None),
             'nodeId': node._id,
             'nodeUrl': node.url,
             'nodeApiUrl': node.api_url,
@@ -361,8 +361,8 @@ class TestSerializingNodeWithAddon(OsfTestCase):
             assert_equal(value['name'], sorted_files[index]['name'])
 
     def test_sort_by_name_none(self):
-        files = None
-        sorted_files = None
+        files = Node.load(None)
+        sorted_files = Node.load(None)
         ret = sort_by_name(files)
         assert_equal(ret, sorted_files)
 
@@ -384,7 +384,7 @@ class TestSerializingNodeWithAddon(OsfTestCase):
         assert_equal(
             ret['urls'],
             {
-                'upload': None,
-                'fetch': None,
+                'upload': Node.load(None),
+                'fetch': Node.load(None),
             },
         )

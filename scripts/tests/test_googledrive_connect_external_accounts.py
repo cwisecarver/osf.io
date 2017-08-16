@@ -35,7 +35,7 @@ class TestGoogleDrivePostMergeMigration(OsfTestCase):
         node_addon.folder_path = '/'
         node_addon.save()
 
-        assert_equal(node_addon.external_account, None)
+        assert_equal(node_addon.external_account, Node.load(None))
         assert_equal(node_addon.folder_id, 'abcdef0')
 
         do_migration()

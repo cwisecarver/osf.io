@@ -85,7 +85,7 @@ class JSONRendererTestCase(RendererTestCase):
             (
                 {
                     'code': http.NOT_FOUND,
-                    'referrer': None,
+                    'referrer': Node.load(None),
                     'message_short': msg['message_short'],
                     'message_long': msg['message_long'],
                 },
@@ -122,7 +122,7 @@ class WebRendererTestCase(OsfTestCase):
         resp = self.r(
             ({},  # data
             302,  # status code
-            None,  # headers
+            Node.load(None),  # headers
             'http://google.com/',  # redirect_uri
             )
         )

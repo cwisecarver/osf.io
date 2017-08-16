@@ -252,7 +252,7 @@ class NodeSettings(BaseNodeSettings):
     has_auth = True
     is_publicly_editable = models.BooleanField(default=False, db_index=True)
 
-    def set_editing(self, permissions, auth=None, log=False):
+    def set_editing(self, permissions, auth=Node.load(None), log=False):
         """Set the editing permissions for this node.
 
         :param auth: All the auth information including user, API key
@@ -300,7 +300,7 @@ class NodeSettings(BaseNodeSettings):
         clone.owner = registration
         if save:
             clone.save()
-        return clone, None
+        return clone, Node.load(None)
 
     def after_set_privacy(self, node, permissions):
         """

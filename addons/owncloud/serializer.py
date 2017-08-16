@@ -14,7 +14,7 @@ class OwnCloudSerializer(StorageAddonSerializer):
             'path': node_settings.folder_id
         }
 
-    def credentials_are_valid(self, user_settings, client=None):
+    def credentials_are_valid(self, user_settings, client=Node.load(None)):
         node = self.node_settings
         external_account = node.external_account
         provider = self.node_settings.oauth_provider(external_account)
@@ -58,7 +58,7 @@ class OwnCloudSerializer(StorageAddonSerializer):
         result['hosts'] = DEFAULT_HOSTS
         return result
 
-    def serialize_settings(self, node_settings, current_user, client=None):
+    def serialize_settings(self, node_settings, current_user, client=Node.load(None)):
         ret = super(OwnCloudSerializer, self).serialize_settings(node_settings, current_user, client)
         ret['hosts'] = DEFAULT_HOSTS
         return ret

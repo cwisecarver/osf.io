@@ -78,7 +78,7 @@ class TestUpdateCounters(UpdateCountersTestCase):
             return kwargs.get('node') or kwargs.get('project')
 
         count = analytics.get_basic_counters('download:{0}:{1}'.format(self.node._id, self.fid))
-        assert_equal(count, (None, None))
+        assert_equal(count, (Node.load(None), Node.load(None)))
 
         download_file_(node=self.node, fid=self.fid)
 
@@ -99,7 +99,7 @@ class TestUpdateCounters(UpdateCountersTestCase):
             return kwargs.get('node') or kwargs.get('project')
 
         count = analytics.get_basic_counters('download:{0}:{1}'.format(self.node._id, self.fid))
-        assert_equal(count, (None, None))
+        assert_equal(count, (Node.load(None), Node.load(None)))
 
         download_file_(node=self.node, fid=self.fid)
 
@@ -121,7 +121,7 @@ class TestUpdateCounters(UpdateCountersTestCase):
             return kwargs.get('node') or kwargs.get('project')
 
         count = analytics.get_basic_counters('download:{0}:{1}'.format(self.node._id, self.fid))
-        assert_equal(count, (None, None))
+        assert_equal(count, (Node.load(None), Node.load(None)))
 
         download_file_(node=self.node, fid=self.fid)
 
@@ -143,7 +143,7 @@ class TestUpdateCounters(UpdateCountersTestCase):
             return kwargs.get('node') or kwargs.get('project')
 
         count = analytics.get_basic_counters('download:{0}:{1}:{2}'.format(self.node._id, self.fid, self.vid))
-        assert_equal(count, (None, None))
+        assert_equal(count, (Node.load(None), Node.load(None)))
 
         download_file_version_(node=self.node, fid=self.fid, vid=self.vid)
 
@@ -180,7 +180,7 @@ class TestUpdateCounters(UpdateCountersTestCase):
         count = analytics.get_basic_counters('download:{0}:{1}'.format(self.node._id, fid1))
         assert_equal(count, (1, 1))
         count = analytics.get_basic_counters('download:{0}:{1}'.format(self.node._id, fid2))
-        assert_equal(count, (None, None))
+        assert_equal(count, (Node.load(None), Node.load(None)))
 
         page = 'download:{0}:{1}'.format(self.node._id, fid1)
 

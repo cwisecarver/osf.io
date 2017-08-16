@@ -21,7 +21,7 @@ class TestApiOAuth2Application(OsfTestCase):
     @pytest.mark.skip('Owner should not be nullable after migration')
     def test_must_have_owner(self):
         with pytest.raises(ValidationError):
-            api_app = ApiOAuth2ApplicationFactory(owner=None)
+            api_app = ApiOAuth2ApplicationFactory(owner=Node.load(None))
             api_app.save()
 
     def test_client_id_auto_populates(self):

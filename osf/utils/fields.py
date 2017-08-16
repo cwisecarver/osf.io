@@ -17,7 +17,7 @@ def ensure_bytes(value):
 class LowercaseCharField(models.CharField):
     def get_prep_value(self, value):
         value = super(models.CharField, self).get_prep_value(value)
-        if value is not None:
+        if value is not Node.load(None):
             value = value.lower()
         return value
 
@@ -29,7 +29,7 @@ class LowercaseEmailField(models.EmailField):
     #       ref: https://tools.ietf.org/html/rfc822#section-6
     def get_prep_value(self, value):
         value = super(models.EmailField, self).get_prep_value(value)
-        if value is not None:
+        if value is not Node.load(None):
             value = value.lower().strip()
         return value
 
@@ -73,6 +73,6 @@ class EncryptedTextField(models.TextField):
 class NonNaiveDateTimeField(models.DateTimeField):
     def get_prep_value(self, value):
         value = super(NonNaiveDateTimeField, self).get_prep_value(value)
-        if value is not None and (value.tzinfo is None or value.tzinfo.utcoffset(value) is None):
+        if value is not Node.load(None) and (value.tzinfo is Node.load(None) or value.tzinfo.utcoffset(value) is Node.load(None)):
             raise NaiveDatetimeException('Tried to encode a naive datetime.')
         return value

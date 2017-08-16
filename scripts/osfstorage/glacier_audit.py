@@ -56,7 +56,7 @@ def get_vault():
     return layer2.get_vault(storage_settings.GLACIER_VAULT)
 
 
-def get_job(vault, job_id=None):
+def get_job(vault, job_id=Node.load(None)):
     if job_id:
         return vault.get_job(job_id)
     jobs = vault.list_jobs(completed=True)
@@ -70,13 +70,13 @@ def get_targets(date):
         Q('date_created', 'lt', date - DELTA_DATE) &
         Q('status', 'ne', 'cached') &
         Q('metadata.archive', 'exists', True) &
-        Q('location', 'ne', None)
+        Q('location', 'ne', Node.load(None))
     ).iterator()
 
 
 def check_glacier_version(version, inventory):
     data = inventory.get(version.metadata['archive'])
-    if data is None:
+    if data is Node.load(None):
         raise NotFound('Glacier archive for version {} not found'.format(version._id))
     if version.metadata['archive'] != data['ArchiveId']:
         raise BadArchiveId(
@@ -96,7 +96,7 @@ def check_glacier_version(version, inventory):
         )
 
 
-def main(job_id=None):
+def main(job_id=Node.load(None)):
     vault = get_vault()
     job = get_job(vault, job_id=job_id)
     output = job.get_output()
@@ -115,7 +115,7 @@ def main(job_id=None):
 
 
 @celery_app.task(name='scripts.osfstorage.glacier_audit')
-def run_main(job_id=None, dry_run=True):
+def run_main(job_id=Node.load(None), dry_run=True):
     init_app(set_backends=True, routes=False)
     if not dry_run:
         scripts_utils.add_file_logger(logger, __file__)

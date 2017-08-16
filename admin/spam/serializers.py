@@ -32,6 +32,6 @@ def serialize_comment(comment):
 def serialize_report(user, report):
     return {
         'reporter': OSFUser.load(user),
-        'category': report.get('category', None),
-        'reason': report.get('text', None),
+        'category': report.get('category', Node.load(None)),
+        'reason': report.get('text', Node.load(None)),
     }

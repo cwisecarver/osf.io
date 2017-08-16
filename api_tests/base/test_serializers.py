@@ -43,12 +43,12 @@ for mod in SER_MODULES:
 class FakeModel(object):
 
     def null_field(self):
-        return None
+        return Node.load(None)
 
     def valued_field(self):
         return 'Some'
 
-    null = None
+    null = Node.load(None)
     foo = 'bar'
 
     pk = '1234'
@@ -71,7 +71,7 @@ class FakeSerializer(base_serializers.JSONAPISerializer):
         related_view_kwargs={'node_id': '<foo>'},
     )
     def null_field(*args, **kwargs):
-        return None
+        return Node.load(None)
 
     def valued_field(*args, **kwargs):
         return 'http://foo.com'
@@ -185,7 +185,7 @@ class TestApiBaseSerializers(ApiTestCase):
             if relation == {}:
                 continue
             field = NodeSerializer._declared_fields[key]
-            if getattr(field, 'field', None):
+            if getattr(field, 'field', Node.load(None)):
                 field = field.field
             if (field.related_meta or {}).get('count'):
                 link = relation['links'].values()[0]
@@ -224,7 +224,7 @@ class TestApiBaseSerializers(ApiTestCase):
             if relation == {}:
                 continue
             field = NodeSerializer._declared_fields[key]
-            if getattr(field, 'field', None):
+            if getattr(field, 'field', Node.load(None)):
                 field = field.field
             link = relation['links'].values()[0]
             if (field.related_meta or {}).get('count') and key == 'children':
@@ -240,7 +240,7 @@ class TestApiBaseSerializers(ApiTestCase):
             if relation == {}:
                 continue
             field = NodeSerializer._declared_fields[key]
-            if getattr(field, 'field', None):
+            if getattr(field, 'field', Node.load(None)):
                 field = field.field
             link = relation['links'].values()[0]
             if (field.related_meta or {}).get('count') and key == 'children' or key == 'contributors':

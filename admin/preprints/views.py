@@ -50,7 +50,7 @@ class PreprintView(PermissionRequiredMixin, UpdateView, GuidView):
             raise PermissionsError("This user does not have permission to update this preprint's provider.")
         return super(PreprintView, self).post(request, *args, **kwargs)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return PreprintService.load(self.kwargs.get('guid'))
 
     def get_context_data(self, **kwargs):
@@ -64,7 +64,7 @@ class PreprintView(PermissionRequiredMixin, UpdateView, GuidView):
 class PreprintReindexShare(PermissionRequiredMixin, DeleteView):
     template_name = 'preprints/reindex_preprint_share.html'
     context_object_name = 'preprintservice'
-    object = None
+    object = Node.load(None)
     permission_required = 'osf.view_preprintservice'
     raise_exception = True
 
@@ -73,7 +73,7 @@ class PreprintReindexShare(PermissionRequiredMixin, DeleteView):
         context.setdefault('guid', kwargs.get('object')._id)
         return super(PreprintReindexShare, self).get_context_data(**context)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return PreprintService.load(self.kwargs.get('guid'))
 
     def delete(self, request, *args, **kwargs):

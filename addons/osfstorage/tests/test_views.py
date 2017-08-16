@@ -153,7 +153,7 @@ class TestUploadFileHook(HookTestCase):
         self.record = recursively_create_file(self.node_settings, self.name)
         self.auth = make_auth(self.user)
 
-    def send_upload_hook(self, parent, payload=None, **kwargs):
+    def send_upload_hook(self, parent, payload=Node.load(None), **kwargs):
         return self.send_hook(
             'osfstorage_create_child',
             {'fid': parent._id},
@@ -213,7 +213,7 @@ class TestUploadFileHook(HookTestCase):
             'modified': 'Mon, 16 Feb 2015 18:45:34 GMT'
         })
 
-        assert_is_not(version, None)
+        assert_is_not(version, Node.load(None))
         assert_equal([version], list(record.versions.all()))
         assert_not_in(version, self.record.versions.all())
         assert_equal(record.serialize(), res.json['data'])
@@ -227,7 +227,7 @@ class TestUploadFileHook(HookTestCase):
         assert_equal(res.status_code, 200)
         assert_equal(res.json['status'], 'success')
         version = models.FileVersion.load(res.json['version'])
-        assert_is_not(version, None)
+        assert_is_not(version, Node.load(None))
         assert_in(version, self.record.versions.all())
 
     def test_upload_duplicate(self):
@@ -243,7 +243,7 @@ class TestUploadFileHook(HookTestCase):
         assert_equal(res.status_code, 200)
         assert_equal(res.json['status'], 'success')
         version = models.FileVersion.load(res.json['version'])
-        assert_is_not(version, None)
+        assert_is_not(version, Node.load(None))
         assert_in(version, self.record.versions.all())
 
     def test_upload_create_child(self):
@@ -257,7 +257,7 @@ class TestUploadFileHook(HookTestCase):
 
         version = models.FileVersion.load(res.json['version'])
 
-        assert_is_not(version, None)
+        assert_is_not(version, Node.load(None))
         assert_not_in(version, self.record.versions.all())
 
         record = parent.find_child_by_name(name)
@@ -277,7 +277,7 @@ class TestUploadFileHook(HookTestCase):
 
         version = models.FileVersion.load(res.json['version'])
 
-        assert_is_not(version, None)
+        assert_is_not(version, Node.load(None))
         assert_not_in(version, self.record.versions.all())
 
         record = parent.find_child_by_name(name)
@@ -315,7 +315,7 @@ class TestUploadFileHook(HookTestCase):
 
         version = models.FileVersion.load(res.json['version'])
 
-        assert_is_not(version, None)
+        assert_is_not(version, Node.load(None))
         assert_in(version, new_node.versions.all())
 
         assert_in(version, new_node.versions.all())
@@ -399,7 +399,7 @@ class TestUpdateMetadataHook(HookTestCase):
             'size': 321,  # Just to make sure the field is ignored
         }
 
-    def send_metadata_hook(self, payload=None, **kwargs):
+    def send_metadata_hook(self, payload=Node.load(None), **kwargs):
         return self.send_hook(
             'osfstorage_update_metadata',
             {},
@@ -409,7 +409,7 @@ class TestUpdateMetadataHook(HookTestCase):
         )
 
     def test_callback(self):
-        self.version.date_modified = None
+        self.version.date_modified = Node.load(None)
         self.version.save()
         self.send_metadata_hook()
         self.version.reload()
@@ -460,7 +460,7 @@ class TestGetRevisions(StorageTestCase):
         self.record.versions = [factories.FileVersionFactory() for __ in range(15)]
         self.record.save()
 
-    def get_revisions(self, fid=None, **kwargs):
+    def get_revisions(self, fid=Node.load(None), **kwargs):
         return self.app.get(
             self.project.api_url_for(
                 'osfstorage_get_revisions',
@@ -500,7 +500,7 @@ class TestCreateFolder(HookTestCase):
         super(TestCreateFolder, self).setUp()
         self.root_node = self.node_settings.get_root()
 
-    def create_folder(self, name, parent=None, **kwargs):
+    def create_folder(self, name, parent=Node.load(None), **kwargs):
         parent = parent or self.node_settings.get_root()
 
         return self.send_hook(
@@ -589,7 +589,7 @@ class TestDeleteHook(HookTestCase):
         fid = file._id
         del file
         # models.StoredFileNode._clear_object_cache()
-        assert_is(OsfStorageFileNode.load(fid), None)
+        assert_is(OsfStorageFileNode.load(fid), Node.load(None))
         assert_true(models.TrashedFileNode.load(fid))
 
     def test_delete_deleted(self):

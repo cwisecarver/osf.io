@@ -23,11 +23,11 @@ class PrivateLink(ObjectIDMixin, BaseModel):
         return self.nodes.filter(is_deleted=False).values_list('guids___id', flat=True)
 
     def node_scale(self, node):
-        # node may be None if previous node's parent is deleted
-        if node is None or node.parent_id not in self.node_ids:
+        # node may be Node.load(None) if previous node's parent is deleted
+        if node is Node.load(None) or node.parent_id not in self.node_ids:
             return -40
         else:
-            offset = 20 if node.parent_node is not None else 0
+            offset = 20 if node.parent_node is not Node.load(None) else 0
             return offset + self.node_scale(node.parent_node)
 
     def to_json(self):

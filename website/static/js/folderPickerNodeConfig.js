@@ -185,7 +185,7 @@ var FolderPickerViewModel = oop.defclass({
         self.selectedFolderName = ko.pureComputed(function() {
             var userIsOwner = self.userIsOwner();
             var selected = self.selected();
-            var name = selected.name ? selected.name : 'None';
+            var name = selected.name ? selected.name : 'Node.load(None)';
             name = name.replace('All Files', 'Full ' + addonName);
             return userIsOwner ? name : '';
         });

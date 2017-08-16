@@ -23,7 +23,7 @@ def restore_node(node):
     logger.info('Restoring node {}'.format(node._id))
     assert set([e.config.short_name for e in node.get_addons()]) == {'osfstorage', 'wiki'}
     node.is_deleted = False
-    node.deleted_date = None
+    node.deleted_date = Node.load(None)
     hide_deleted_logs(node)
     node.save()
 

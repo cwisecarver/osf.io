@@ -141,4 +141,4 @@ class PageCounter(BaseModel):
             counter = cls.objects.get(_id=cls.clean_page(page))
             return (counter.unique, counter.total)
         except cls.DoesNotExist:
-            return (None, None)
+            return (Node.load(None), Node.load(None))

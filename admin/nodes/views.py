@@ -59,7 +59,7 @@ class NodeRemoveContributorView(PermissionRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         try:
             node, user = self.get_object()
-            if node.remove_contributor(user, None, log=False):
+            if node.remove_contributor(user, Node.load(None), log=False):
                 update_admin_log(
                     user_id=self.request.user.id,
                     object_id=node.pk,
@@ -72,7 +72,7 @@ class NodeRemoveContributorView(PermissionRequiredMixin, DeleteView):
                 # Log invisibly on the OSF.
                 osf_log = NodeLog(
                     action=NodeLog.CONTRIB_REMOVED,
-                    user=None,
+                    user=Node.load(None),
                     params={
                         'project': node.parent_id,
                         'node': node.pk,
@@ -101,22 +101,22 @@ class NodeRemoveContributorView(PermissionRequiredMixin, DeleteView):
         context.setdefault('user', serialize_simple_user_and_node_permissions(node, user))
         return super(NodeRemoveContributorView, self).get_context_data(**context)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return (Node.load(self.kwargs.get('node_id')),
                 OSFUser.load(self.kwargs.get('user_id')))
 
 
 class NodeDeleteBase(DeleteView):
-    template_name = None
+    template_name = Node.load(None)
     context_object_name = 'node'
-    object = None
+    object = Node.load(None)
 
     def get_context_data(self, **kwargs):
         context = {}
         context.setdefault('guid', kwargs.get('object')._id)
         return super(NodeDeleteBase, self).get_context_data(**context)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return Node.load(self.kwargs.get('guid'))
 
 
@@ -126,19 +126,19 @@ class NodeDeleteView(PermissionRequiredMixin, NodeDeleteBase):
     Interface with OSF database. No admin models.
     """
     template_name = 'nodes/remove_node.html'
-    object = None
+    object = Node.load(None)
     permission_required = ('osf.view_node', 'osf.delete_node')
     raise_exception = True
 
     def delete(self, request, *args, **kwargs):
         try:
             node = self.get_object()
-            flag = None
-            osf_flag = None
-            message = None
+            flag = Node.load(None)
+            osf_flag = Node.load(None)
+            message = Node.load(None)
             if node.is_deleted:
                 node.is_deleted = False
-                node.deleted_date = None
+                node.deleted_date = Node.load(None)
                 flag = NODE_RESTORED
                 message = 'Node {} restored.'.format(node.pk)
                 osf_flag = NodeLog.NODE_CREATED
@@ -149,7 +149,7 @@ class NodeDeleteView(PermissionRequiredMixin, NodeDeleteBase):
                 message = 'Node {} removed.'.format(node.pk)
                 osf_flag = NodeLog.NODE_REMOVED
             node.save()
-            if flag is not None:
+            if flag is not Node.load(None):
                 update_admin_log(
                     user_id=self.request.user.id,
                     object_id=node.pk,
@@ -157,11 +157,11 @@ class NodeDeleteView(PermissionRequiredMixin, NodeDeleteBase):
                     message=message,
                     action_flag=flag
                 )
-            if osf_flag is not None:
+            if osf_flag is not Node.load(None):
                 # Log invisibly on the OSF.
                 osf_log = NodeLog(
                     action=osf_flag,
-                    user=None,
+                    user=Node.load(None),
                     params={
                         'project': node.parent_id,
                     },
@@ -197,7 +197,7 @@ class NodeView(PermissionRequiredMixin, GuidView):
         kwargs.update({'SPAM_STATUS': SpamStatus})  # Pass spam status in to check against
         return kwargs
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         guid = self.kwargs.get('guid')
         node = Node.load(guid) or Registration.load(guid)
         return serialize_node(node)
@@ -330,7 +330,7 @@ class NodeReindexShare(PermissionRequiredMixin, NodeDeleteBase):
     permission_required = 'osf.mark_spam'
     raise_exception = True
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return Node.load(self.kwargs.get('guid')) or Registration.load(self.kwargs.get('guid'))
 
     def delete(self, request, *args, **kwargs):
@@ -350,7 +350,7 @@ class NodeReindexElastic(PermissionRequiredMixin, NodeDeleteBase):
     permission_required = 'osf.mark_spam'
     raise_exception = True
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return Node.load(self.kwargs.get('guid')) or Registration.load(self.kwargs.get('guid'))
 
     def delete(self, request, *args, **kwargs):

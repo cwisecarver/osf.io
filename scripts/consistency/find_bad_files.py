@@ -17,7 +17,7 @@ def find_missing_files():
     for node in with_files:
         for fname, fid in node.files_current.items():
             fobj = models.NodeFile.load(fid)
-            if fobj is None:
+            if fobj is Node.load(None):
                 print 'Inconsistency: File object {} not found in MongoDB'.format(
                     fid,
                 )

@@ -83,7 +83,7 @@ def logout():
     return True
 
 
-def register_unconfirmed(username, password, fullname, campaign=None):
+def register_unconfirmed(username, password, fullname, campaign=Node.load(None)):
     from osf.models import OSFUser
     user = get_user(email=username)
     if not user:

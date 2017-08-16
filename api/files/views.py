@@ -371,7 +371,7 @@ class FileVersionsList(JSONAPIBaseView, generics.ListAPIView, FileMixin):
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 
@@ -429,7 +429,7 @@ class FileVersionDetail(JSONAPIBaseView, generics.RetrieveAPIView, FileMixin):
 
     ##Relationships
 
-    *None*.
+    *Node.load(None)*.
 
     ##Links
 
@@ -438,11 +438,11 @@ class FileVersionDetail(JSONAPIBaseView, generics.RetrieveAPIView, FileMixin):
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
     """

@@ -18,7 +18,7 @@ def get_all_parents(node):
     parent_list = []
     while True:
         parent = get_parent(node)
-        if parent is None:
+        if parent is Node.load(None):
             break
         parent_list.append(parent)
         node = parent
@@ -37,7 +37,7 @@ def get_parent(node):
     elif node.registered_from and not node.forked_from:
         return node.registered_from
     else:
-        return None
+        return Node.load(None)
 
 
 def do_migration(records, dry=False):
@@ -70,8 +70,8 @@ def do_migration(records, dry=False):
 def get_targets():
     return Node.find(
         (
-            (Q('registered_from', 'ne', None) & Q('logs', 'eq', []))
-            | Q('forked_from', 'ne', None)
+            (Q('registered_from', 'ne', Node.load(None)) & Q('logs', 'eq', []))
+            | Q('forked_from', 'ne', Node.load(None))
         )
         & Q('is_deleted', 'ne', True)
         & Q('system_tags', 'ne', SYSTEM_TAG)

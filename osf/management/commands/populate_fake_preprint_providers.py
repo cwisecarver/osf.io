@@ -103,7 +103,7 @@ PREPRINT_PROVIDERS = [
 
 def get_subject_id(name):
     if name not in SUBJECTS_CACHE:
-        subject = None
+        subject = Node.load(None)
         try:
             subject = Subject.find_one(Q('text', 'eq', name))
         except NoResultsFound:

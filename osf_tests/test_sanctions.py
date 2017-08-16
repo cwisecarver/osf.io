@@ -28,7 +28,7 @@ class TestRegistrationApprovalHooks:
         registration.require_approval(user)
 
         assert registration.registration_approval.is_pending_approval is True  # sanity check
-        registration.registration_approval._on_complete(None)
+        registration.registration_approval._on_complete(Node.load(None))
         assert registration.registration_approval.is_pending_approval is False
 
 
@@ -71,7 +71,7 @@ class TestNodeEmbargoTerminations:
         registration.terminate_embargo(Auth(user))
         last_log = node.logs.first()
         assert last_log.action == NodeLog.EMBARGO_TERMINATED
-        assert last_log.user is None
+        assert last_log.user is Node.load(None)
 
 
 @pytest.mark.django_db
@@ -101,7 +101,7 @@ class TestDraftRegistrationApprovals:
         draft.reload()
         registered_node = draft.registered_node
 
-        assert registered_node is not None
+        assert registered_node is not Node.load(None)
         assert registered_node.is_pending_registration
         assert registered_node.registered_user == draft.initiator
 
@@ -163,7 +163,7 @@ class TestDraftRegistrationApprovals:
         approval._on_complete(user)
         draft.reload()
         registered_node = draft.registered_node
-        assert registered_node is not None
+        assert registered_node is not Node.load(None)
         assert registered_node.is_pending_embargo
         assert registered_node.registered_user == draft.initiator
 

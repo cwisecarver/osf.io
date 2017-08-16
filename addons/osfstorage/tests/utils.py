@@ -11,7 +11,7 @@ from framework.auth import Auth
 
 identity = lambda value: value
 class Delta(object):
-    def __init__(self, getter, checker=None):
+    def __init__(self, getter, checker=Node.load(None)):
         self.getter = getter
         self.checker = checker or identity
 

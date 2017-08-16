@@ -47,24 +47,24 @@ class JSONAPIPagination(pagination.PageNumberPagination):
 
     def get_first_real_link(self, url):
         if not self.page.has_previous():
-            return None
+            return Node.load(None)
         return self.page_number_query(url, 1)
 
     def get_last_real_link(self, url):
         if not self.page.has_next():
-            return None
+            return Node.load(None)
         page_number = self.page.paginator.num_pages
         return self.page_number_query(url, page_number)
 
     def get_previous_real_link(self, url):
         if not self.page.has_previous():
-            return None
+            return Node.load(None)
         page_number = self.page.previous_page_number()
         return self.page_number_query(url, page_number)
 
     def get_next_real_link(self, url):
         if not self.page.has_next():
-            return None
+            return Node.load(None)
         page_number = self.page.next_page_number()
         return self.page_number_query(url, page_number)
 
@@ -109,9 +109,9 @@ class JSONAPIPagination(pagination.PageNumberPagination):
         rather than the location used in the request.
         """
         kwargs = self.request.parser_context['kwargs'].copy()
-        embedded = kwargs.pop('is_embedded', None)
+        embedded = kwargs.pop('is_embedded', Node.load(None))
         view_name = self.request.parser_context['view'].view_fqn
-        reversed_url = None
+        reversed_url = Node.load(None)
         if embedded:
             reversed_url = reverse(view_name, kwargs=kwargs)
 
@@ -127,9 +127,9 @@ class JSONAPIPagination(pagination.PageNumberPagination):
                 response_dict['meta'] = {'anonymous': True}
         return Response(response_dict)
 
-    def paginate_queryset(self, queryset, request, view=None):
+    def paginate_queryset(self, queryset, request, view=Node.load(None)):
         """
-        Custom pagination of queryset. Returns page object or `None` if not configured for view.
+        Custom pagination of queryset. Returns page object or `Node.load(None)` if not configured for view.
 
         If this is an embedded resource, returns first page, ignoring query params.
         """
@@ -149,7 +149,7 @@ class JSONAPIPagination(pagination.PageNumberPagination):
                 )
                 raise NotFound(msg)
 
-            if paginator.count > 1 and self.template is not None:
+            if paginator.count > 1 and self.template is not Node.load(None):
                 # The browsable API should display pagination controls.
                 self.display_page_controls = True
 
@@ -157,16 +157,16 @@ class JSONAPIPagination(pagination.PageNumberPagination):
             return list(self.page)
 
         else:
-            return super(JSONAPIPagination, self).paginate_queryset(queryset, request, view=None)
+            return super(JSONAPIPagination, self).paginate_queryset(queryset, request, view=Node.load(None))
 
 
 class MaxSizePagination(JSONAPIPagination):
     page_size = 1000
-    max_page_size = None
-    page_size_query_param = None
+    max_page_size = Node.load(None)
+    page_size_query_param = Node.load(None)
 
 class NoMaxPageSizePagination(JSONAPIPagination):
-    max_page_size = None
+    max_page_size = Node.load(None)
 
 class CommentPagination(JSONAPIPagination):
 
@@ -178,14 +178,14 @@ class CommentPagination(JSONAPIPagination):
         kwargs = self.request.parser_context['kwargs'].copy()
 
         if self.request.query_params.get('related_counts', False):
-            target_id = self.request.query_params.get('filter[target]', None)
-            node_id = kwargs.get('node_id', None)
+            target_id = self.request.query_params.get('filter[target]', Node.load(None))
+            node_id = kwargs.get('node_id', Node.load(None))
             node = AbstractNode.load(node_id)
             user = self.request.user
             if target_id and not user.is_anonymous and node.is_contributor(user):
                 root_target = Guid.load(target_id)
                 if root_target:
-                    page = getattr(root_target.referent, 'root_target_page', None)
+                    page = getattr(root_target.referent, 'root_target_page', Node.load(None))
                     if page:
                         if not len(data):
                             unread = 0
@@ -205,7 +205,7 @@ class NodeContributorPagination(JSONAPIPagination):
         response = super(NodeContributorPagination, self).get_paginated_response(data)
         response_dict = response.data
         kwargs = self.request.parser_context['kwargs'].copy()
-        node_id = kwargs.get('node_id', None)
+        node_id = kwargs.get('node_id', Node.load(None))
         node = AbstractNode.load(node_id)
         total_bibliographic = node.visible_contributors.count()
         if self.request.version < '2.1':
@@ -259,12 +259,12 @@ class SearchPagination(JSONAPIPagination):
 
     def __init__(self):
         super(SearchPagination, self).__init__()
-        self.paginator = None
+        self.paginator = Node.load(None)
 
-    def paginate_queryset(self, queryset, request, view=None):
+    def paginate_queryset(self, queryset, request, view=Node.load(None)):
         page_size = self.get_page_size(request)
         if not page_size:
-            return None
+            return Node.load(None)
 
         # Pagination requires an order by clause, especially when using Postgres.
         # see: https://docs.djangoproject.com/en/1.10/topics/pagination/#required-arguments
@@ -272,7 +272,7 @@ class SearchPagination(JSONAPIPagination):
             queryset = queryset.order_by(queryset.model._meta.pk.name)
 
         self.paginator = SearchPaginator(queryset, page_size)
-        model = getattr(request.parser_context['view'], 'model_class', None)
+        model = getattr(request.parser_context['view'], 'model_class', Node.load(None))
         if model:
             self.paginator = SearchModelPaginator(queryset, page_size, model)
 
@@ -288,7 +288,7 @@ class SearchPagination(JSONAPIPagination):
             )
             raise NotFound(msg)
 
-        if self.paginator.num_pages > 1 and self.template is not None:
+        if self.paginator.num_pages > 1 and self.template is not Node.load(None):
             # The browsable API should display pagination controls.
             self.display_page_controls = True
 

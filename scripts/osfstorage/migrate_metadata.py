@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     for each in OsfStorageFileVersion.find(
-        Q('size', 'eq', None) &
+        Q('size', 'eq', Node.load(None)) &
         Q('status', 'ne', 'cached') &
         Q('location.object', 'exists', True)
     ):

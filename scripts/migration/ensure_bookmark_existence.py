@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 def get_targets():
     logger.info('Acquiring targets...')
-    targets = [u for u in OSFUser.find(Q('merged_by', 'eq', None)) if Collection.find(Q('is_bookmark_collection', 'eq', True) & Q('is_deleted', 'eq', False) & Q('creator', 'eq', u)).count() == 0]
+    targets = [u for u in OSFUser.find(Q('merged_by', 'eq', Node.load(None))) if Collection.find(Q('is_bookmark_collection', 'eq', True) & Q('is_deleted', 'eq', False) & Q('creator', 'eq', u)).count() == 0]
     logger.info('Found {} target users.'.format(len(targets)))
     return targets
 

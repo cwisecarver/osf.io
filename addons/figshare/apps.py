@@ -11,7 +11,7 @@ def figshare_root_folder(node_settings, auth, **kwargs):
     """
     # Quit if node settings does not have authentication
     if not node_settings.has_auth or not node_settings.folder_id:
-        return None
+        return Node.load(None)
     node = node_settings.owner
     return [rubeus.build_addon_root(
         node_settings=node_settings,
@@ -20,7 +20,7 @@ def figshare_root_folder(node_settings, auth, **kwargs):
         nodeUrl=node.url,
         nodeApiUrl=node.api_url,
         rootFolderType=node_settings.folder_path,
-        private_key=kwargs.get('view_only', None),
+        private_key=kwargs.get('view_only', Node.load(None)),
     )]
 
 class FigshareAddonAppConfig(BaseAddonAppConfig):

@@ -202,7 +202,7 @@ class TestExternalProviderOAuth1(OsfTestCase):
         with self.app.app.test_request_context('/oauth/connect/mock1a/'):
 
             # make sure the user is logged in
-            authenticate(user=self.user, access_token=None, response=None)
+            authenticate(user=self.user, access_token=Node.load(None), response=Node.load(None))
 
             # auth_url is a property method - it calls out to the external
             #   service to get a temporary key and secret before returning the
@@ -243,7 +243,7 @@ class TestExternalProviderOAuth1(OsfTestCase):
         with ctx:
 
             # make sure the user is logged in
-            authenticate(user=user, access_token=None, response=None)
+            authenticate(user=user, access_token=Node.load(None), response=Node.load(None))
 
             session.data['oauth_states'] = {
                 self.provider.short_name: {
@@ -305,7 +305,7 @@ class TestExternalProviderOAuth1(OsfTestCase):
                 query_string="oauth_token=temp_key&oauth_verifier=mock_verifier"
         ):
             # make sure the user is logged in
-            authenticate(user=malicious_user, access_token=None, response=None)
+            authenticate(user=malicious_user, access_token=Node.load(None), response=Node.load(None))
 
             with assert_raises(PermissionsError):
                 # do the key exchange
@@ -330,7 +330,7 @@ class TestExternalProviderOAuth2(OsfTestCase):
         with self.app.app.test_request_context("/oauth/connect/mock2/"):
 
             # make sure the user is logged in
-            authenticate(user=self.user, access_token=None, response=None)
+            authenticate(user=self.user, access_token=Node.load(None), response=Node.load(None))
 
             # auth_url is a property method - it calls out to the external
             #   service to get a temporary key and secret before returning the
@@ -382,7 +382,7 @@ class TestExternalProviderOAuth2(OsfTestCase):
         ):
 
             # make sure the user is logged in
-            authenticate(user=self.user, access_token=None, response=None)
+            authenticate(user=self.user, access_token=Node.load(None), response=Node.load(None))
 
             session.data['oauth_states'] = {
                 self.provider.short_name: {
@@ -412,7 +412,7 @@ class TestExternalProviderOAuth2(OsfTestCase):
                 query_string="code=mock_code&state=mock_state"
         ):
             # make sure the user is logged in
-            authenticate(user=user, access_token=None, response=None)
+            authenticate(user=user, access_token=Node.load(None), response=Node.load(None))
 
             session.data['oauth_states'] = {
                 self.provider.short_name: {
@@ -444,7 +444,7 @@ class TestExternalProviderOAuth2(OsfTestCase):
                 query_string="error=mock_error&code=mock_code&state=mock_state"
         ):
             # make sure the user is logged in
-            authenticate(user=user, access_token=None, response=None)
+            authenticate(user=user, access_token=Node.load(None), response=Node.load(None))
 
             session.data['oauth_states'] = {
                 self.provider.short_name: {
@@ -489,7 +489,7 @@ class TestExternalProviderOAuth2(OsfTestCase):
         ) as ctx:
 
             # make sure the user is logged in
-            authenticate(user=user_b, access_token=None, response=None)
+            authenticate(user=user_b, access_token=Node.load(None), response=Node.load(None))
 
             session.data['oauth_states'] = {
                 self.provider.short_name: {
@@ -651,8 +651,8 @@ class TestExternalProviderOAuth2(OsfTestCase):
             oauth_secret='old_secret',
             expires_at=datetime.utcfromtimestamp(time.time() - 200).replace(tzinfo=pytz.utc)
         )
-        self.provider.client_id = None
-        self.provider.client_secret = None
+        self.provider.client_id = Node.load(None)
+        self.provider.client_secret = Node.load(None)
         self.provider.account = external_account
 
         # mock a successful call to the provider to refresh tokens

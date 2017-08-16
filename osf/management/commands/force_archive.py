@@ -156,15 +156,15 @@ def perform_wb_copy(reg, node_settings):
     if res.status_code not in (http.OK, http.CREATED, http.ACCEPTED):
         raise HTTPError(res.status_code)
 
-def manually_archive(tree, reg, node_settings, parent=None):
+def manually_archive(tree, reg, node_settings, parent=Node.load(None)):
     if not isinstance(tree, list):
         tree = [tree]
     for filenode in tree:
         if filenode['deleted']:
             continue
         if filenode.get('parent') and (
-                (parent is not None and filenode['parent']._id != parent.copied_from._id)
-                or (parent is None and filenode['parent'].name != '')):
+                (parent is not Node.load(None) and filenode['parent']._id != parent.copied_from._id)
+                or (parent is Node.load(None) and filenode['parent'].name != '')):
             # Not the parent we're looking for
             continue
         file_obj = filenode['object']
@@ -196,11 +196,11 @@ def manually_archive(tree, reg, node_settings, parent=None):
             manually_archive(filenode['children'], reg, node_settings, parent=cloned)
 
 
-def modify_file_tree_recursive(reg_id, tree, file_obj, deleted=None, cached=False, rename=None, revert=False, move_under=None):
+def modify_file_tree_recursive(reg_id, tree, file_obj, deleted=Node.load(None), cached=False, rename=Node.load(None), revert=False, move_under=Node.load(None)):
     # Note: `deleted` has three possible states:
     # - True: indicates file should be marked as deleted
     # - False: indicates file should be added or undeleted
-    # - None: indicates no change to deletion status, allows renames/reverts
+    # - Node.load(None): indicates no change to deletion status, allows renames/reverts
     retree = []
     noop = True
     target_parent = move_under or file_obj.parent
@@ -209,19 +209,19 @@ def modify_file_tree_recursive(reg_id, tree, file_obj, deleted=None, cached=Fals
     for filenode in tree:
         if (file_obj.is_deleted or file_obj.node._id != reg_id) and not cached and filenode['object'].id == target_parent.id:
             filenode['children'].append({
-                'deleted': None,
+                'deleted': Node.load(None),
                 'object': file_obj,
                 'name': file_obj.name,
-                'version': int(file_obj.versions.latest('date_created').identifier) if file_obj.versions.exists() else None
+                'version': int(file_obj.versions.latest('date_created').identifier) if file_obj.versions.exists() else Node.load(None)
             })
             cached = True
             if move_under:
                 noop = False
         if filenode['object']._id == file_obj._id:
-            if deleted is not None:
+            if deleted is not Node.load(None):
                 filenode['deleted'] = deleted
                 noop = False
-            elif deleted is None:
+            elif deleted is Node.load(None):
                 if revert:
                     if not isinstance(filenode['version'], int):
                         raise Exception('Unexpected type for version: got {}'.format(type(filenode['version'])))
@@ -244,7 +244,7 @@ def modify_file_tree_recursive(reg_id, tree, file_obj, deleted=None, cached=Fals
                     'object': file_obj,
                     'name': file_obj.name,
                     'deleted': file_obj.is_deleted,
-                    'version': int(file_obj.versions.latest('date_created').identifier) if file_obj.versions.exists() else None
+                    'version': int(file_obj.versions.latest('date_created').identifier) if file_obj.versions.exists() else Node.load(None)
                 })
             noop = False
         if filenode.get('children'):
@@ -315,7 +315,7 @@ def build_file_tree(reg, node_settings):
             'object': file_obj,
             'name': file_obj.name,
             'deleted': file_obj.is_deleted,
-            'version': int(file_obj.versions.latest('date_created').identifier) if file_obj.versions.exists() else None
+            'version': int(file_obj.versions.latest('date_created').identifier) if file_obj.versions.exists() else Node.load(None)
         }
         if not file_obj.is_file:
             serialized['children'] = [_recurse(child, node) for child in node.files.filter(parent_id=file_obj.id)]
@@ -338,7 +338,7 @@ def archive(registration):
         for short_name in PERMISSIBLE_ADDONS:
             node_settings = reg.registered_from.get_addon(short_name)
             if not hasattr(node_settings, '_get_file_tree'):
-                # Excludes invalid or None-type
+                # Excludes invalid or Node.load(None)-type
                 continue
             if not reg.archive_job.get_target(short_name) or reg.archive_job.get_target(short_name).status == ARCHIVER_SUCCESS:
                 continue

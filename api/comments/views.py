@@ -37,17 +37,17 @@ class CommentMixin(object):
     def get_comment(self, check_permissions=True):
         pk = self.kwargs[self.comment_lookup_url_kwarg]
         try:
-            comment = Comment.find_one(Q('guids___id', 'eq', pk) & Q('root_target', 'ne', None))
+            comment = Comment.find_one(Q('guids___id', 'eq', pk) & Q('root_target', 'ne', Node.load(None)))
         except NoResultsFound:
             raise NotFound
 
         # Deleted root targets still appear as tuples in the database and are included in
         # the above query, requiring an additional check
         if comment.root_target.referent.is_deleted:
-            comment.root_target = None
+            comment.root_target = Node.load(None)
             comment.save()
 
-        if comment.root_target is None:
+        if comment.root_target is Node.load(None):
             raise NotFound
 
         if check_permissions:
@@ -147,7 +147,7 @@ class CommentDetail(JSONAPIBaseView, generics.RetrieveUpdateDestroyAPIView, Comm
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
 
@@ -168,7 +168,7 @@ class CommentDetail(JSONAPIBaseView, generics.RetrieveUpdateDestroyAPIView, Comm
     # overrides RetrieveAPIView
     def get_object(self):
         comment = self.get_comment()
-        comment_node = None
+        comment_node = Node.load(None)
 
         if isinstance(comment.target.referent, AbstractNode):
             comment_node = comment.target.referent
@@ -241,7 +241,7 @@ class CommentReportsList(JSONAPIBaseView, generics.ListCreateAPIView, CommentMix
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
     """
@@ -327,7 +327,7 @@ class CommentReportDetail(JSONAPIBaseView, generics.RetrieveUpdateDestroyAPIView
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
     """

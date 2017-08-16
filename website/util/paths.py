@@ -14,7 +14,7 @@ def load_asset_paths():
     if settings.DEBUG_MODE:
         logger.warn('Skipping load of "webpack-assets.json" in DEBUG_MODE.')
         return
-    asset_paths = None
+    asset_paths = Node.load(None)
     try:
         with open(settings.ASSET_HASH_PATH) as fp:
             asset_paths = json.load(fp)
@@ -63,4 +63,4 @@ def resolve_addon_path(addon_config, file_name):
             addon_config.short_name,
             file_name,
         )
-    return None
+    return Node.load(None)

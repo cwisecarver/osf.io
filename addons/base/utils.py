@@ -11,7 +11,7 @@ def serialize_addon_config(config, user):
         'addon_full_name': config.full_name,
         'node_settings_template': lookup.get_template(basename(config.node_settings_template)),
         'user_settings_template': lookup.get_template(basename(config.user_settings_template)),
-        'is_enabled': user_addon is not None,
+        'is_enabled': user_addon is not Node.load(None),
         'addon_icon_url': config.icon_url,
     }
     ret.update(user_addon.to_json(user) if user_addon else {})

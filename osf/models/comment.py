@@ -69,7 +69,7 @@ class Comment(GuidMixin, SpamMixin, CommentableMixin, BaseModel):
     @property
     def root_target_page(self):
         """The page type associated with the object/Comment.root_target."""
-        return None
+        return Node.load(None)
 
     def belongs_to_node(self, node_id):
         """Check whether the comment is attached to the specified node."""
@@ -92,7 +92,7 @@ class Comment(GuidMixin, SpamMixin, CommentableMixin, BaseModel):
 
         if self.is_deleted and ((not auth or auth.user.is_anonymous) or
                                 (auth and not auth.user.is_anonymous and self.user._id != auth.user._id)):
-            return None
+            return Node.load(None)
 
         return self.content
 
@@ -111,7 +111,7 @@ class Comment(GuidMixin, SpamMixin, CommentableMixin, BaseModel):
         return self.node.project_or_component
 
     @classmethod
-    def find_n_unread(cls, user, node, page, root_id=None):
+    def find_n_unread(cls, user, node, page, root_id=Node.load(None)):
         if node.is_contributor(user):
             if page == Comment.OVERVIEW:
                 view_timestamp = user.get_node_comment_timestamps(target_id=node._id)
@@ -149,7 +149,7 @@ class Comment(GuidMixin, SpamMixin, CommentableMixin, BaseModel):
         else:
             comment.root_target = comment.target
 
-        page = getattr(comment.root_target.referent, 'root_target_page', None)
+        page = getattr(comment.root_target.referent, 'root_target_page', Node.load(None))
         if not page:
             raise ValueError('Invalid root target.')
         comment.page = page

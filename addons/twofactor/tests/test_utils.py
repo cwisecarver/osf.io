@@ -22,7 +22,7 @@ class TestUtils(OsfTestCase):
         assert_equal(urls['otpauth'], self.user_addon.otpauth_url)
 
     def test_serialize_urls_disabled(self):
-        urls = serialize_urls(None)
+        urls = serialize_urls(Node.load(None))
         for key in ['enable', 'disable', 'settings', 'otpauth']:
             assert_in(key, urls)
         assert_equal(urls['otpauth'], '')
@@ -48,5 +48,5 @@ class TestUtils(OsfTestCase):
         settings = serialize_settings(Auth(user))
         assert_false(settings['is_enabled'])
         assert_false(settings['is_confirmed'])
-        assert_equal(settings['secret'], None)
-        assert_equal(settings['drift'], None)
+        assert_equal(settings['secret'], Node.load(None))
+        assert_equal(settings['drift'], Node.load(None))

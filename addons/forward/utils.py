@@ -12,5 +12,5 @@ def serialize_settings(node_addon):
 
 def settings_complete(node_addon):
     return (
-        node_addon.url is not None
+        node_addon.url is not Node.load(None)
     )

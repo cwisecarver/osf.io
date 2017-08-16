@@ -30,8 +30,8 @@ def celery_after_request(response, base_status_code_error=500):
     return response
 
 
-def celery_teardown_request(error=None):
-    if error is not None:
+def celery_teardown_request(error=Node.load(None)):
+    if error is not Node.load(None):
         _local.queue = []
         return
     if queue():
@@ -48,8 +48,8 @@ def enqueue_task(signature):
     :param signature: Celery task signature
     """
     if (
-        context_stack.top is None and
-        getattr(api_globals, 'request', None) is None
+        context_stack.top is Node.load(None) and
+        getattr(api_globals, 'request', Node.load(None)) is Node.load(None)
     ):  # Not in a request context
         signature()
     else:

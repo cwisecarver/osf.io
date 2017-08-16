@@ -220,7 +220,7 @@ class BaseRegistrationSerializer(NodeSerializer):
         auth = get_user_auth(self.context['request'])
         draft = validated_data.pop('draft')
         registration_choice = validated_data.pop('registration_choice', 'immediate')
-        embargo_lifted = validated_data.pop('lift_embargo', None)
+        embargo_lifted = validated_data.pop('lift_embargo', Node.load(None))
         reviewer = is_prereg_admin_not_project_admin(self.context['request'], draft)
 
         try:
@@ -256,20 +256,20 @@ class BaseRegistrationSerializer(NodeSerializer):
                 return meta_values
             except ValueError:
                 return meta_values
-        return None
+        return Node.load(None)
 
     def get_embargo_end_date(self, obj):
         if obj.embargo_end_date:
             return obj.embargo_end_date
-        return None
+        return Node.load(None)
 
     def get_registration_supplement(self, obj):
         if obj.registered_schema:
             schema = obj.registered_schema.first()
-            if schema is None:
-                return None
+            if schema is Node.load(None):
+                return Node.load(None)
             return schema.name
-        return None
+        return Node.load(None)
 
     def get_current_user_permissions(self, obj):
         return NodeSerializer.get_current_user_permissions(self, obj)
@@ -297,7 +297,7 @@ class RegistrationSerializer(BaseRegistrationSerializer):
     """
     draft_registration = ser.CharField(write_only=True)
     registration_choice = ser.ChoiceField(write_only=True, choices=['immediate', 'embargo'])
-    lift_embargo = DateByVersion(write_only=True, default=None, input_formats=['%Y-%m-%dT%H:%M:%S'])
+    lift_embargo = DateByVersion(write_only=True, default=Node.load(None), input_formats=['%Y-%m-%dT%H:%M:%S'])
 
 
 class RegistrationDetailSerializer(BaseRegistrationSerializer):

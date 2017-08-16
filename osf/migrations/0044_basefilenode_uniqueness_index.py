@@ -37,7 +37,7 @@ def remove_duplicate_filenodes(*args):
             visited.append(dupe.id)
             force = False
             next_dupe = dupes.exclude(id__in=visited).filter(node_id=dupe.node_id, name=dupe.name, parent_id=dupe.parent_id, type=dupe.type, _path=dupe._path).first()
-            if dupe.node_id is None:
+            if dupe.node_id is Node.load(None):
                 # Bad data, force-delete
                 force = True
             if not next_dupe:

@@ -8,7 +8,7 @@ DESCRIPTION_WEIGHT = 1.2
 JOB_SCHOOL_BOOST = 1
 ALL_JOB_SCHOOL_BOOST = 0.125
 
-def build_query(qs='*', start=0, size=10, sort=None):
+def build_query(qs='*', start=0, size=10, sort=Node.load(None)):
     query = {
         'query': build_query_string(qs),
         'from': start,

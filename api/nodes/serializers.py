@@ -37,9 +37,9 @@ from website.util import permissions as osf_permissions
 
 class NodeTagField(ser.Field):
     def to_representation(self, obj):
-        if obj is not None:
+        if obj is not Node.load(None):
             return obj.name
-        return None
+        return Node.load(None)
 
     def to_internal_value(self, data):
         return data
@@ -93,8 +93,8 @@ class NodeCitationStyleSerializer(JSONAPISerializer):
 def get_license_details(node, validated_data):
     license = node.license if isinstance(node, PreprintService) else node.node_license
 
-    license_id = license.node_license.license_id if license else None
-    license_year = license.year if license else None
+    license_id = license.node_license.license_id if license else Node.load(None)
+    license_year = license.year if license else Node.load(None)
     license_holders = license.copyright_holders if license else []
 
     if 'license' in validated_data:
@@ -332,7 +332,7 @@ class NodeSerializer(JSONAPISerializer):
 
     def get_current_user_can_comment(self, obj):
         user = self.context['request'].user
-        auth = Auth(user if not user.is_anonymous else None)
+        auth = Auth(user if not user.is_anonymous else Node.load(None))
         return obj.can_comment(auth)
 
     class Meta:
@@ -348,7 +348,7 @@ class NodeSerializer(JSONAPISerializer):
 
     def get_node_count(self, obj):
         auth = get_user_auth(self.context['request'])
-        user_id = getattr(auth.user, 'id', None)
+        user_id = getattr(auth.user, 'id', Node.load(None))
         with connection.cursor() as cursor:
             cursor.execute('''
                 WITH RECURSIVE parents AS (
@@ -428,7 +428,7 @@ class NodeSerializer(JSONAPISerializer):
         if 'template_from' in validated_data:
             template_from = validated_data.pop('template_from')
             template_node = Node.load(template_from)
-            if template_node is None:
+            if template_node is Node.load(None):
                 raise exceptions.NotFound
             if not template_node.has_permission(user, 'read', check_parent=False):
                 raise exceptions.PermissionDenied
@@ -601,7 +601,7 @@ class NodeAddonSettingsSerializer(NodeAddonSettingsSerializerBase):
             external_account_id = data['external_account']['_id']
             set_account = True
         except KeyError:
-            external_account_id = None
+            external_account_id = Node.load(None)
             set_account = False
         return set_account, external_account_id
 
@@ -610,7 +610,7 @@ class NodeAddonSettingsSerializer(NodeAddonSettingsSerializerBase):
             folder_info = data['folder_id']
             set_folder = True
         except KeyError:
-            folder_info = None
+            folder_info = Node.load(None)
             set_folder = False
 
         if addon_name == 'googledrive':
@@ -618,7 +618,7 @@ class NodeAddonSettingsSerializer(NodeAddonSettingsSerializerBase):
             try:
                 folder_path = data['folder_path']
             except KeyError:
-                folder_path = None
+                folder_path = Node.load(None)
 
             if (folder_id or folder_path) and not (folder_id and folder_path):
                 raise exceptions.ValidationError(detail='Must specify both folder_id and folder_path for {}'.format(addon_name))
@@ -710,7 +710,7 @@ class NodeForksSerializer(NodeSerializer):
 
     def create(self, validated_data):
         node = validated_data.pop('node')
-        fork_title = validated_data.pop('title', None)
+        fork_title = validated_data.pop('title', Node.load(None))
         request = self.context['request']
         auth = get_user_auth(request)
         fork = node.fork_node(auth, title=fork_title)
@@ -797,9 +797,9 @@ class NodeContributorsSerializer(JSONAPISerializer):
         )
 
     def get_unregistered_contributor(self, obj):
-        unclaimed_records = obj.user.unclaimed_records.get(obj.node._id, None)
+        unclaimed_records = obj.user.unclaimed_records.get(obj.node._id, Node.load(None))
         if unclaimed_records:
-            return unclaimed_records.get('name', None)
+            return unclaimed_records.get('name', Node.load(None))
 
 
 class NodeContributorsCreateSerializer(NodeContributorsSerializer):
@@ -820,7 +820,7 @@ class NodeContributorsCreateSerializer(NodeContributorsSerializer):
 
     email_preferences = ['default', 'preprint', 'false']
 
-    def validate_data(self, node, user_id=None, full_name=None, email=None, index=None):
+    def validate_data(self, node, user_id=Node.load(None), full_name=Node.load(None), email=Node.load(None), index=Node.load(None)):
         if user_id and (full_name or email):
             raise Conflict(detail='Full name and/or email should not be included with a user ID.')
         if not user_id and not full_name:
@@ -830,8 +830,8 @@ class NodeContributorsCreateSerializer(NodeContributorsSerializer):
 
     def create(self, validated_data):
         id = validated_data.get('_id')
-        email = validated_data.get('user', {}).get('email', None)
-        index = None
+        email = validated_data.get('user', {}).get('email', Node.load(None))
+        index = Node.load(None)
         if '_order' in validated_data:
             index = validated_data.pop('_order')
         node = self.context['view'].get_node()
@@ -866,7 +866,7 @@ class NodeContributorDetailSerializer(NodeContributorsSerializer):
     index = ser.IntegerField(required=False, read_only=False, source='_order')
 
     def update(self, instance, validated_data):
-        index = None
+        index = Node.load(None)
         if '_order' in validated_data:
             index = validated_data.pop('_order')
 
@@ -879,7 +879,7 @@ class NodeContributorDetailSerializer(NodeContributorsSerializer):
             bibliographic = node.get_visible(instance.user)
         permission = validated_data.get('permission') or instance.permission
         try:
-            if index is not None:
+            if index is not Node.load(None):
                 node.move_contributor(instance.user, auth, index, save=True)
             node.update_contributor(instance.user, permission, bibliographic, auth, save=True)
         except NodeStateError as e:
@@ -1112,8 +1112,8 @@ class NodeAlternativeCitationSerializer(JSONAPISerializer):
 
     def error_checker(self, data):
         errors = []
-        name = data.get('name', None)
-        text = data.get('text', None)
+        name = data.get('name', Node.load(None))
+        text = data.get('text', Node.load(None))
         citations = self.context['view'].get_node().alternative_citations
         if not (self.instance and self.instance.name == name) and citations.filter(name=name).count() > 0:
             errors.append("There is already a citation named '{}'".format(name))
@@ -1163,7 +1163,7 @@ class DraftRegistrationSerializer(JSONAPISerializer):
     def create(self, validated_data):
         node = validated_data.pop('node')
         initiator = validated_data.pop('initiator')
-        metadata = validated_data.pop('registration_metadata', None)
+        metadata = validated_data.pop('registration_metadata', Node.load(None))
 
         schema_id = validated_data.pop('registration_schema').get('_id')
         schema = get_object_or_error(MetaSchema, schema_id)
@@ -1202,7 +1202,7 @@ class DraftRegistrationDetailSerializer(DraftRegistrationSerializer):
         """
         Update draft instance with the validated metadata.
         """
-        metadata = validated_data.pop('registration_metadata', None)
+        metadata = validated_data.pop('registration_metadata', Node.load(None))
         reviewer = is_prereg_admin_not_project_admin(self.context['request'], draft)
         if metadata:
             try:
@@ -1217,9 +1217,9 @@ class DraftRegistrationDetailSerializer(DraftRegistrationSerializer):
 
 class NodeVOL(ser.Field):
     def to_representation(self, obj):
-        if obj is not None:
+        if obj is not Node.load(None):
             return obj._id
-        return None
+        return Node.load(None)
 
     def to_internal_value(self, data):
         return data

@@ -192,7 +192,7 @@ class PreprintIsValidListMixin:
 
     @mock.patch('website.preprints.tasks.on_preprint_updated.si')
     def test_preprint_node_null_invisible(self, mock_preprint_updated, app, user_admin_contrib, user_write_contrib, user_non_contrib, preprint, url):
-        preprint.node = None
+        preprint.node = Node.load(None)
         preprint.save()
 
         # unauth

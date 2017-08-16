@@ -17,9 +17,9 @@ default_adapter = HTTPAdapter()
 
 class GitHubClient(object):
 
-    def __init__(self, external_account=None, access_token=None):
+    def __init__(self, external_account=Node.load(None), access_token=Node.load(None)):
 
-        self.access_token = getattr(external_account, 'oauth_key', None) or access_token
+        self.access_token = getattr(external_account, 'oauth_key', Node.load(None)) or access_token
         if self.access_token:
             self.gh3 = github3.login(token=self.access_token)
             self.gh3.set_client_id(
@@ -33,7 +33,7 @@ class GitHubClient(object):
             self.gh3._session.mount('https://api.github.com/user', default_adapter)
             self.gh3._session.mount('https://', https_cache)
 
-    def user(self, user=None):
+    def user(self, user=Node.load(None)):
         """Fetch a user or the authenticated user.
 
         :param user: Optional GitHub user name; will fetch authenticated
@@ -65,7 +65,7 @@ class GitHubClient(object):
     def user_repos(self, user):
         return self.gh3.iter_user_repos(user, type='all', sort='full_name')
 
-    def my_org_repos(self, permissions=None):
+    def my_org_repos(self, permissions=Node.load(None)):
         permissions = permissions or ['push']
         return itertools.chain.from_iterable(
             team.iter_repos()
@@ -76,7 +76,7 @@ class GitHubClient(object):
     def create_repo(self, repo, **kwargs):
         return self.gh3.create_repo(repo, **kwargs)
 
-    def branches(self, user, repo, branch=None):
+    def branches(self, user, repo, branch=Node.load(None)):
         """List a repo's branches or get a single branch (in a list).
 
         :param str user: GitHub user name
@@ -121,7 +121,7 @@ class GitHubClient(object):
         """
         return self.repo(user, repo).iter_hooks()
 
-    def add_hook(self, user, repo, name, config, events=None, active=True):
+    def add_hook(self, user, repo, name, config, events=Node.load(None), active=True):
         """Create a webhook.
 
         :param str user: GitHub user name
@@ -133,7 +133,7 @@ class GitHubClient(object):
             hook = self.repo(user, repo).create_hook(name, config, events, active)
         except github3.GitHubError:
             # TODO Handle this case - if '20 hooks' in e.errors[0].get('message'):
-            return None
+            return Node.load(None)
         else:
             return hook
 
@@ -147,7 +147,7 @@ class GitHubClient(object):
         """
         repo = self.repo(user, repo)
         hook = repo.hook(_id)
-        if hook is None:
+        if hook is Node.load(None):
             raise NotFoundError
         return repo.hook(_id).delete()
 
@@ -160,7 +160,7 @@ class GitHubClient(object):
             return self.gh3.revoke_authorization(self.access_token)
 
 
-def ref_to_params(branch=None, sha=None):
+def ref_to_params(branch=Node.load(None), sha=Node.load(None)):
 
     params = urllib.urlencode({
         key: value

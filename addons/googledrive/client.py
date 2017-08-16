@@ -19,7 +19,7 @@ class GoogleAuthClient(BaseClient):
 
 class GoogleDriveClient(BaseClient):
 
-    def __init__(self, access_token=None):
+    def __init__(self, access_token=Node.load(None)):
         self.access_token = access_token
 
     @property

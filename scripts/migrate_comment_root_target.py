@@ -34,7 +34,7 @@ def get_guid(filenode):
         guid = Guid.find_one(Q('referent', 'eq', filenode))
     except ModularOdmException:
         logger.error('No Guid found for filenode {}'.format(filenode._id))
-        return None
+        return Node.load(None)
     else:
         return guid
 
@@ -59,8 +59,8 @@ def main():
             else:
                 logger.error('Unexpected root target: {}'.format(root_target))
         # If root_target is unset, look at the target field
-        elif root_target is None:
-            logger.info('Root target for comment {} is None'.format(comment._id))
+        elif root_target is Node.load(None):
+            logger.info('Root target for comment {} is Node.load(None)'.format(comment._id))
             guid = comment.target
             if isinstance(guid.referent, (TrashedFileNode, StoredFileNode)):
                 logger.info('Setting root_target to Guid {}'.format(guid._id))

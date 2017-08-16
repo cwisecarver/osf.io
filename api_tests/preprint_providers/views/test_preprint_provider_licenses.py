@@ -20,7 +20,7 @@ class TestPreprintProviderLicenses(ApiTestCase):
 
     def test_preprint_provider_has_no_acceptable_licenses_and_no_default(self):
         self.provider.licenses_acceptable = []
-        self.provider.default_license = None
+        self.provider.default_license = Node.load(None)
         self.provider.save()
         res = self.app.get(self.url)
 
@@ -41,7 +41,7 @@ class TestPreprintProviderLicenses(ApiTestCase):
 
     def test_prerint_provider_has_acceptable_licenses_but_no_default(self):
         self.provider.licenses_acceptable.add(self.license1, self.license2)
-        self.provider.default_license = None
+        self.provider.default_license = Node.load(None)
         self.provider.save()
         res = self.app.get(self.url)
 

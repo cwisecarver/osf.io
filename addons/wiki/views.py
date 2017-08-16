@@ -104,11 +104,11 @@ def _get_wiki_pages_current(node):
             for sorted_key in sorted(node.wiki_pages_current)
         ]
         # TODO: remove after forward slash migration
-        if sorted_page is not None
+        if sorted_page is not Node.load(None)
     ]
 
 
-def _get_wiki_api_urls(node, name, additional_urls=None):
+def _get_wiki_api_urls(node, name, additional_urls=Node.load(None)):
     urls = {
         'base': node.api_url_for('project_wiki_home'),
         'delete': node.api_url_for('project_wiki_delete', wname=name),
@@ -122,7 +122,7 @@ def _get_wiki_api_urls(node, name, additional_urls=None):
     return urls
 
 
-def _get_wiki_web_urls(node, key, version=1, additional_urls=None):
+def _get_wiki_web_urls(node, key, version=1, additional_urls=Node.load(None)):
     urls = {
         'base': node.web_url_for('project_wiki_home', _guid=True),
         'edit': node.web_url_for('project_wiki_view', wname=key, _guid=True),
@@ -154,11 +154,11 @@ def wiki_widget(**kwargs):
             wiki_html = BeautifulSoup(wiki_html)
         rendered_before_update = wiki_page.rendered_before_update
     else:
-        wiki_html = None
+        wiki_html = Node.load(None)
 
     ret = {
         'complete': True,
-        'wiki_content': unicode(wiki_html) if wiki_html else None,
+        'wiki_content': unicode(wiki_html) if wiki_html else Node.load(None),
         'wiki_content_url': node.api_url_for('wiki_page_content', wname='home'),
         'rendered_before_update': rendered_before_update,
         'more': more,
@@ -176,12 +176,12 @@ def wiki_page_draft(wname, **kwargs):
     wiki_page = node.get_wiki_page(wname)
 
     return {
-        'wiki_content': wiki_page.content if wiki_page else None,
+        'wiki_content': wiki_page.content if wiki_page else Node.load(None),
         'wiki_draft': (wiki_page.get_draft(node) if wiki_page
                        else wiki_utils.get_sharejs_content(node, wname)),
     }
 
-def _wiki_page_content(wname, wver=None, **kwargs):
+def _wiki_page_content(wname, wver=Node.load(None), **kwargs):
     node = kwargs['node'] or kwargs['project']
     wiki_page = node.get_wiki_page(wname, version=wver)
     rendered_before_update = wiki_page.rendered_before_update if wiki_page else False
@@ -193,7 +193,7 @@ def _wiki_page_content(wname, wver=None, **kwargs):
 @must_be_valid_project
 @must_be_contributor_or_public
 @must_have_addon('wiki', 'node')
-def wiki_page_content(wname, wver=None, **kwargs):
+def wiki_page_content(wname, wver=Node.load(None), **kwargs):
     return _wiki_page_content(wname, wver=wver, **kwargs)
 
 @must_be_valid_project  # injects project
@@ -216,7 +216,7 @@ def project_wiki_delete(auth, wname, **kwargs):
 @must_be_valid_project  # returns project
 @must_be_contributor_or_public
 @must_have_addon('wiki', 'node')
-def project_wiki_view(auth, wname, path=None, **kwargs):
+def project_wiki_view(auth, wname, path=Node.load(None), **kwargs):
     node = kwargs['node'] or kwargs['project']
     anonymous = has_anonymous_link(node, auth)
     wiki_name = (wname or '').strip()
@@ -285,7 +285,7 @@ def project_wiki_view(auth, wname, path=None, **kwargs):
             if wiki_settings.is_publicly_editable:
                 raise HTTPError(http.UNAUTHORIZED)
             raise HTTPError(http.FORBIDDEN)
-        sharejs_uuid = None
+        sharejs_uuid = Node.load(None)
 
     # Opens 'edit' panel when home wiki is empty
     if not content and can_edit and wiki_name == 'home':
@@ -298,7 +298,7 @@ def project_wiki_view(auth, wname, path=None, **kwargs):
     }
 
     ret = {
-        'wiki_id': wiki_page._primary_key if wiki_page else None,
+        'wiki_id': wiki_page._primary_key if wiki_page else Node.load(None),
         'wiki_name': wiki_page.page_name if wiki_page else wiki_name,
         'wiki_content': content,
         'rendered_before_update': rendered_before_update,
@@ -353,7 +353,7 @@ def project_wiki_edit_post(auth, wname, **kwargs):
         # update_node_wiki will create a new wiki page because a page
         node.update_node_wiki(wiki_name, form_wiki_content, auth)
         ret = {'status': 'success'}
-    return ret, http.FOUND, None, redirect_url
+    return ret, http.FOUND, Node.load(None), redirect_url
 
 @must_be_valid_project  # injects node or project
 @must_have_permission('admin')
@@ -361,7 +361,7 @@ def project_wiki_edit_post(auth, wname, **kwargs):
 @must_have_addon('wiki', 'node')
 def edit_wiki_settings(node, auth, **kwargs):
     wiki_settings = node.get_addon('wiki')
-    permissions = request.get_json().get('permission', None)
+    permissions = request.get_json().get('permission', Node.load(None))
 
     if not wiki_settings:
         raise HTTPError(http.BAD_REQUEST, data=dict(
@@ -444,7 +444,7 @@ def project_wiki_rename(auth, wname, **kwargs):
     """
     node = kwargs['node'] or kwargs['project']
     wiki_name = wname.strip()
-    new_wiki_name = request.get_json().get('value', None)
+    new_wiki_name = request.get_json().get('value', Node.load(None))
 
     try:
         node.rename_node_wiki(wiki_name, new_wiki_name, auth)
@@ -520,7 +520,7 @@ def format_home_wiki_page(node):
         'page': {
             'url': node.web_url_for('project_wiki_home'),
             'name': 'Home',
-            'id': 'None',
+            'id': 'Node.load(None)',
         }
     }
     if home_wiki:
@@ -610,4 +610,4 @@ def serialize_component_wiki(node, auth):
             'children': children,
         }
         return component
-    return None
+    return Node.load(None)

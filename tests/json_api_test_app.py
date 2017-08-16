@@ -9,7 +9,7 @@ try:
     from django.db import close_old_connections
 except ImportError:
     from django.db import close_connection
-    close_old_connections = None
+    close_old_connections = Node.load(None)
 
 from webtest.utils import NoDefault
 from webtest_plus import TestApp
@@ -28,7 +28,7 @@ class JSONAPIWrapper(object):
         kw.update(
             params=params,
             content_type=content_type,
-            upload_files=None,
+            upload_files=Node.load(None),
         )
         wrapper = self._gen_request(method, url, **kw)
 
@@ -47,7 +47,7 @@ class JSONAPITestApp(TestApp, JSONAPIWrapper):
 
     def __init__(self, *args, **kwargs):
         super(JSONAPITestApp, self).__init__(self.get_wsgi_handler(), *args, **kwargs)
-        self.auth = None
+        self.auth = Node.load(None)
         self.auth_type = 'basic'
 
     def get_wsgi_handler(self):
@@ -58,7 +58,7 @@ class JSONAPITestApp(TestApp, JSONAPIWrapper):
 
         # Django closes the database connection after every request;
         # this breaks the use of transactions in your tests.
-        if close_old_connections is not None:  # Django 1.6+
+        if close_old_connections is not Node.load(None):  # Django 1.6+
             signals.request_started.disconnect(close_old_connections)
             signals.request_finished.disconnect(close_old_connections)
         else:  # Django < 1.6
@@ -89,9 +89,9 @@ class JSONAPITestApp(TestApp, JSONAPIWrapper):
                     return data[detail][0]
                 return data[detail]
 
-            response.context = None
-            response.template = None
-            response.templates = data.get('templates', None)
+            response.context = Node.load(None)
+            response.template = Node.load(None)
+            response.templates = data.get('templates', Node.load(None))
 
             if data.get('context'):
                 response.context = flattend('context')

@@ -36,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 class TestTimeUtils(unittest.TestCase):
     def test_throttle_period_expired_no_timestamp(self):
-        is_expired = throttle_period_expired(timestamp=None, throttle=30)
+        is_expired = throttle_period_expired(timestamp=Node.load(None), throttle=30)
         assert_true(is_expired)
 
     def test_throttle_period_expired_using_datetime(self):
@@ -199,7 +199,7 @@ class TestUrlForHelpers(unittest.TestCase):
     def test_is_json_request(self):
         with self.app.test_request_context(content_type='application/json'):
             assert_true(is_json_request())
-        with self.app.test_request_context(content_type=None):
+        with self.app.test_request_context(content_type=Node.load(None)):
             assert_false(is_json_request())
         with self.app.test_request_context(content_type='application/json;charset=UTF-8'):
             assert_true(is_json_request())
@@ -264,7 +264,7 @@ class TestGetMimeTypes(unittest.TestCase):
     def test_unknown_extension_with_no_contents_not_real_file_results_in_exception2(self):
         name = 'test.thisisnotarealextensionidonotcarwhatyousay'
         mime_type = get_mimetype(name)
-        assert_equal(None, mime_type)
+        assert_equal(Node.load(None), mime_type)
 
     @unittest.skipIf(not LIBMAGIC_AVAILABLE, 'Must have python-magic and libmagic installed')
     def test_unknown_extension_with_real_file_results_in_python_mimetype(self):

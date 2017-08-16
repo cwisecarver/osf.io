@@ -12,12 +12,12 @@ def _connect(host, token):
     try:
         return Connection(host, token)
     except ConnectionError:
-        return None
+        return Node.load(None)
 
 
 def connect_from_settings(node_settings):
     if not (node_settings and node_settings.external_account):
-        return None
+        return Node.load(None)
 
     host = node_settings.external_account.oauth_key
     token = node_settings.external_account.oauth_secret
@@ -25,7 +25,7 @@ def connect_from_settings(node_settings):
     try:
         return _connect(host, token)
     except UnauthorizedError:
-        return None
+        return Node.load(None)
 
 
 def connect_or_error(host, token):
@@ -40,7 +40,7 @@ def connect_or_error(host, token):
 
 def connect_from_settings_or_401(node_settings):
     if not (node_settings and node_settings.external_account):
-        return None
+        return Node.load(None)
 
     host = node_settings.external_account.oauth_key
     token = node_settings.external_account.oauth_secret
@@ -79,13 +79,13 @@ def publish_dataset(dataset):
 
 
 def get_datasets(dataverse):
-    if dataverse is None:
+    if dataverse is Node.load(None):
         return []
     return dataverse.get_datasets(timeout=settings.REQUEST_TIMEOUT)
 
 
 def get_dataset(dataverse, doi):
-    if dataverse is None:
+    if dataverse is Node.load(None):
         return
     dataset = dataverse.get_dataset_by_doi(doi, timeout=settings.REQUEST_TIMEOUT)
     try:
@@ -104,18 +104,18 @@ def get_dataset(dataverse, doi):
 
 
 def get_dataverses(connection):
-    if connection is None:
+    if connection is Node.load(None):
         return []
     return connection.get_dataverses()
 
 
 def get_dataverse(connection, alias):
-    if connection is None:
+    if connection is Node.load(None):
         return
     return connection.get_dataverse(alias)
 
 
 def get_custom_publish_text(connection):
-    if connection is None:
+    if connection is Node.load(None):
         return ''
     return strip_html(connection.get_custom_publish_text(), tags=['strong', 'li', 'ul'])

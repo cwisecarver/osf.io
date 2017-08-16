@@ -42,10 +42,10 @@ class UserSummary(SummaryAnalytics):
 
         active_user_query = (
             Q('is_registered', 'eq', True) &
-            Q('password', 'ne', None) &
-            Q('merged_by', 'eq', None) &
-            Q('date_disabled', 'eq', None) &
-            Q('date_confirmed', 'ne', None) &
+            Q('password', 'ne', Node.load(None)) &
+            Q('merged_by', 'eq', Node.load(None)) &
+            Q('date_disabled', 'eq', Node.load(None)) &
+            Q('date_confirmed', 'ne', Node.load(None)) &
             Q('date_confirmed', 'lt', query_datetime)
         )
 
@@ -70,15 +70,15 @@ class UserSummary(SummaryAnalytics):
                 'depth': depth_users,
                 'unconfirmed': OSFUser.find(
                     Q('date_registered', 'lt', query_datetime) &
-                    Q('date_confirmed', 'eq', None)
+                    Q('date_confirmed', 'eq', Node.load(None))
                 ).count(),
                 'deactivated': OSFUser.find(
-                    Q('date_disabled', 'ne', None) &
+                    Q('date_disabled', 'ne', Node.load(None)) &
                     Q('date_disabled', 'lt', query_datetime)
                 ).count(),
                 'merged': OSFUser.find(
                     Q('date_registered', 'lt', query_datetime) &
-                    Q('merged_by', 'ne', None)
+                    Q('merged_by', 'ne', Node.load(None))
                 ).count(),
                 'profile_edited': profile_edited
             }
@@ -108,6 +108,6 @@ if __name__ == '__main__':
     if yesterday:
         date = (datetime.today() - timedelta(1)).date()
     else:
-        date = parse(args.date).date() if args.date else None
+        date = parse(args.date).date() if args.date else Node.load(None)
     events = user_summary.get_events(date)
     user_summary.send_events(events)

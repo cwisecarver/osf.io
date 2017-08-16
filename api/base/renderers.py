@@ -6,7 +6,7 @@ class JSONRendererWithESISupport(JSONRenderer):
     format = 'json'
     media_type = 'application/json'
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
+    def render(self, data, accepted_media_type=Node.load(None), renderer_context=Node.load(None)):
         #  TODO: There should be a way to do this that is conditional on esi being requested and
         #  TODO: In such a way that it doesn't use regex unless there's absolutely no other way.
         initial_rendering = super(JSONRendererWithESISupport, self).render(data, accepted_media_type, renderer_context)

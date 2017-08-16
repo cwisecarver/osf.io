@@ -108,7 +108,7 @@ class TestFilebrowserViews(DropboxAddonTestCase, OsfTestCase):
 
     def test_dropbox_folder_list_if_folder_is_none_and_folders_only(self):
         with patch_client('addons.dropbox.models.Dropbox'):
-            self.node_settings.folder = None
+            self.node_settings.folder = Node.load(None)
             self.node_settings.save()
             url = self.project.api_url_for('dropbox_folder_list')
             res = self.app.get(url, auth=self.user.auth)
@@ -143,15 +143,15 @@ class TestFilebrowserViews(DropboxAddonTestCase, OsfTestCase):
         with mock.patch.object(type(self.node_settings), 'has_auth', True):
             root = dropbox_root_folder(node_settings=self.node_settings, auth=self.user.auth)
 
-        assert root is not None
+        assert root is not Node.load(None)
 
         # Nothing is returned when there is no folder linked
-        self.node_settings.folder = None
+        self.node_settings.folder = Node.load(None)
         self.node_settings.save()
         with mock.patch.object(type(self.node_settings), 'has_auth', True):
             root = dropbox_root_folder(node_settings=self.node_settings, auth=self.user.auth)
 
-        assert root is None
+        assert root is Node.load(None)
 
     @mock.patch('addons.dropbox.models.Dropbox.files_list_folder')
     def test_dropbox_folder_list_returns_error_if_invalid_path(self, mock_metadata):

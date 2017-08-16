@@ -66,8 +66,8 @@ def prepare_private_key():
         if key:
             key = key[0]
     else:
-        scheme = None
-        key = None
+        scheme = Node.load(None)
+        key = Node.load(None)
 
     # Update URL and redirect
     if key and not session.is_authenticated:
@@ -88,7 +88,7 @@ def set_session(session):
     sessions[request._get_current_object()] = session
 
 
-def create_session(response, data=None):
+def create_session(response, data=Node.load(None)):
     Session = apps.get_model('osf.Session')
     current_session = get_session()
     if current_session:
@@ -101,7 +101,7 @@ def create_session(response, data=None):
         new_session.save()
         cookie_value = itsdangerous.Signer(settings.SECRET_KEY).sign(session_id)
         set_session(new_session)
-    if response is not None:
+    if response is not Node.load(None):
         response.set_cookie(settings.COOKIE_NAME, value=cookie_value, domain=settings.OSF_COOKIE_DOMAIN,
                             secure=settings.SESSION_COOKIE_SECURE, httponly=settings.SESSION_COOKIE_HTTPONLY)
         return response
@@ -142,7 +142,7 @@ def before_request():
             user_addon = user.get_addon('twofactor')
             if user_addon and user_addon.is_confirmed:
                 otp = request.headers.get('X-OSF-OTP')
-                if otp is None or not user_addon.verify_code(otp):
+                if otp is Node.load(None) or not user_addon.verify_code(otp):
                     # Must specify two-factor authentication OTP code or invalid two-factor authentication OTP code.
                     user_session.data['auth_error_code'] = http.UNAUTHORIZED
                     return

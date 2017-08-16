@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Migrate users whose email_verifications=None to have
+"""Migrate users whose email_verifications=Node.load(None) to have
 email_verifications={} (which is now the default value).
 """
 import sys
@@ -15,7 +15,7 @@ from scripts import utils as script_utils
 logger = logging.getLogger(__name__)
 
 def do_migration():
-    users = User.find(Q('email_verifications', 'eq', None))
+    users = User.find(Q('email_verifications', 'eq', Node.load(None)))
     migrated = 0
     for user in users:
         logger.info('Setting email_verifications for user {} to {{}}'.format(user._id))

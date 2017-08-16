@@ -264,7 +264,7 @@ class CollectionDetail(JSONAPIBaseView, generics.RetrieveUpdateDestroyAPIView, C
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
 
@@ -464,7 +464,7 @@ class NodeLinksList(JSONAPIBaseView, bulk_views.BulkDestroyJSONAPIView, bulk_vie
 
     ##Node Link Attributes
 
-    *None*
+    *Node.load(None)*
 
     ##Links
 
@@ -546,7 +546,7 @@ class NodeLinksDetail(JSONAPIBaseView, generics.RetrieveDestroyAPIView, Collecti
 
     ##Attributes
 
-    *None*
+    *Node.load(None)*
 
     ##Relationships
 
@@ -568,7 +568,7 @@ class NodeLinksDetail(JSONAPIBaseView, generics.RetrieveDestroyAPIView, Collecti
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
     """

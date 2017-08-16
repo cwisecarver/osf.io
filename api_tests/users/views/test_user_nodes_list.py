@@ -156,7 +156,7 @@ class TestUserNodesPreprintsFiltering:
     @pytest.fixture()
     def orphaned_preprint(self, orphaned_preprint_node):
         orphaned_preprint = PreprintFactory(project=orphaned_preprint_node)
-        orphaned_preprint.node.preprint_file = None
+        orphaned_preprint.node.preprint_file = Node.load(None)
         orphaned_preprint.node.save()
         return orphaned_preprint
 

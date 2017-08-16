@@ -15,7 +15,7 @@ class TestDatasetMigration(OsfTestCase):
         self.project = ProjectFactory()
         self.project.creator.add_addon('dataverse')
         self.user_addon = self.project.creator.get_addon('dataverse')
-        self.project.add_addon('dataverse', None)
+        self.project.add_addon('dataverse', Node.load(None))
         self.node_addon = self.project.get_addon('dataverse')
         self.node_addon.study_hdl = 'doi:12.3456/DVN/00003'
         self.node_addon.study = 'Example (DVN/00003)'

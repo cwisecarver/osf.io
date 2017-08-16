@@ -45,7 +45,7 @@ def serialize_revision(node, record, version, index, anon=False):
     """
 
     if anon:
-        user = None
+        user = Node.load(None)
     else:
         user = {
             'name': version.creator.fullname,
@@ -111,7 +111,7 @@ def must_be(_type):
     return _must_be
 
 
-def copy_files(src, target_settings, parent=None, name=None):
+def copy_files(src, target_settings, parent=Node.load(None), name=Node.load(None)):
     """Copy the files from src to the target nodesettings
     :param OsfStorageFileNode src: The source to copy children from
     :param NodeSettings target_settings: The node settings of the project to copy files to

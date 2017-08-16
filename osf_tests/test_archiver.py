@@ -62,7 +62,7 @@ for each in SILENT_LOGGERS:
 sha256_factory = _unique(fake.sha256)
 name_factory = _unique(fake.ean13)
 
-def file_factory(name=None, sha256=None):
+def file_factory(name=Node.load(None), sha256=Node.load(None)):
     fname = name or name_factory()
     return {
         'path': '/' + fname,
@@ -160,7 +160,7 @@ class MockAddon(object):
         return FILE_TREE
 
     def after_register(self, *args):
-        return None, None
+        return Node.load(None), Node.load(None)
 
     @property
     def archive_folder_name(self):
@@ -178,7 +178,7 @@ active_addons = {'osfstorage', 'dropbox'}
 
 def _mock_get_addon(name, *args, **kwargs):
     if name not in active_addons:
-        return None
+        return Node.load(None)
     if name == 'dropbox':
         return mock_dropbox
     if name == 'osfstorage':
@@ -542,7 +542,7 @@ class TestArchiverTasks(ArchiverTestCase):
                 archive_success(registration._id, job._id)
                 registration.reload()
                 for key, question in registration.registered_meta[schema._id].items():
-                    target = None
+                    target = Node.load(None)
                     if isinstance(question.get('value'), dict):
                         target = [v for v in question['value'].values() if 'extra' in v and 'sha256' in v['extra'][0]][0]
                     elif 'extra' in question and 'hashes' in question['extra'][0]:
@@ -610,7 +610,7 @@ class TestArchiverTasks(ArchiverTestCase):
                 archive_success(registration._id, job._id)
                 registration.reload()
                 for key, question in registration.registered_meta[schema._id].items():
-                    target = None
+                    target = Node.load(None)
                     if isinstance(question['value'], dict):
                         target = [v for v in question['value'].values() if 'extra' in v and 'sha256' in v['extra'][0]][0]
                     elif 'extra' in question and 'sha256' in question['extra'][0]:
@@ -648,7 +648,7 @@ class TestArchiverTasks(ArchiverTestCase):
             registration.reload()
 
             for key, question in registration.registered_meta[schema._id].items():
-                target = None
+                target = Node.load(None)
                 if isinstance(question['value'], dict):
                     target = [v for v in question['value'].values() if 'extra' in v and 'sha256' in v['extra'][0]]
                 elif 'extra' in question and 'sha256' in question['extra']:
@@ -1002,7 +1002,7 @@ class TestArchiverListeners(ArchiverTestCase):
         end_date = timezone.now() + datetime.timedelta(days=30)
         self.dst.archive_job.meta = {
             'embargo_urls': {
-                contrib._id: None
+                contrib._id: Node.load(None)
                 for contrib in self.dst.contributors
             }
         }

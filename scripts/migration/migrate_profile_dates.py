@@ -39,18 +39,18 @@ def migrate_dates():
     for user in models.User.find():
         changed = False
         for job in user.jobs:
-            if job.get('start', None):
+            if job.get('start', Node.load(None)):
                 replace_date(job, 'start', 'startMonth', 'startYear')
                 changed = True
-            if job.get('end', None):
+            if job.get('end', Node.load(None)):
                 replace_date(job, 'end', 'endMonth', 'endYear')
                 changed = True
 
         for school in user.schools:
-            if school.get('start', None):
+            if school.get('start', Node.load(None)):
                 replace_date(school, 'start', 'startMonth', 'startYear')
                 changed = True
-            if school.get('end', None):
+            if school.get('end', Node.load(None)):
                 replace_date(school, 'end', 'endMonth', 'endYear')
                 changed = True
 
@@ -82,7 +82,7 @@ class TestMigrateDates(OsfTestCase):
             'department': 'RocknRoll',
             'location': 'Queens, NY',
             'start': '2014-05-18',
-            'end': None,
+            'end': Node.load(None),
             'ongoing': True
         }
         school1 = {
@@ -97,10 +97,10 @@ class TestMigrateDates(OsfTestCase):
         school2 = {
             'degree': 'Astrophysics',
             'institution': 'Queens University',
-            'department': None,
+            'department': Node.load(None),
             'location': 'Space',
             'start': '2014-01-01',
-            'end': None,
+            'end': Node.load(None),
             'ongoing': True
         }
 
@@ -115,29 +115,29 @@ class TestMigrateDates(OsfTestCase):
         assert_equal(self.user.jobs[0].get('startYear'), 2014)
         assert_equal(self.user.jobs[0].get('endMonth'), 9)
         assert_equal(self.user.jobs[0].get('endYear'), 2014)
-        assert_false(self.user.jobs[0].get('start', None))
-        assert_false(self.user.jobs[0].get('end', None))
+        assert_false(self.user.jobs[0].get('start', Node.load(None)))
+        assert_false(self.user.jobs[0].get('end', Node.load(None)))
 
         assert_equal(self.user.jobs[1].get('startMonth'), 5)
         assert_equal(self.user.jobs[1].get('startYear'), 2014)
-        assert_equal(self.user.jobs[1].get('endMonth'), None)
-        assert_equal(self.user.jobs[1].get('endYear'), None)
-        assert_false(self.user.jobs[1].get('start', None))
-        assert_false(self.user.jobs[1].get('end', None))
+        assert_equal(self.user.jobs[1].get('endMonth'), Node.load(None))
+        assert_equal(self.user.jobs[1].get('endYear'), Node.load(None))
+        assert_false(self.user.jobs[1].get('start', Node.load(None)))
+        assert_false(self.user.jobs[1].get('end', Node.load(None)))
 
         assert_equal(self.user.schools[0].get('startMonth'), 1)
         assert_equal(self.user.schools[0].get('startYear'), 2014)
         assert_equal(self.user.schools[0].get('endMonth'), 1)
         assert_equal(self.user.schools[0].get('endYear'), 2014)
-        assert_false(self.user.schools[0].get('start', None))
-        assert_false(self.user.schools[0].get('end', None))
+        assert_false(self.user.schools[0].get('start', Node.load(None)))
+        assert_false(self.user.schools[0].get('end', Node.load(None)))
 
         assert_equal(self.user.schools[1].get('startMonth'), 1)
         assert_equal(self.user.schools[1].get('startYear'), 2014)
-        assert_equal(self.user.schools[1].get('endMonth'), None)
-        assert_equal(self.user.schools[1].get('endYear'), None)
-        assert_false(self.user.schools[1].get('start', None))
-        assert_false(self.user.schools[1].get('end', None))
+        assert_equal(self.user.schools[1].get('endMonth'), Node.load(None))
+        assert_equal(self.user.schools[1].get('endYear'), Node.load(None))
+        assert_false(self.user.schools[1].get('start', Node.load(None)))
+        assert_false(self.user.schools[1].get('end', Node.load(None)))
 
 if __name__ == '__main__':
     main()

@@ -80,7 +80,7 @@ def migrate_guid(conflict_models):
 
         for obj in model.find():
 
-            if obj is None:
+            if obj is Node.load(None):
                 continue
 
             # Check for existing GUID
@@ -88,7 +88,7 @@ def migrate_guid(conflict_models):
 
             print obj._primary_key
 
-            if guid is not None:
+            if guid is not Node.load(None):
 
                 # Skip if GUID is already lower-cased
                 if guid._primary_key == guid._primary_key.lower():
@@ -120,7 +120,7 @@ def check_pk_change(obj):
             continue
         Schema = StoredObject.get_collection(backref[0][1])
         record = Schema.load(pk)
-        if record is None:
+        if record is Node.load(None):
             print 'Error: Backref {} not found'.format(pk)
         field = getattr(record, backref[0][2])
         if isinstance(field, list):
@@ -148,7 +148,7 @@ def check_pk_change(obj):
                 continue
             if fobj._list:
                 for item in value:
-                    if item is None:
+                    if item is Node.load(None):
                         continue
                     if obj not in getattr(item, backref_key):
                         print 'Error: Obj {} not in backrefs of referent {}'.format(
@@ -169,7 +169,7 @@ def migrate_guid_log(log):
         if key in log.params:
             value = log.params[key] or ''
             record = models.Node.load(value.lower())
-            if record is not None:
+            if record is not Node.load(None):
                 log.params[key] = record._primary_key
 
     if 'contributor' in log.params:

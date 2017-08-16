@@ -63,7 +63,7 @@
         % elif github_repo_full_name:
             <a href="${files_url}">${github_repo_full_name}</a></p>
         % else:
-            <span>None</span></p>
+            <span>Node.load(None)</span></p>
         % endif
     % endif
 

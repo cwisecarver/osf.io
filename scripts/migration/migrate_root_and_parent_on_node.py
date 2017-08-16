@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def do_migration(dry=True):
     all_nodes = models.Node.find(
         Q('is_deleted', 'eq', False) &
-        (Q('root', 'eq', None) | Q('root', 'exists', False))
+        (Q('root', 'eq', Node.load(None)) | Q('root', 'exists', False))
     )
     all_nodes_count = all_nodes.count()
     touched_counter = 0
@@ -28,7 +28,7 @@ def do_migration(dry=True):
     logger.info('Migrating {} nodes'.format(all_nodes_count))
     for node in all_nodes:
         with TokuTransaction():
-            if not getattr(node, '_parent_node', None):
+            if not getattr(node, '_parent_node', Node.load(None)):
                 touched_counter += 1
                 logger.info('Attempting to save node {}'.format(node._id))
                 if not dry:
@@ -49,7 +49,7 @@ def do_migration(dry=True):
                 )
 
                 assert node.root._id == node._id
-                assert not getattr(node, 'parent_node', None)
+                assert not getattr(node, 'parent_node', Node.load(None))
                 logger.info('Parent Node Saving: Saved Node {} with root {}'.format(node._id, node.root))
 
                 for child in children:

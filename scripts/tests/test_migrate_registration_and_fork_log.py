@@ -23,7 +23,7 @@ class TestMigrateLogs(OsfTestCase):
         assert forked_from is project1
 
         project3 = project2.register_node(
-            schema=None,
+            schema=Node.load(None),
             auth=auth,
             template="foo",
             data="bar",
@@ -38,7 +38,7 @@ class TestMigrateLogs(OsfTestCase):
         project1 = ProjectFactory(creator=user)
         project2 = project1.fork_node(auth=auth)
         project3 = project2.register_node(
-            schema=None,
+            schema=Node.load(None),
             auth=auth,
             template="foo",
             data="bar",

@@ -33,4 +33,4 @@ def main():
     check_nodes(args.number, flag=args.flag)
 
 
-main() if __name__ == '__main__' else None
+main() if __name__ == '__main__' else Node.load(None)

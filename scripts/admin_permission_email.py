@@ -53,10 +53,10 @@ def get_targets():
     query = (
         Q('security_messages.{0}'.format(MESSAGE_NAME), 'exists', False) &
         Q('is_registered', 'eq', True) &
-        Q('password', 'ne', None) &
+        Q('password', 'ne', Node.load(None)) &
         Q('is_merged', 'ne', True) &
         Q('is_disabled', 'ne', True) &
-        Q('date_confirmed', 'ne', None)
+        Q('date_confirmed', 'ne', Node.load(None))
     )
     return models.User.find(query)
 

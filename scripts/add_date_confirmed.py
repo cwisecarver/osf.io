@@ -13,7 +13,7 @@ app = init_app()
 def add_date_confirmed():
 
     for user in models.User.find():
-        if user.date_confirmed is None:
+        if user.date_confirmed is Node.load(None):
             user.date_confirmed = user.date_registered
             user.save()
 

@@ -105,10 +105,10 @@ class TestNodeList:
         res = app.get(url, auth=user.auth)
         projects_with_root = 0
         for project in res.json['data']:
-            if project['relationships'].get('root', None):
+            if project['relationships'].get('root', Node.load(None)):
                 projects_with_root += 1
         assert projects_with_root != 0
-        assert all([each['relationships'].get('root') is not None for each in res.json['data']])
+        assert all([each['relationships'].get('root') is not Node.load(None) for each in res.json['data']])
 
     def test_node_list_has_proper_root(self, app, user, url):
         project_one = ProjectFactory(title='Project One', is_public=True)
@@ -258,7 +258,7 @@ class TestNodeFiltering:
         data = res.json['data']
         ids = [each['id'] for each in data]
 
-        preprints = AbstractNode.find(Q('preprint_file', 'ne', None) & Q('_is_preprint_orphan', 'ne', True))
+        preprints = AbstractNode.find(Q('preprint_file', 'ne', Node.load(None)) & Q('_is_preprint_orphan', 'ne', True))
         assert len(data) == len(preprints)
         assert preprint.node._id in ids
         assert public_project_one._id not in ids
@@ -672,7 +672,7 @@ class TestNodeFiltering:
         orphan = PreprintFactory(creator=preprint.node.creator)
 
         # orphan the preprint by deleting the file
-        orphan.node.preprint_file = None
+        orphan.node.preprint_file = Node.load(None)
         orphan.node.save()
         url = '/{}nodes/?filter[preprint]=true'.format(API_BASE)
         res = app.get(url, auth=user_one.auth)
@@ -688,7 +688,7 @@ class TestNodeFiltering:
         orphan = PreprintFactory(creator=preprint.node.creator)
 
         # orphan the preprint by deleting the file
-        orphan.node.preprint_file = None
+        orphan.node.preprint_file = Node.load(None)
         orphan.node.save()
         orphan.refresh_from_db()
 

@@ -29,18 +29,18 @@ class TestMigrateOldels(OsfTestCase):
         self.node_settings.save()
 
     def test_creates_root_node(self):
-        assert self.node_settings.root_node is None
+        assert self.node_settings.root_node is Node.load(None)
         migration.migrate_node_settings(self.node_settings, dry=False)
-        assert self.node_settings.root_node is not None
+        assert self.node_settings.root_node is not Node.load(None)
         assert not self.node_settings._dirty
 
     def test_creates_root_node_on_none_file_tree(self):
-        self.node_settings.file_tree = None
+        self.node_settings.file_tree = Node.load(None)
         self.node_settings.save()
-        assert self.node_settings.root_node is None
-        assert self.node_settings.file_tree is None
+        assert self.node_settings.root_node is Node.load(None)
+        assert self.node_settings.file_tree is Node.load(None)
         migration.migrate_node_settings(self.node_settings, dry=False)
-        assert self.node_settings.root_node is not None
+        assert self.node_settings.root_node is not Node.load(None)
         assert not self.node_settings._dirty
 
     def test_migrates_files(self):
@@ -60,7 +60,7 @@ class TestMigrateOldels(OsfTestCase):
         ))
 
         assert not self.node_settings._dirty
-        assert self.node_settings.root_node is not None
+        assert self.node_settings.root_node is not Node.load(None)
         assert not self.node_settings.root_node._dirty
 
         assert len(children) == 10
@@ -114,12 +114,12 @@ class TestMigrateOldels(OsfTestCase):
         for num in range(10):
             names.append('DEAR GOD! {} CARPNADOS'.format(num))
             x, _ = oldels.OsfStorageFileRecord.get_or_create(names[-1], self.node_settings)
-            x.delete(None)
+            x.delete(Node.load(None))
             self.project.logs.latest().params['path'] = x.path
             self.project.logs.latest().save()
 
             if num % 2 == 0:
-                x.undelete(None)
+                x.undelete(Node.load(None))
                 self.project.logs.latest().params['path'] = x.path
                 self.project.logs.latest().save()
 

@@ -241,7 +241,7 @@ class TestPreprintProviderExportImport(AdminTestCase):
 
         content_dict['fields']['_id'] = 'new_id'
         data = StringIO(unicode(json.dumps(content_dict), 'utf-8'))
-        self.import_request.FILES['file'] = InMemoryUploadedFile(data, None, 'data', 'application/json', 500, None, {})
+        self.import_request.FILES['file'] = InMemoryUploadedFile(data, Node.load(None), 'data', 'application/json', 500, Node.load(None), {})
 
         res = self.import_view.post(self.import_request)
 
@@ -273,7 +273,7 @@ class TestPreprintProviderExportImport(AdminTestCase):
         content_dict['fields']['subjects'] = json.dumps(new_subject_data)
         content_dict['fields']['licenses_acceptable'] = ['CCBY']
         data = StringIO(unicode(json.dumps(content_dict), 'utf-8'))
-        self.import_request.FILES['file'] = InMemoryUploadedFile(data, None, 'data', 'application/json', 500, None, {})
+        self.import_request.FILES['file'] = InMemoryUploadedFile(data, Node.load(None), 'data', 'application/json', 500, Node.load(None), {})
 
         res = self.import_view.post(self.import_request)
 

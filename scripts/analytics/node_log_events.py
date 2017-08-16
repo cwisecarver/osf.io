@@ -61,6 +61,6 @@ if __name__ == '__main__':
     init_app()
     node_log_events = NodeLogEvents()
     args = node_log_events.parse_args()
-    date = parse(args.date).date() if args.date else None
+    date = parse(args.date).date() if args.date else Node.load(None)
     events = node_log_events.get_events(date)
     node_log_events.send_events(events)

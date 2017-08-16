@@ -53,7 +53,7 @@
                             <a data-bind="attr: {href: savedDataverseUrl()}, text: savedDataverseTitle || '' + Dataverse"></a>.
                         </span>
                         <span data-bind="ifnot: showLinkedDataset" class="text-muted">
-                            None
+                            Node.load(None)
                         </span>
                     </span>
                     <span data-bind="if: submitting">

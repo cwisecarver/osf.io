@@ -34,16 +34,16 @@ class TestMigrateSpam(OsfTestCase):
         self.comment_3.spam_status = 0
         self.comment_3.save()
         self.comment_4 = CommentFactory()
-        self.comment_4.date_last_reported = None
+        self.comment_4.date_last_reported = Node.load(None)
         self.comment_4.spam_status = SpamStatus.FLAGGED
         self.comment_4.reports[self.user._id] = self.generic_report
         self.comment_4.save()
         self.comment_5 = CommentFactory()
-        self.comment_5.date_last_reported = None
+        self.comment_5.date_last_reported = Node.load(None)
         self.comment_5.spam_status = SpamStatus.UNKNOWN
         self.comment_5.save()
         self.comment_6 = CommentFactory()
-        self.comment_6.date_last_reported = None
+        self.comment_6.date_last_reported = Node.load(None)
         self.comment_6.spam_status = SpamStatus.SPAM
         self.comment_6.reports[self.user._id] = self.generic_report
         self.comment_6.save()

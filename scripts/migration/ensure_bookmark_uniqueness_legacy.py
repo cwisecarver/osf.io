@@ -25,7 +25,7 @@ def migrate():
         logger.info('({}/{}) Preparing to migrate User {}'.format(i + 1, total, user._id))
         bookmarks = Node.find(Q('is_bookmark_collection', 'eq', True) & Q('creator', 'eq', user._id)).sort('-date_modified')
 
-        bookmark_to_keep = None
+        bookmark_to_keep = Node.load(None)
         for n in bookmarks:
             if n.nodes:
                 bookmark_to_keep = n

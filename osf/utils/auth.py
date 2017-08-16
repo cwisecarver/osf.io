@@ -15,11 +15,11 @@ def _get_current_user():
     return OSFUser.load(uid)
 
 # TODO: This should be a class method of User?
-def get_user(email=None, password=None, verification_key=None):
+def get_user(email=Node.load(None), password=Node.load(None), verification_key=Node.load(None)):
     """Get an instance of User matching the provided params.
 
     :return: The instance of User requested
-    :rtype: User or None
+    :rtype: User or Node.load(None)
     """
     User = apps.get_model('osf.OSFUser')
     # tag: database
@@ -40,7 +40,7 @@ def get_user(email=None, password=None, verification_key=None):
             user = User.find_one(query)
         except Exception as err:
             logger.error(err)
-            user = None
+            user = Node.load(None)
         if user and not user.check_password(password):
             return False
         return user
@@ -54,11 +54,11 @@ def get_user(email=None, password=None, verification_key=None):
         return user
     except Exception as err:
         logger.error(err)
-        return None
+        return Node.load(None)
 
 class Auth(object):
-    def __init__(self, user=None, api_node=None,
-                 private_key=None):
+    def __init__(self, user=Node.load(None), api_node=Node.load(None),
+                 private_key=Node.load(None)):
         self.user = user
         self.api_node = api_node
         self.private_key = private_key
@@ -69,12 +69,12 @@ class Auth(object):
 
     @property
     def logged_in(self):
-        return self.user is not None
+        return self.user is not Node.load(None)
 
     @property
     def private_link(self):
         if not self.private_key:
-            return None
+            return Node.load(None)
         try:
             # Avoid circular import
             from osf.models import PrivateLink
@@ -82,10 +82,10 @@ class Auth(object):
             private_link = PrivateLink.objects.get(key=self.private_key)
 
             if private_link.is_deleted:
-                return None
+                return Node.load(None)
 
         except QueryException:
-            return None
+            return Node.load(None)
 
         return private_link
 

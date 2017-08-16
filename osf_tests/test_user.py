@@ -422,7 +422,7 @@ class TestOSFUser:
     def test_set_unusable_username_for_unsaved_user(self):
         user = UserFactory.build()
         user.set_unusable_username()
-        assert user.username is not None
+        assert user.username is not Node.load(None)
         user.save()
         assert user.has_usable_username() is False
 
@@ -444,7 +444,7 @@ class TestOSFUser:
         )
         assert user.profile_image_url() == expected
         size = urlparse.parse_qs(urlparse.urlparse(user.profile_image_url()).query).get('size')
-        assert size is None
+        assert size is Node.load(None)
 
     def test_activity_points(self, user):
         assert(
@@ -516,7 +516,7 @@ class TestOSFUser:
         project.save()
         unreg_user.reload()
         project.reload()
-        unregistered_name = unreg_user.unclaimed_records[project._id].get('name', None)
+        unregistered_name = unreg_user.unclaimed_records[project._id].get('name', Node.load(None))
         assert new_name == unregistered_name
 
     def test_username_is_automatically_lowercased(self):
@@ -613,10 +613,10 @@ class TestCookieMethods:
         assert user == OSFUser.from_cookie(cookie)
 
     def test_get_user_by_cookie_returns_none(self):
-        assert OSFUser.from_cookie('') is None
+        assert OSFUser.from_cookie('') is Node.load(None)
 
     def test_get_user_by_cookie_bad_cookie(self):
-        assert OSFUser.from_cookie('foobar') is None
+        assert OSFUser.from_cookie('foobar') is Node.load(None)
 
     def test_get_user_by_cookie_no_user_id(self):
         user = UserFactory()
@@ -624,13 +624,13 @@ class TestCookieMethods:
         session = Session.find_one(Q('data.auth_user_id', 'eq', user._id))
         del session.data['auth_user_id']
         session.save()
-        assert OSFUser.from_cookie(cookie) is None
+        assert OSFUser.from_cookie(cookie) is Node.load(None)
 
     def test_get_user_by_cookie_no_session(self):
         user = UserFactory()
         cookie = user.get_or_create_cookie()
         Session.objects.all().delete()
-        assert OSFUser.from_cookie(cookie) is None
+        assert OSFUser.from_cookie(cookie) is Node.load(None)
 
 
 class TestChangePassword:
@@ -666,7 +666,7 @@ class TestChangePassword:
         assert user.password.startswith('md5$')
         assert mock_send_mail.called is False
 
-    def test_change_password_invalid(self, old_password=None, new_password=None, confirm_password=None,
+    def test_change_password_invalid(self, old_password=Node.load(None), new_password=Node.load(None), confirm_password=Node.load(None),
                                      error_message='Old password is invalid'):
         user = UserFactory()
         user.set_password('password')
@@ -710,11 +710,11 @@ class TestChangePassword:
         )
 
     def test_change_password_invalid_blank_new_password(self):
-        for password in (None, '', '      '):
+        for password in (Node.load(None), '', '      '):
             self.test_change_password_invalid_blank_password('password', password, 'new password')
 
     def test_change_password_invalid_blank_confirm_password(self):
-        for password in (None, '', '      '):
+        for password in (Node.load(None), '', '      '):
             self.test_change_password_invalid_blank_password('password', 'new password', password)
 
 
@@ -726,7 +726,7 @@ class TestIsActive:
             # By default, return an active user
             user = UserFactory.build(
                 is_registered=True,
-                merged_by=None,
+                merged_by=Node.load(None),
                 is_disabled=False,
                 date_confirmed=timezone.now(),
             )
@@ -756,7 +756,7 @@ class TestIsActive:
         assert user.is_active is True
 
     def test_is_active_is_false_if_not_confirmed(self, make_user):
-        user = make_user(date_confirmed=None)
+        user = make_user(date_confirmed=Node.load(None))
         user.save()
         assert user.is_active is False
 
@@ -1225,7 +1225,7 @@ class TestDisablingUsers(OsfTestCase):
         self.user.is_disabled = False
         self.user.save()
 
-        assert self.user.date_disabled is None
+        assert self.user.date_disabled is Node.load(None)
         assert self.user.is_disabled is False
         assert self.user.is_active is True
 
@@ -1289,7 +1289,7 @@ class TestUser(OsfTestCase):
         self.user.add_unconfirmed_email('foo@bar.com')
         assert self.user.unconfirmed_emails == ['foo@bar.com']
 
-        # email_verifications field may NOT be None
+        # email_verifications field may NOT be Node.load(None)
         self.user.email_verifications = []
         self.user.save()
         assert self.user.unconfirmed_emails == []
@@ -1627,7 +1627,7 @@ class TestUserMerging(OsfTestCase):
 
         assert self.unconfirmed.email_verifications == {}
         assert self.unconfirmed.password[0] == '!'
-        assert self.unconfirmed.verification_key is None
+        assert self.unconfirmed.verification_key is Node.load(None)
         # The mergee's email no longer needs to be confirmed by merger
         unconfirmed_emails = [record['email'] for record in self.user.email_verifications.values()]
         assert unconfirmed_username not in unconfirmed_emails
@@ -1687,7 +1687,7 @@ class TestUserValidation(OsfTestCase):
         self.user = AuthUserFactory()
 
     def test_validate_fullname_none(self):
-        self.user.fullname = None
+        self.user.fullname = Node.load(None)
         with pytest.raises(ValidationError):
             self.user.save()
 

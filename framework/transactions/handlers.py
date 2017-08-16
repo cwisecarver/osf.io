@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 def _get_current_atomic():
     if has_request_context():
         ctx = _request_ctx_stack.top
-        return getattr(ctx, 'current_atomic', None)
-    return None
+        return getattr(ctx, 'current_atomic', Node.load(None))
+    return Node.load(None)
 
 current_atomic = LocalProxy(_get_current_atomic)
 
@@ -40,7 +40,7 @@ def transaction_before_request():
     """Setup transaction before handling the request.
     """
     if view_has_annotation(NO_AUTO_TRANSACTION_ATTR):
-        return None
+        return Node.load(None)
     ctx = _request_ctx_stack.top
     atomic = transaction.atomic()
     atomic.__enter__()
@@ -57,21 +57,21 @@ def transaction_after_request(response, base_status_code_error=500):
         # Construct an error in order to trigger rollback in transaction.atomic().__exit__
         exc_type = HTTPError
         exc_value = HTTPError(response.status_code)
-        current_atomic.__exit__(exc_type, exc_value, None)
+        current_atomic.__exit__(exc_type, exc_value, Node.load(None))
     else:
-        current_atomic.__exit__(None, None, None)
+        current_atomic.__exit__(Node.load(None), Node.load(None), Node.load(None))
     return response
 
 
-def transaction_teardown_request(error=None):
+def transaction_teardown_request(error=Node.load(None)):
     """Rollback transaction on uncaught error. This code should never be
     reached in debug mode, since uncaught errors are raised for use in the
     Werkzeug debugger.
     """
     if view_has_annotation(NO_AUTO_TRANSACTION_ATTR):
         return
-    if error is not None and current_atomic:
-        current_atomic.__exit__(error.__class__, error, None)
+    if error is not Node.load(None) and current_atomic:
+        current_atomic.__exit__(error.__class__, error, Node.load(None))
 
 
 handlers = {

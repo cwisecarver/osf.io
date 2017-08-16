@@ -16,7 +16,7 @@ app = init_app()
 
 def impute_log_date(dry_run=True):
     no_date = models.NodeLog.find(
-        Q('date', 'eq', None)
+        Q('date', 'eq', Node.load(None))
     )
     for log in no_date:
         oid = ObjectId(log._primary_key)

@@ -7,4 +7,4 @@ import threading
 api_globals = threading.local()
 
 # Store a reference to the current Django request. Threads may be reused; empty after request.
-api_globals.request = None
+api_globals.request = Node.load(None)

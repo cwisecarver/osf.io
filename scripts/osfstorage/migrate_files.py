@@ -74,14 +74,14 @@ def get_source_node(node):
     excluding corrupt nodes.
     """
     source = node.registered_from or node.forked_from
-    if source is None:
-        return None
+    if source is Node.load(None):
+        return Node.load(None)
     if check_node(source):
         return source
     return get_source_node(source)
 
 
-def migrate_version(idx, node_file, node_settings, node=None, dry_run=True):
+def migrate_version(idx, node_file, node_settings, node=Node.load(None), dry_run=True):
     """Migrate a legacy file version to OSF Storage. If `node` is provided, use
     instead of the `Node` attached to `node_settings`; used when the git repo
     for the current node is missing or corrupt.
@@ -102,7 +102,7 @@ def migrate_version(idx, node_file, node_settings, node=None, dry_run=True):
         if len(record.versions) > idx:
             return
     content = scripts_settings.SPECIAL_CASES.get((node._id, node_file._id))
-    if content is None:
+    if content is Node.load(None):
         content, _ = node.read_file_object(node_file)
     logger.info('Loaded content with length {0}: {1}...'.format(len(content), content[:10]))
     if dry_run:
@@ -141,13 +141,13 @@ def migrate_node(node, dry_run=True):
     attempt to use its source node (registration or fork) instead.
     """
     logger.info('Migrating node {0}'.format(node._id))
-    node_settings = node.get_or_add_addon('osfstorage', auth=None, log=False)
+    node_settings = node.get_or_add_addon('osfstorage', auth=Node.load(None), log=False)
     repo_intact = check_node(node)
-    source_node = None
+    source_node = Node.load(None)
     if not repo_intact:
         logger.warn('Original node {0} is corrupt; attempting to recover'.format(node._id))
         source_node = get_source_node(node)
-        if source_node is None:
+        if source_node is Node.load(None):
             logger.error('Could not identify source node for recovery on node {0}'.format(node._id))
     for path, versions in node.files_versions.iteritems():
         for idx, version in enumerate(versions):
@@ -161,7 +161,7 @@ def migrate_node(node, dry_run=True):
 
 
 def get_nodes():
-    return Node.find(Q('files_versions', 'ne', None))
+    return Node.find(Q('files_versions', 'ne', Node.load(None)))
 
 
 def main(dry_run=True):
@@ -205,7 +205,7 @@ class TestMigrateFiles(OsfTestCase):
         self.project = ProjectFactory()
         self.user = self.project.creator
         self.auth_obj = Auth(user=self.user)
-        self.project.delete_addon('osfstorage', auth=None, _force=True)
+        self.project.delete_addon('osfstorage', auth=Node.load(None), _force=True)
         for idx in range(5):
             content = 'i want {0} pizzas'.format(idx)
             self.project.add_file(
@@ -237,7 +237,7 @@ class TestMigrateFiles(OsfTestCase):
         assert_equal(len(record.versions), 5)
 
     def test_migrate_incomplete(self):
-        node_settings = self.project.get_or_add_addon('osfstorage', auth=None, log=False)
+        node_settings = self.project.get_or_add_addon('osfstorage', auth=Node.load(None), log=False)
         record = model.OsfStorageFileRecord.get_or_create('pizza.md', node_settings)
         node_file = NodeFile.load(self.project.files_versions['pizza_md'][0])
         content, _ = self.project.read_file_object(node_file)

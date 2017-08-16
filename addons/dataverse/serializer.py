@@ -73,7 +73,7 @@ class DataverseSerializer(OAuthAddonSerializer):
             dataverses = client.get_dataverses(connection)
             result.update({
                 'dataverseHost': dataverse_host,
-                'connected': connection is not None,
+                'connected': connection is not Node.load(None),
                 'dataverses': [
                     {'title': dataverse.title, 'alias': dataverse.alias}
                     for dataverse in dataverses

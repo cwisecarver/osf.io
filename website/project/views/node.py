@@ -59,7 +59,7 @@ def edit_node(auth, node, **kwargs):
     edited_field = post_data.get('name')
     value = post_data.get('value', '')
 
-    new_val = None
+    new_val = Node.load(None)
     if edited_field == 'title':
         try:
             node.set_title(value, auth=auth)
@@ -138,7 +138,7 @@ def project_new_post(auth, **kwargs):
         new_project = _view_project(project, auth)
     return {
         'projectUrl': project.url,
-        'newNode': new_project['node'] if new_project else None
+        'newNode': new_project['node'] if new_project else Node.load(None)
     }, http.CREATED
 
 
@@ -149,7 +149,7 @@ def project_new_from_template(auth, node, **kwargs):
         auth=auth,
         changes=dict(),
     )
-    return {'url': new_node.url}, http.CREATED, None
+    return {'url': new_node.url}, http.CREATED, Node.load(None)
 
 
 ##############################################################################
@@ -202,7 +202,7 @@ def project_new_node(auth, node, **kwargs):
 
         return {
             'status': 'success',
-        }, 201, None, redirect_url
+        }, 201, Node.load(None), redirect_url
     else:
         # TODO: This function doesn't seem to exist anymore?
         status.push_errors_to_status(form.errors)
@@ -339,7 +339,7 @@ def node_contributors(auth, node, **kwargs):
 def configure_comments(node, **kwargs):
     comment_level = request.json.get('commentLevel')
     if not comment_level:
-        node.comment_level = None
+        node.comment_level = Node.load(None)
     elif comment_level in ['public', 'private']:
         node.comment_level = comment_level
     else:
@@ -372,11 +372,11 @@ def view_project(auth, node, **kwargs):
     ret.update(rubeus.collect_addon_assets(node))
 
     addons_widget_data = {
-        'wiki': None,
-        'mendeley': None,
-        'zotero': None,
-        'forward': None,
-        'dataverse': None
+        'wiki': Node.load(None),
+        'mendeley': Node.load(None),
+        'zotero': Node.load(None),
+        'forward': Node.load(None),
+        'dataverse': Node.load(None)
     }
 
     if 'wiki' in ret['addons']:
@@ -396,11 +396,11 @@ def view_project(auth, node, **kwargs):
                 wiki_html = BeautifulSoup(wiki_html)
             rendered_before_update = wiki_page.rendered_before_update
         else:
-            wiki_html = None
+            wiki_html = Node.load(None)
 
         wiki_widget_data = {
             'complete': True,
-            'wiki_content': unicode(wiki_html) if wiki_html else None,
+            'wiki_content': unicode(wiki_html) if wiki_html else Node.load(None),
             'wiki_content_url': node.api_url_for('wiki_page_content', wname='home'),
             'rendered_before_update': rendered_before_update,
             'more': more,
@@ -507,7 +507,7 @@ def project_statistics(auth, node, **kwargs):
 def project_set_privacy(auth, node, **kwargs):
 
     permissions = kwargs.get('permissions')
-    if permissions is None:
+    if permissions is Node.load(None):
         raise HTTPError(http.BAD_REQUEST)
 
     try:
@@ -603,7 +603,7 @@ def remove_private_link(*args, **kwargs):
             node.add_log(
                 NodeLog.VIEW_ONLY_LINK_REMOVED,
                 log_dict,
-                auth=kwargs.get('auth', None)
+                auth=kwargs.get('auth', Node.load(None))
             )
 
     except ModularOdmException:
@@ -631,7 +631,7 @@ def _render_addons(addons):
 
 def _should_show_wiki_widget(node, contributor):
     has_wiki = bool(node.get_addon('wiki'))
-    wiki_page = node.get_wiki_page('home', None)
+    wiki_page = node.get_wiki_page('home', Node.load(None))
     if not contributor or not contributor.write:
         return has_wiki and wiki_page and wiki_page.html(node)
     else:
@@ -649,7 +649,7 @@ def _view_project(node, auth, primary=False,
     try:
         contributor = node.contributor_set.get(user=user)
     except Contributor.DoesNotExist:
-        contributor = None
+        contributor = Node.load(None)
 
     parent = node.find_readable_antecedent(auth)
     if user:
@@ -663,7 +663,7 @@ def _view_project(node, auth, primary=False,
     anonymous = has_anonymous_link(node, auth)
     addons = list(node.get_addons())
     widgets, configs, js, css = _render_addons(addons)
-    redirect_url = node.url + '?view_only=None'
+    redirect_url = node.url + '?view_only=Node.load(None)'
 
     disapproval_link = ''
     if (node.is_pending_registration and node.has_permission(user, ADMIN)):
@@ -706,8 +706,8 @@ def _view_project(node, auth, primary=False,
             'is_pending_registration': node.is_pending_registration if is_registration else False,
             'is_retracted': node.is_retracted if is_registration else False,
             'is_pending_retraction': node.is_pending_retraction if is_registration else False,
-            'retracted_justification': getattr(node.retraction, 'justification', None) if is_registration else None,
-            'date_retracted': iso8601format(getattr(node.retraction, 'date_retracted', None)) if is_registration else '',
+            'retracted_justification': getattr(node.retraction, 'justification', Node.load(None)) if is_registration else Node.load(None),
+            'date_retracted': iso8601format(getattr(node.retraction, 'date_retracted', Node.load(None))) if is_registration else '',
             'embargo_end_date': node.embargo_end_date.strftime('%A, %b %d, %Y') if is_registration and node.embargo_end_date else '',
             'is_pending_embargo': node.is_pending_embargo if is_registration else False,
             'is_embargoed': node.is_embargoed if is_registration else False,
@@ -717,7 +717,7 @@ def _view_project(node, auth, primary=False,
             ),
             'registered_from_url': node.registered_from.url if is_registration else '',
             'registered_date': iso8601format(node.registered_date) if is_registration else '',
-            'root_id': node.root._id if node.root else None,
+            'root_id': node.root._id if node.root else Node.load(None),
             'registered_meta': node.registered_meta,
             'registered_schemas': serialize_meta_schemas(list(node.registered_schema.all())) if is_registration else False,
             'is_fork': node.is_fork,
@@ -740,11 +740,11 @@ def _view_project(node, auth, primary=False,
             'is_preprint': node.is_preprint,
             'is_preprint_orphan': node.is_preprint_orphan,
             'has_published_preprint': node.preprints.filter(is_published=True).exists() if node else False,
-            'preprint_file_id': node.preprint_file._id if node.preprint_file else None,
+            'preprint_file_id': node.preprint_file._id if node.preprint_file else Node.load(None),
             'preprint_url': node.preprint_url
         },
         'parent_node': {
-            'exists': parent is not None,
+            'exists': parent is not Node.load(None),
             'id': parent._primary_key if parent else '',
             'title': parent.title if parent else '',
             'category': parent.category_display if parent else '',
@@ -763,8 +763,8 @@ def _view_project(node, auth, primary=False,
             'can_edit': bool(contributor) and contributor.write and not node.is_registration,
             'has_read_permissions': node.has_permission(user, READ),
             'permissions': get_contributor_permissions(contributor, as_list=True) if contributor else [],
-            'id': user._id if user else None,
-            'username': user.username if user else None,
+            'id': user._id if user else Node.load(None),
+            'username': user.username if user else Node.load(None),
             'fullname': user.fullname if user else '',
             'can_comment': bool(contributor) or node.can_comment(auth),
             'show_wiki_widget': _should_show_wiki_widget(node, contributor),
@@ -864,7 +864,7 @@ def get_recent_logs(node, **kwargs):
     return {'logs': logs}
 
 
-def _get_readable_descendants(auth, node, permission=None):
+def _get_readable_descendants(auth, node, permission=Node.load(None)):
     descendants = []
     all_readable = True
     for child in node.get_nodes(is_deleted=False):
@@ -1152,11 +1152,11 @@ def remove_pointer(auth, node, **kwargs):
     # TODO: since these a delete request, shouldn't use request body. put pointer
     # id in the URL instead
     pointer_id = request.json.get('pointerId')
-    if pointer_id is None:
+    if pointer_id is Node.load(None):
         raise HTTPError(http.BAD_REQUEST)
 
     pointer = AbstractNode.load(pointer_id)
-    if pointer is None:
+    if pointer is Node.load(None):
         raise HTTPError(http.BAD_REQUEST)
 
     try:
@@ -1180,7 +1180,7 @@ def fork_pointer(auth, node, **kwargs):
     linked_node = AbstractNode.load(linked_node_id)
     pointer = NodeRelation.objects.filter(child=linked_node, is_node_link=True, parent=node).first()
 
-    if pointer is None:
+    if pointer is Node.load(None):
         # TODO: Change this to 404?
         raise HTTPError(http.BAD_REQUEST)
 
@@ -1207,7 +1207,7 @@ def serialize_pointer(node, auth):
             'authorShort': abbrev_authors(node),
         }
     return {
-        'url': None,
+        'url': Node.load(None),
         'title': 'Private Component',
         'authorShort': 'Private Author(s)',
     }

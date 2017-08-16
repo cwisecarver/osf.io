@@ -17,8 +17,8 @@ def serialize_settings(auth):
         result = {
             'is_enabled': False,
             'is_confirmed': False,
-            'secret': None,
-            'drift': None,
+            'secret': Node.load(None),
+            'drift': Node.load(None),
         }
     urls = serialize_urls(user_addon)
     result.update({'urls': urls})

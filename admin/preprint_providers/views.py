@@ -77,7 +77,7 @@ class PreprintProviderDisplay(PermissionRequiredMixin, DetailView):
     permission_required = 'osf.view_preprintprovider'
     raise_exception = True
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return PreprintProvider.objects.get(id=self.kwargs.get('preprint_provider_id'))
 
     def get_context_data(self, *args, **kwargs):
@@ -147,7 +147,7 @@ class PreprintProviderChangeForm(PermissionRequiredMixin, UpdateView):
     model = PreprintProvider
     form_class = PreprintProviderForm
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         provider_id = self.kwargs.get('preprint_provider_id')
         return PreprintProvider.objects.get(id=provider_id)
 
@@ -209,7 +209,7 @@ class DeletePreprintProvider(PermissionRequiredMixin, DeleteView):
             return redirect('preprint_providers:cannot_delete', preprint_provider_id=preprint_provider.pk)
         return super(DeletePreprintProvider, self).get(request, *args, **kwargs)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return PreprintProvider.objects.get(id=self.kwargs['preprint_provider_id'])
 
 
@@ -281,7 +281,7 @@ class SubjectDynamicUpdateView(PermissionRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         parent_id = request.GET['parent_id']
-        level = request.GET.get('level', None)
+        level = request.GET.get('level', Node.load(None))
         subjects_from_parent = Subject.objects.filter(parent__id=parent_id)
         subject_ids = [sub.id for sub in subjects_from_parent]
 

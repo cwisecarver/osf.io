@@ -36,7 +36,7 @@ class TestBoxPostMergeMigration(OsfTestCase):
         node_addon.folder_name = '/ (Full Box)'
         node_addon.save()
 
-        assert_equal(node_addon.external_account, None)
+        assert_equal(node_addon.external_account, Node.load(None))
         assert_equal(node_addon.folder_id, 'abcdef0')
 
         do_migration()

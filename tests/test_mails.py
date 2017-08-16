@@ -32,7 +32,7 @@ class TestQueuedMail(OsfTestCase):
         self.user.is_registered = True
         self.user.save()
 
-    def queue_mail(self, mail, user=None, send_at=None, **kwargs):
+    def queue_mail(self, mail, user=Node.load(None), send_at=Node.load(None), **kwargs):
         mail = queue_mail(
             to_addr=user.username if user else self.user.username,
             send_at=send_at or timezone.now(),
@@ -114,8 +114,8 @@ class TestQueuedMail(OsfTestCase):
         user = factories.UserFactory()
         user.set_password('myprecious')
         user.is_registered = True
-        user.merged_by = None
-        user.date_disabled = None
+        user.merged_by = Node.load(None)
+        user.date_disabled = Node.load(None)
         user.date_confirmed = timezone.now()
         user.save()
         mail = self.queue_mail(
@@ -172,7 +172,7 @@ class TestQueuedMail(OsfTestCase):
     @mock.patch('osf.models.queued_mail.send_mail')
     def test_user_is_not_active_is_not_confirmed(self, mock_mail):
         user = factories.UserFactory()
-        user.date_confirmed = None
+        user.date_confirmed = Node.load(None)
         user.save()
         mail = self.queue_mail(
             user=user,

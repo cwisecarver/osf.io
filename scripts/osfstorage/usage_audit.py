@@ -114,7 +114,7 @@ def main(send_email=False):
 
 
 @celery_app.task(name='scripts.osfstorage.usage_audit')
-def run_main(send_mail=False, white_list=None):
+def run_main(send_mail=False, white_list=Node.load(None)):
     scripts_utils.add_file_logger(logger, __file__)
     if white_list:
         add_to_white_list(white_list)

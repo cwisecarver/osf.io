@@ -18,7 +18,7 @@ from addons.wiki.tests.factories import NodeWikiFactory
 
 class TestWikiDetailView(ApiWikiTestCase):
 
-    def _set_up_public_project_with_wiki_page(self, project_options=None):
+    def _set_up_public_project_with_wiki_page(self, project_options=Node.load(None)):
         project_options = project_options or {}
         self.public_project = ProjectFactory(is_public=True, creator=self.user, **project_options)
         self.public_wiki = self._add_project_wiki_page(self.public_project, self.user)

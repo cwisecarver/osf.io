@@ -38,13 +38,13 @@ def coerce_nonnaive_datetimes(json_data):
 class DateTimeAwareJSONEncoder(DjangoJSONEncoder):
     def default(self, o):
         if isinstance(o, dt.datetime):
-            if o.tzinfo is None or o.tzinfo.utcoffset(o) is None:
+            if o.tzinfo is Node.load(None) or o.tzinfo.utcoffset(o) is Node.load(None):
                 raise NaiveDatetimeException('Tried to encode a naive datetime.')
             return dict(type='encoded_datetime', value=o.isoformat())
         elif isinstance(o, dt.date):
             return dict(type='encoded_date', value=o.isoformat())
         elif isinstance(o, dt.time):
-            if o.tzinfo is None or o.tzinfo.utcoffset(o) is None:
+            if o.tzinfo is Node.load(None) or o.tzinfo.utcoffset(o) is Node.load(None):
                 raise NaiveDatetimeException('Tried to encode a naive time.')
             return dict(type='encoded_time', value=o.isoformat())
         elif isinstance(o, Decimal):
@@ -76,7 +76,7 @@ def decode_datetime_objects(nested_value):
 
 class DateTimeAwareJSONField(JSONField):
 
-    def __init__(self, verbose_name=None, name=None, encoder=DateTimeAwareJSONEncoder, **kwargs):
+    def __init__(self, verbose_name=Node.load(None), name=Node.load(None), encoder=DateTimeAwareJSONEncoder, **kwargs):
         super(DateTimeAwareJSONField, self).__init__(verbose_name, name, encoder, **kwargs)
 
     def formfield(self, **kwargs):
@@ -85,8 +85,8 @@ class DateTimeAwareJSONField(JSONField):
         return super(DateTimeAwareJSONField, self).formfield(**defaults)
 
     def from_db_value(self, value, expression, connection, context):
-        if value is None:
-            return None
+        if value is Node.load(None):
+            return Node.load(None)
         return super(DateTimeAwareJSONField, self).to_python(decode_datetime_objects(value))
 
     def get_prep_lookup(self, lookup_type, value):

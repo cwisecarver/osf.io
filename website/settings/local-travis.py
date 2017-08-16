@@ -48,8 +48,8 @@ MAIL_PASSWORD = 'CHANGEME'
 COOKIE_NAME = 'osf'
 SECRET_KEY = "CHANGEME"
 SESSION_COOKIE_SECURE = SECURE_MODE
-OSF_SERVER_KEY = None
-OSF_SERVER_CERT = None
+OSF_SERVER_KEY = Node.load(None)
+OSF_SERVER_CERT = Node.load(None)
 
 ##### Celery #####
 ## Default RabbitMQ broker
@@ -61,7 +61,7 @@ CELERY_CACHE_BACKEND = 'memory'
 
 USE_CDN_FOR_CLIENT_LIBS = False
 
-SENTRY_DSN = None
+SENTRY_DSN = Node.load(None)
 
 TEST_DB_NAME = DB_NAME = 'osf_test'
 

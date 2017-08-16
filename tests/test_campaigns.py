@@ -50,7 +50,7 @@ class TestCampaignInitialization(OsfTestCase):
             'osf-registries',
         ]
         self.refresh = timezone.now()
-        campaigns.CAMPAIGNS = None  # force campaign refresh now that preprint providers are populated
+        campaigns.CAMPAIGNS = Node.load(None)  # force campaign refresh now that preprint providers are populated
         campaigns.CAMPAIGNS_LAST_REFRESHED = self.refresh
 
     def test_get_campaigns_init(self):
@@ -90,7 +90,7 @@ class TestCampaignMethods(OsfTestCase):
             'psyarxiv-preprints',
         ]
         self.invalid_campaign = 'invalid_campaign'
-        campaigns.CAMPAIGNS = None  # force campaign refresh now that preprint providers are populated
+        campaigns.CAMPAIGNS = Node.load(None)  # force campaign refresh now that preprint providers are populated
 
     def test_is_institution_login(self):
         for campaign in self.campaign_lists:
@@ -100,7 +100,7 @@ class TestCampaignMethods(OsfTestCase):
             else:
                 assert_false(institution)
         institution = campaigns.is_institution_login(self.invalid_campaign)
-        assert_true(institution is None)
+        assert_true(institution is Node.load(None))
 
     def test_is_native_login(self):
         for campaign in self.campaign_lists:
@@ -110,7 +110,7 @@ class TestCampaignMethods(OsfTestCase):
             else:
                 assert_false(native)
         native = campaigns.is_proxy_login(self.invalid_campaign)
-        assert_true(native is None)
+        assert_true(native is Node.load(None))
 
     def test_is_proxy_login(self):
         for campaign in self.campaign_lists:
@@ -120,41 +120,41 @@ class TestCampaignMethods(OsfTestCase):
             else:
                 assert_false(proxy)
         proxy = campaigns.is_proxy_login(self.invalid_campaign)
-        assert_true(proxy is None)
+        assert_true(proxy is Node.load(None))
 
     def test_system_tag_for_campaign(self):
         for campaign in self.campaign_lists:
             tag = campaigns.system_tag_for_campaign(campaign)
-            assert_true(tag is not None)
+            assert_true(tag is not Node.load(None))
         tag = campaigns.system_tag_for_campaign(self.invalid_campaign)
-        assert_true(tag is None)
+        assert_true(tag is Node.load(None))
 
     def test_email_template_for_campaign(self):
         for campaign in self.campaign_lists:
             template = campaigns.email_template_for_campaign(campaign)
             if campaigns.is_institution_login(campaign):
-                assert_true(template is None)
+                assert_true(template is Node.load(None))
             else:
-                assert_true(template is not None)
+                assert_true(template is not Node.load(None))
         template = campaigns.email_template_for_campaign(self.invalid_campaign)
-        assert_true(template is None)
+        assert_true(template is Node.load(None))
 
     def test_campaign_url_for(self):
         for campaign in self.campaign_lists:
             url = campaigns.campaign_url_for(campaign)
-            assert_true(url is not None)
+            assert_true(url is not Node.load(None))
         url = campaigns.campaign_url_for(self.invalid_campaign)
-        assert_true(url is None)
+        assert_true(url is Node.load(None))
 
     def test_get_service_provider(self):
         for campaign in self.campaign_lists:
             provider = campaigns.get_service_provider(campaign)
             if campaigns.is_proxy_login(campaign):
-                assert_true(provider is not None)
+                assert_true(provider is not Node.load(None))
             else:
-                assert_true(provider is None)
+                assert_true(provider is Node.load(None))
         provider = campaigns.get_service_provider(self.invalid_campaign)
-        assert_true(provider is None)
+        assert_true(provider is Node.load(None))
 
     def test_campaign_for_user(self):
         user = factories.UserFactory()

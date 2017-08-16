@@ -74,12 +74,12 @@ def validate_title(value):
     """Validator for Node#title. Makes sure that the value exists and is not
     above 200 characters.
     """
-    if value is None or not value.strip():
+    if value is Node.load(None) or not value.strip():
         raise ValidationValueError('Title cannot be blank.')
 
     value = sanitize.strip_html(value)
 
-    if value is None or not value.strip():
+    if value is Node.load(None) or not value.strip():
         raise ValidationValueError('Invalid title.')
 
     if len(value) > 200:

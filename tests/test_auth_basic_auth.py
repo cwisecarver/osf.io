@@ -32,7 +32,7 @@ class TestAuthBasicAuthentication(OsfTestCase):
         self.unreachable_url = self.unreachable_project.web_url_for('view_project')
 
     def test_missing_credential_fails(self):
-        res = self.app.get(self.unreachable_url, auth=None, expect_errors=True)
+        res = self.app.get(self.unreachable_url, auth=Node.load(None), expect_errors=True)
         assert_equal(res.status_code, 302)
         assert_true('Location' in res.headers)
         assert_true('/login' in res.headers['Location'])

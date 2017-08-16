@@ -72,7 +72,7 @@ class ArchiveJob(ObjectIDMixin, BaseModel):
     @property
     def parent(self):
         parent_node = self.dst_node.parent_node
-        return parent_node.archive_job if parent_node else None
+        return parent_node.archive_job if parent_node else Node.load(None)
 
     @property
     def success(self):
@@ -150,7 +150,7 @@ class ArchiveJob(ObjectIDMixin, BaseModel):
                       if settings.ADDONS_ARCHIVABLE[name] != 'none']:
             if not addon or not isinstance(addon, BaseStorageAddon) or not addon.complete:
                 continue
-            archive_errors = getattr(addon, 'archive_errors', None)
+            archive_errors = getattr(addon, 'archive_errors', Node.load(None))
             if not archive_errors or (archive_errors and not archive_errors()):
                 if addon.config.short_name == 'dataverse':
                     addons.append(addon.config.short_name + '-draft')
@@ -161,7 +161,7 @@ class ArchiveJob(ObjectIDMixin, BaseModel):
             self._set_target(addon)
         self.save()
 
-    def update_target(self, addon_short_name, status, stat_result=None, errors=None):
+    def update_target(self, addon_short_name, status, stat_result=Node.load(None), errors=Node.load(None)):
         stat_result = stat_result or {}
         errors = errors or []
 

@@ -31,7 +31,7 @@ def verify_user_settings_documents(user_document):
         assert('owner' in user_document)
         assert('access_key' in user_document)
         assert('secret_key' in user_document)
-        assert(user_document.get('owner', None))
+        assert(user_document.get('owner', Node.load(None)))
     except AssertionError:
         return False
     else:
@@ -44,7 +44,7 @@ def verify_node_settings_document(document):
         assert('bucket' in document)
         assert('owner' in document)
         assert('user_settings' in document)
-        assert(document.get('owner', None))
+        assert(document.get('owner', Node.load(None)))
     except AssertionError:
         return False
     try:
@@ -67,7 +67,7 @@ def migrate_to_external_account(user_settings_document):
     user_info = utils.get_user_info(access_key=user_settings_document['access_key'], secret_key=user_settings_document['secret_key'])
     user = User.load(user_settings_document['owner'])
     if not user_info:
-        return (None, None, None)
+        return (Node.load(None), Node.load(None), Node.load(None))
 
     new = False
     try:
@@ -102,7 +102,7 @@ def make_new_user_settings(user):
     user.reload()
     return user.get_or_add_addon('s3', override=True)
 
-def make_new_node_settings(node, node_settings_document, external_account=None, user_settings_instance=None):
+def make_new_node_settings(node, node_settings_document, external_account=Node.load(None), user_settings_instance=Node.load(None)):
     # kill backrefs to old models
     database['node'].find_and_modify(
         {'_id': node._id},
@@ -113,7 +113,7 @@ def make_new_node_settings(node, node_settings_document, external_account=None, 
         }
     )
     node.reload()
-    node_settings_instance = node.get_or_add_addon('s3', auth=None, override=True, log=False)
+    node_settings_instance = node.get_or_add_addon('s3', auth=Node.load(None), override=True, log=False)
     node_settings_instance.bucket = node_settings_document['bucket']
     node_settings_instance.save()
     if external_account and user_settings_instance:

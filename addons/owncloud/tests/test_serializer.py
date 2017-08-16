@@ -12,7 +12,7 @@ class TestOwnCloudSerializer(StorageAddonSerializerTestSuiteMixin, OsfTestCase):
     addon_short_name = 'owncloud'
     Serializer = OwnCloudSerializer
     ExternalAccountFactory = OwnCloudAccountFactory
-    client = None
+    client = Node.load(None)
 
     def set_provider_id(self, pid):
         self.node_settings.folder_id = pid

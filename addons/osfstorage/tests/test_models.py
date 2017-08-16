@@ -27,10 +27,10 @@ from website.files.exceptions import FileNodeCheckedOutError
 @pytest.mark.django_db
 class TestOsfstorageFileNode(StorageTestCase):
     def test_root_node_exists(self):
-        assert_true(self.node_settings.root_node is not None)
+        assert_true(self.node_settings.root_node is not Node.load(None))
 
     def test_root_node_has_no_parent(self):
-        assert_true(self.node_settings.root_node.parent is None)
+        assert_true(self.node_settings.root_node.parent is Node.load(None))
 
     def test_node_reference(self):
         assert_equal(self.project, self.node_settings.root_node.node)
@@ -64,17 +64,17 @@ class TestOsfstorageFileNode(StorageTestCase):
         assert_equals(file.serialize(), {
             u'id': file._id,
             u'path': file.path,
-            u'created': None,
+            u'created': Node.load(None),
             u'name': u'MOAR PYLONS',
             u'kind': 'file',
             u'version': 0,
             u'downloads': 0,
-            u'size': None,
-            u'modified': None,
-            u'contentType': None,
-            u'checkout': None,
-            u'md5': None,
-            u'sha256': None,
+            u'size': Node.load(None),
+            u'modified': Node.load(None),
+            u'contentType': Node.load(None),
+            u'checkout': Node.load(None),
+            u'md5': Node.load(None),
+            u'sha256': Node.load(None),
         })
 
         version = file.create_version(
@@ -99,9 +99,9 @@ class TestOsfstorageFileNode(StorageTestCase):
             u'size': 1234L,
             u'modified': version.date_created.isoformat(),
             u'contentType': u'text/plain',
-            u'checkout': None,
-            u'md5': None,
-            u'sha256': None,
+            u'checkout': Node.load(None),
+            u'md5': Node.load(None),
+            u'sha256': Node.load(None),
         })
 
         date = timezone.now()
@@ -122,9 +122,9 @@ class TestOsfstorageFileNode(StorageTestCase):
             # see https://github.com/CenterForOpenScience/osf.io/pull/7155
             u'modified': version.date_created.isoformat(),
             u'contentType': u'text/plain',
-            u'checkout': None,
-            u'md5': None,
-            u'sha256': None,
+            u'checkout': Node.load(None),
+            u'md5': Node.load(None),
+            u'sha256': Node.load(None),
         })
 
     def test_get_child_by_name(self):
@@ -210,14 +210,14 @@ class TestOsfstorageFileNode(StorageTestCase):
 
         parent.delete()
 
-        assert_is(OsfStorageFileNode.load(parent._id), None)
+        assert_is(OsfStorageFileNode.load(parent._id), Node.load(None))
         assert_equals(count - 11, OsfStorageFileNode.find().count())
         assert_equals(tcount + 11, models.TrashedFileNode.find().count())
 
         for kid in kids:
             assert_is(
                 OsfStorageFileNode.load(kid._id),
-                None
+                Node.load(None)
             )
 
     def test_delete_file(self):
@@ -226,7 +226,7 @@ class TestOsfstorageFileNode(StorageTestCase):
         child_data = {f: getattr(child, f) for f in field_names}
         child.delete()
 
-        assert_is(OsfStorageFileNode.load(child._id), None)
+        assert_is(OsfStorageFileNode.load(child._id), Node.load(None))
         trashed = models.TrashedFileNode.load(child._id)
         child_storage = dict()
         trashed_storage = dict()
@@ -348,7 +348,7 @@ class TestOsfstorageFileNode(StorageTestCase):
         file.get_guid(create=True)
         guid = file.get_guid()._id
 
-        assert guid is not None
+        assert guid is not Node.load(None)
         assert guid in OsfStorageFileNode.get_file_guids(
             '/' + file._id, provider='osfstorage', node=node)
 
@@ -378,7 +378,7 @@ class TestOsfstorageFileNode(StorageTestCase):
         guid = file.get_guid()._id
 
         file.delete()
-        assert guid is not None
+        assert guid is not Node.load(None)
         assert guid in OsfStorageFileNode.get_file_guids(
             '/' + file._id, provider='osfstorage', node=node)
 
@@ -642,7 +642,7 @@ class TestOsfStorageFileVersion(StorageTestCase):
         )
 
         assert_is(version._find_matching_archive(), True)
-        assert_is_not(version.archive, None)
+        assert_is_not(version.archive, Node.load(None))
 
         assert_equal(version.metadata['vault'], 'the cloud')
         assert_equal(version.metadata['archive'], 'erchiv')
@@ -709,10 +709,10 @@ class TestOsfStorageCheckout(StorageTestCase):
         assert_equal(self.node.logs.latest().action, 'checked_out')
         assert_equal(self.node.logs.latest().user, non_admin)
 
-        self.file.check_in_or_out(self.user, None, save=True)
+        self.file.check_in_or_out(self.user, Node.load(None), save=True)
         self.file.reload()
         self.node.reload()
-        assert_equal(self.file.checkout, None)
+        assert_equal(self.file.checkout, Node.load(None))
         assert_equal(self.node.logs.latest().action, 'checked_in')
         assert_equal(self.node.logs.latest().user, self.user)
 
@@ -724,7 +724,7 @@ class TestOsfStorageCheckout(StorageTestCase):
         assert_equal(self.node.logs.latest().user, self.user)
 
         with assert_raises(FileNodeCheckedOutError):
-            self.file.check_in_or_out(non_admin, None, save=True)
+            self.file.check_in_or_out(non_admin, Node.load(None), save=True)
 
         with assert_raises(FileNodeCheckedOutError):
             self.file.check_in_or_out(non_admin, non_admin, save=True)
@@ -782,4 +782,4 @@ class TestOsfStorageCheckout(StorageTestCase):
         assert_equal(self.file.checkout, self.user)
         self.file.node.remove_contributors([self.user], save=True)
         self.file.reload()
-        assert_equal(self.file.checkout, None)
+        assert_equal(self.file.checkout, Node.load(None))

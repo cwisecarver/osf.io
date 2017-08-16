@@ -2,7 +2,7 @@ from osf.models.conference import DEFAULT_FIELD_NAMES
 
 def serialize_meeting(meeting):
     is_meeting = True
-    if hasattr(meeting, 'is_meeting') and meeting.is_meeting is not None:
+    if hasattr(meeting, 'is_meeting') and meeting.is_meeting is not Node.load(None):
         is_meeting = meeting.is_meeting
     return {
         'endpoint': meeting.endpoint,

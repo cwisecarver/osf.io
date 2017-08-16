@@ -83,7 +83,7 @@ def fix_duplicate_addon_node_settings():
                         logger.info('No owner for {} {}. Removing.'.format(collection, _id))
                         database[collection].remove(_id)
                     else:
-                        logger.info('_id was None: {}'.format(group))
+                        logger.info('_id was Node.load(None): {}'.format(group))
             else:
                 logger.info(
                     '{} {} found for node {}'.format(
@@ -105,14 +105,14 @@ def fix_duplicate_addon_node_settings():
                             logger.info('Removing {} from {}'.format(bad, collection))
                             database[collection].remove(bad)
                         else:
-                            logger.info('_id was None: {}'.format(group))
+                            logger.info('_id was Node.load(None): {}'.format(group))
                 elif len(active_ns) == 1:
                     logger.info('Found one active {} for node {}: {}'.format(
                         collection, group['_id'], active_ns[0]
                     ))
                     for _id in group['ids']:
                         if not _id:
-                            logger.info('_id was None: {}'.format(group))
+                            logger.info('_id was Node.load(None): {}'.format(group))
                             continue
                         if _id not in active_ns:
                             logger.info('Removing {} from {}'.format(_id, collection))
@@ -170,7 +170,7 @@ def fix_duplicate_addon_user_settings():
             update_grants = False
             bad = []
             good = []
-            newest = None
+            newest = Node.load(None)
             # Merge existing oauth_grants
             for _id in group['ids']:
                 instance = database[collection].find_one(_id)

@@ -28,8 +28,8 @@ from scripts.osfstorage import settings as storage_settings
 TEST_CONTAINER_NAME = 'osf_uploads_test'
 PROD_CONTAINER_NAME = 'osf_storage_prod'
 
-test_container = None
-prod_container = None
+test_container = Node.load(None)
+prod_container = Node.load(None)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

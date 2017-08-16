@@ -34,7 +34,7 @@ class LinkedRegistrationsTestCase(ApiTestCase):
         public_node.add_pointer(self.public_linked_registration, auth=Auth(self.admin_contributor))
         public_node.add_pointer(self.private_linked_registration, auth=Auth(self.rw_contributor))
         public_node.save()
-        self.public_registration = public_node.register_node(get_default_metaschema(), Auth(self.admin_contributor), '', None)
+        self.public_registration = public_node.register_node(get_default_metaschema(), Auth(self.admin_contributor), '', Node.load(None))
         self.public_registration.is_public = True
         self.public_registration.save()
 
@@ -44,7 +44,7 @@ class LinkedRegistrationsTestCase(ApiTestCase):
         private_node.add_pointer(self.public_linked_registration, auth=Auth(self.admin_contributor))
         private_node.add_pointer(self.private_linked_registration, auth=Auth(self.rw_contributor))
         private_node.save()
-        self.private_registration = private_node.register_node(get_default_metaschema(), Auth(self.admin_contributor), '', None)
+        self.private_registration = private_node.register_node(get_default_metaschema(), Auth(self.admin_contributor), '', Node.load(None))
 
     def tearDown(self):
         super(LinkedRegistrationsTestCase, self).tearDown()
@@ -56,7 +56,7 @@ class TestRegistrationLinkedRegistrationsList(LinkedRegistrationsTestCase):
     def setUp(self):
         super(TestRegistrationLinkedRegistrationsList, self).setUp()
 
-    def make_request(self, registration_id=None, auth=None, expect_errors=False):
+    def make_request(self, registration_id=Node.load(None), auth=Node.load(None), expect_errors=False):
         url = '/{}registrations/{}/linked_registrations/'.format(API_BASE, registration_id)
         if auth:
             return self.app.get(url, auth=auth, expect_errors=expect_errors)
@@ -125,7 +125,7 @@ class TestRegistrationsLinkedRegistrationsRelationship(LinkedRegistrationsTestCa
             API_BASE, self.public_registration._id
         )
 
-    def make_request(self, registration_id=None, auth=None, expect_errors=False):
+    def make_request(self, registration_id=Node.load(None), auth=Node.load(None), expect_errors=False):
         url = '/{}registrations/{}/relationships/linked_registrations/'.format(API_BASE, registration_id)
         if auth:
             return self.app.get(url, auth=auth, expect_errors=expect_errors)

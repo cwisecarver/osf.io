@@ -59,15 +59,15 @@ def get_user_auth(request):
     authenticated user attached to it.
     """
     user = request.user
-    private_key = request.query_params.get('view_only', None)
+    private_key = request.query_params.get('view_only', Node.load(None))
     if user.is_anonymous:
-        auth = Auth(None, private_key=private_key)
+        auth = Auth(Node.load(None), private_key=private_key)
     else:
         auth = Auth(user, private_key=private_key)
     return auth
 
 
-def absolute_reverse(view_name, query_kwargs=None, args=None, kwargs=None):
+def absolute_reverse(view_name, query_kwargs=Node.load(None), args=Node.load(None), kwargs=Node.load(None)):
     """Like django's `reverse`, except returns an absolute URL. Also add query parameters."""
     relative_url = reverse(view_name, kwargs=kwargs)
 
@@ -75,8 +75,8 @@ def absolute_reverse(view_name, query_kwargs=None, args=None, kwargs=None):
     return url
 
 
-def get_object_or_error(model_cls, query_or_pk, display_name=None):
-    obj = query = None
+def get_object_or_error(model_cls, query_or_pk, display_name=Node.load(None)):
+    obj = query = Node.load(None)
     if isinstance(query_or_pk, basestring):
         # they passed a 5-char guid as a string
         if issubclass(model_cls, GuidMixin):
@@ -117,20 +117,20 @@ def get_object_or_error(model_cls, query_or_pk, display_name=None):
     if model_cls is OSFUser and obj.is_disabled:
         raise UserGone(user=obj)
     elif model_cls is not OSFUser and not getattr(obj, 'is_active', True) or getattr(obj, 'is_deleted', False):
-        if display_name is None:
+        if display_name is Node.load(None):
             raise Gone
         else:
             raise Gone(detail='The requested {name} is no longer available.'.format(name=display_name))
     return obj
 
 
-def waterbutler_url_for(request_type, provider, path, node_id, token, obj_args=None, **query):
+def waterbutler_url_for(request_type, provider, path, node_id, token, obj_args=Node.load(None), **query):
     """Reverse URL lookup for WaterButler routes
     :param str request_type: data or metadata
     :param str provider: The name of the requested provider
     :param str path: The path of the requested file or folder
     :param str node_id: The id of the node being accessed
-    :param str token: The cookie to be used or None
+    :param str token: The cookie to be used or Node.load(None)
     :param dict **query: Addition query parameters to be appended
     """
     url = furl.furl(website_settings.WATERBUTLER_URL)
@@ -142,7 +142,7 @@ def waterbutler_url_for(request_type, provider, path, node_id, token, obj_args=N
         'provider': provider,
     })
 
-    if token is not None:
+    if token is not Node.load(None):
         url.args['cookie'] = token
 
     if 'view_only' in obj_args:
@@ -191,7 +191,7 @@ def has_admin_scope(request):
         return bool(get_session_from_cookie(cookie))
 
     token = request.auth
-    if token is None or not isinstance(token, CasResponse):
+    if token is Node.load(None) or not isinstance(token, CasResponse):
         return False
 
     return set(ComposedScopes.ADMIN_LEVEL).issubset(normalize_scopes(token.attributes['accessTokenScope']))

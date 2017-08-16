@@ -68,10 +68,10 @@ class JSONAPIParser(JSONParser):
 
         # For validating type and id for bulk delete:
         if is_list and request_method == 'DELETE':
-            if object_id is None:
+            if object_id is Node.load(None):
                 raise JSONAPIException(source={'pointer': '/data/id'}, detail=NO_ID_ERROR)
 
-            if object_type is None:
+            if object_type is Node.load(None):
                 raise JSONAPIException(source={'pointer': '/data/type'}, detail=NO_TYPE_ERROR)
 
         attributes = resource_object.get('attributes')
@@ -86,7 +86,7 @@ class JSONAPIParser(JSONParser):
 
         return parsed
 
-    def parse(self, stream, media_type=None, parser_context=None):
+    def parse(self, stream, media_type=Node.load(None), parser_context=Node.load(None)):
         """
         Parses the incoming bytestream as JSON and returns the resulting data.
         """
@@ -127,7 +127,7 @@ class JSONAPIRelationshipParser(JSONParser):
     """
     media_type = 'application/vnd.api+json'
 
-    def parse(self, stream, media_type=None, parser_context=None):
+    def parse(self, stream, media_type=Node.load(None), parser_context=Node.load(None)):
         res = super(JSONAPIRelationshipParser, self).parse(stream, media_type, parser_context)
 
         if not isinstance(res, dict):
@@ -139,10 +139,10 @@ class JSONAPIRelationshipParser(JSONParser):
                 raise ParseError('Data must be an array')
             for i, datum in enumerate(data):
 
-                if datum.get('id') is None:
+                if datum.get('id') is Node.load(None):
                     raise JSONAPIException(source={'pointer': '/data/{}/id'.format(str(i))}, detail=NO_ID_ERROR)
 
-                if datum.get('type') is None:
+                if datum.get('type') is Node.load(None):
                     raise JSONAPIException(source={'pointer': '/data/{}/type'.format(str(i))}, detail=NO_TYPE_ERROR)
 
             return {'data': data}
@@ -162,7 +162,7 @@ class JSONAPIOnetoOneRelationshipParser(JSONParser):
     """
     media_type = 'application/vnd.api+json'
 
-    def parse(self, stream, media_type=None, parser_context=None):
+    def parse(self, stream, media_type=Node.load(None), parser_context=Node.load(None)):
         res = super(JSONAPIOnetoOneRelationshipParser, self).parse(stream, media_type, parser_context)
 
         if not isinstance(res, dict):
@@ -173,15 +173,15 @@ class JSONAPIOnetoOneRelationshipParser(JSONParser):
             id_ = data.get('id')
             type_ = data.get('type')
 
-            if id_ is None:
+            if id_ is Node.load(None):
                 raise JSONAPIException(source={'pointer': '/data/id'}, detail=NO_ID_ERROR)
 
-            if type_ is None:
+            if type_ is Node.load(None):
                 raise JSONAPIException(source={'pointer': '/data/type'}, detail=NO_TYPE_ERROR)
 
             return data
 
-        return {'type': None, 'id': None}
+        return {'type': Node.load(None), 'id': Node.load(None)}
 
 
 class JSONAPIOnetoOneRelationshipParserForRegularJSON(JSONAPIOnetoOneRelationshipParser):

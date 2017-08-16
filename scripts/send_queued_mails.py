@@ -51,7 +51,7 @@ def main(dry_run=True):
 def find_queued_mails_ready_to_be_sent():
     return QueuedMail.find(
         Q('send_at', 'lt', timezone.now()) &
-        Q('sent_at', 'eq', None)
+        Q('sent_at', 'eq', Node.load(None))
     )
 
 

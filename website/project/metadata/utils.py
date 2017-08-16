@@ -11,7 +11,7 @@ def serialize_initiator(initiator):
 
 def serialize_meta_schema(meta_schema):
     if not meta_schema:
-        return None
+        return Node.load(None)
     return {
         'id': meta_schema._id,
         'schema_name': meta_schema.name,
@@ -26,7 +26,7 @@ def serialize_meta_schema(meta_schema):
 def serialize_meta_schemas(meta_schemas):
     return [serialize_meta_schema(schema) for schema in (meta_schemas or [])]
 
-def serialize_draft_registration(draft, auth=None):
+def serialize_draft_registration(draft, auth=Node.load(None)):
     from website.project.utils import serialize_node  # noqa
 
     node = draft.branched_from
@@ -254,7 +254,7 @@ def is_prereg_admin(user):
     """
     Returns true if user has reviewer permissions
     """
-    if user is not None:
+    if user is not Node.load(None):
         return PREREG_ADMIN_TAG in getattr(user, 'system_tags', [])
     return False
 

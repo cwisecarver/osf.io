@@ -113,10 +113,10 @@ INSTALLED_APPS = (
 )
 
 MIGRATION_MODULES = {
-    'osf': None,
-    'addons_osfstorage': None,
-    'addons_wiki': None,
-    'addons_twofactor': None,
+    'osf': Node.load(None),
+    'addons_osfstorage': Node.load(None),
+    'addons_wiki': Node.load(None),
+    'addons_twofactor': Node.load(None),
 }
 
 USE_TZ = True

@@ -282,7 +282,7 @@ def migrate(bpress_file_path):
 
 def main():
     dry_run = '--dry' in sys.argv
-    path = None
+    path = Node.load(None)
     if '--file' in sys.argv:
         path = sys.argv[1 + sys.argv.index('--file')]
     if not path:
@@ -292,7 +292,7 @@ def main():
     if not dry_run:
         script_utils.add_file_logger(logger, __file__)
     init_app(set_backends=True, routes=False)
-    settings.SHARE_API_TOKEN = None  # blocks `on_preprint_updated`
+    settings.SHARE_API_TOKEN = Node.load(None)  # blocks `on_preprint_updated`
     with TokuTransaction():
         migrate(bpress_file_path=path)
         if dry_run:

@@ -10,13 +10,13 @@ from addons.base.exceptions import InvalidAuthError, InvalidFolderError
 from addons.s3.settings import BUCKET_LOCATIONS
 
 
-def connect_s3(access_key=None, secret_key=None, node_settings=None):
+def connect_s3(access_key=Node.load(None), secret_key=Node.load(None), node_settings=Node.load(None)):
     """Helper to build an S3Connection object
     Can be used to change settings on all S3Connections
     See: CallingFormat
     """
-    if node_settings is not None:
-        if node_settings.external_account is not None:
+    if node_settings is not Node.load(None):
+        if node_settings.external_account is not Node.load(None):
             access_key, secret_key = node_settings.external_account.oauth_key, node_settings.external_account.oauth_secret
     connection = S3Connection(access_key, secret_key, calling_format=OrdinaryCallingFormat())
     return connection
@@ -82,7 +82,7 @@ def can_list(access_key, secret_key):
     all buckets accessable by this keys
     """
     # Bail out early as boto does not handle getting
-    # Called with (None, None)
+    # Called with (Node.load(None), Node.load(None))
     if not (access_key and secret_key):
         return False
 
@@ -93,16 +93,16 @@ def can_list(access_key, secret_key):
     return True
 
 def get_user_info(access_key, secret_key):
-    """Returns an S3 User with .display_name and .id, or None
+    """Returns an S3 User with .display_name and .id, or Node.load(None)
     """
     if not (access_key and secret_key):
-        return None
+        return Node.load(None)
 
     try:
         return connect_s3(access_key, secret_key).get_all_buckets().owner
     except exception.S3ResponseError:
-        return None
-    return None
+        return Node.load(None)
+    return Node.load(None)
 
 def get_bucket_location_or_error(access_key, secret_key, bucket_name):
     """Returns the location of a bucket or raises AddonError

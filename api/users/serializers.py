@@ -70,9 +70,9 @@ class UserSerializer(JSONAPISerializer):
         return obj.n_projects_in_common(user)
 
     def absolute_url(self, obj):
-        if obj is not None:
+        if obj is not Node.load(None):
             return obj.absolute_url
-        return None
+        return Node.load(None)
 
     def get_absolute_url(self, obj):
         return absolute_reverse('users:user-detail', kwargs={

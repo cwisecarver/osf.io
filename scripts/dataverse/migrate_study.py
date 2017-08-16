@@ -34,16 +34,16 @@ def do_migration(records, dry=True):
                 node_addon.dataset_doi = node_addon.study_hdl
                 node_addon.dataset = node_addon.study
 
-                node_addon.study_hdl = None
-                node_addon.study = None
+                node_addon.study_hdl = Node.load(None)
+                node_addon.study = Node.load(None)
 
                 node_addon.save()
 
 
 def get_targets():
     return AddonDataverseNodeSettings.find(
-        Q('user_settings', 'ne', None) &
-        Q('study_hdl', 'ne', None)
+        Q('user_settings', 'ne', Node.load(None)) &
+        Q('study_hdl', 'ne', Node.load(None))
     )
 
 

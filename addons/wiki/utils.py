@@ -50,7 +50,7 @@ def get_sharejs_uuid(node, wname):
     return str(uuid.uuid5(
         uuid.UUID(private_uuid),
         str(node._id)
-    )) if private_uuid else None
+    )) if private_uuid else Node.load(None)
 
 
 def delete_share_doc(node, wname):
@@ -113,7 +113,7 @@ def get_sharejs_content(node, wname):
     return doc_item['_data'] if doc_item else ''
 
 
-def broadcast_to_sharejs(action, sharejs_uuid, node=None, wiki_name='home', data=None):
+def broadcast_to_sharejs(action, sharejs_uuid, node=Node.load(None), wiki_name='home', data=Node.load(None)):
     """
     Broadcast an action to all documents connected to a wiki.
     Actions include 'lock', 'unlock', 'redirect', and 'delete'

@@ -48,7 +48,7 @@ def migrate_draft_metadata(draft, test=False):
                             )
                             logger.info('Old value: {}'.format(value))
 
-                            new_value[uid]['value'] = None  # unselect file
+                            new_value[uid]['value'] = Node.load(None)  # unselect file
                             new_value[uid]['extra'] = valid  # clear invalid entries
 
                             logger.info('New value: {}'.format(new_value))
@@ -58,7 +58,7 @@ def migrate_draft_metadata(draft, test=False):
     return changed
 
 
-def get_prereg_questions(prereg_schema=None):
+def get_prereg_questions(prereg_schema=Node.load(None)):
     prereg_schema = prereg_schema or get_prereg_schema()
     prereg_questions = ()
     for page in prereg_schema.schema['pages']:

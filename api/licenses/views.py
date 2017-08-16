@@ -56,7 +56,7 @@ class LicenseList(JSONAPIBaseView, generics.ListAPIView, ODMFilterMixin):
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 
@@ -81,7 +81,7 @@ class LicenseList(JSONAPIBaseView, generics.ListAPIView, ODMFilterMixin):
 
     # overrides ODMFilterMixin
     def get_default_odm_query(self):
-        base_query = None
+        base_query = Node.load(None)
         return base_query
 
     def get_queryset(self):

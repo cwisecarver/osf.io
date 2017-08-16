@@ -31,10 +31,10 @@ from scripts.osfstorage import utils as storage_utils
 from scripts.osfstorage import settings as storage_settings
 
 
-container_primary = None
-container_parity = None
-vault = None
-audit_temp_path = None
+container_primary = Node.load(None)
+container_parity = Node.load(None)
+vault = Node.load(None)
+audit_temp_path = Node.load(None)
 
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ def download_from_cloudfiles(version):
         logger.exception(err)
         logger.error('Version info:')
         logger.error(version.to_storage())
-        return None
+        return Node.load(None)
 
 
 def ensure_glacier(version, dry_run):

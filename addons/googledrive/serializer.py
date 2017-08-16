@@ -37,7 +37,7 @@ class GoogleDriveSerializer(StorageAddonSerializer):
     def serialized_node_settings(self):
         result = super(GoogleDriveSerializer, self).serialized_node_settings
         valid_credentials = True
-        if self.node_settings.external_account is not None:
+        if self.node_settings.external_account is not Node.load(None):
             try:
                 self.node_settings.fetch_access_token()
             except InvalidGrantError:

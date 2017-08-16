@@ -290,12 +290,12 @@ def parse_args():
     parser.add_argument('--nprojects', dest='n_projects', type=int, default=3)
     parser.add_argument('-c', '--components', dest='n_components', type=evaluate_argument, default='0')
     parser.add_argument('-p', '--privacy', dest="privacy", type=str, default='private', choices=['public', 'private'])
-    parser.add_argument('-n', '--name', dest='name', type=str, default=None)
+    parser.add_argument('-n', '--name', dest='name', type=str, default=Node.load(None))
     parser.add_argument('-t', '--tags', dest='n_tags', type=int, default=5)
-    parser.add_argument('--presentation', dest='presentation_name', type=str, default=None)
+    parser.add_argument('--presentation', dest='presentation_name', type=str, default=Node.load(None))
     parser.add_argument('-r', '--registration', dest='is_registration', type=bool, default=False)
     parser.add_argument('-pre', '--preprint', dest='is_preprint', type=bool, default=False)
-    parser.add_argument('-preprovider', '--preprintprovider', dest='preprint_provider', type=str, default=None)
+    parser.add_argument('-preprovider', '--preprintprovider', dest='preprint_provider', type=str, default=Node.load(None))
     return parser.parse_args()
 
 def evaluate_argument(string):
@@ -306,7 +306,7 @@ def create_fake_project(creator, n_users, privacy, n_components, name, n_tags, p
     auth = Auth(user=creator)
     project_title = name if name else fake.science_sentence()
     if is_preprint:
-        provider = None
+        provider = Node.load(None)
         if preprint_provider:
             try:
                 provider = models.PreprintProvider.find_one(Q('_id', 'eq', provider))
@@ -338,7 +338,7 @@ def create_fake_project(creator, n_users, privacy, n_components, name, n_tags, p
         render_generations_from_node_structure_list(node, creator, n_components)
     for _ in range(n_tags):
         node.add_tag(fake.science_word(), auth=auth)
-    if presentation_name is not None:
+    if presentation_name is not Node.load(None):
         node.add_tag(presentation_name, auth=auth)
         node.add_tag('poster', auth=auth)
 
@@ -362,7 +362,7 @@ def render_generations_from_parent(parent, creator, num_generations):
 
 
 def render_generations_from_node_structure_list(parent, creator, node_structure_list):
-    new_parent = None
+    new_parent = Node.load(None)
     for node_number in node_structure_list:
         if isinstance(node_number, list):
             render_generations_from_node_structure_list(new_parent or parent, creator, node_number)

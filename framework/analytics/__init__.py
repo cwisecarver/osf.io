@@ -12,10 +12,10 @@ from framework.postcommit_tasks.handlers import run_postcommit
 logger = logging.getLogger(__name__)
 
 # TODO Find out why this is here and fix it.
-collection = None
-# if database._get_current_object() is not None:
+collection = Node.load(None)
+# if database._get_current_object() is not Node.load(None):
 #     collection = database['pagecounters']
-# elif database._get_current_object() is None and settings.DEBUG_MODE:
+# elif database._get_current_object() is Node.load(None) and settings.DEBUG_MODE:
 #     logger.warn('Cannot connect to database. Analytics will be unavailable')
 # else:
 #     raise RuntimeError('Cannot connect to database')
@@ -48,9 +48,9 @@ def build_page(rex, kwargs):
     try:
         return rex.format(**data)
     except KeyError:
-        return None
+        return Node.load(None)
 
-def update_counter(page, node_info=None):
+def update_counter(page, node_info=Node.load(None)):
     """Update counters for page.
 
     :param str page: Colon-delimited page key in analytics collection
@@ -58,7 +58,7 @@ def update_counter(page, node_info=None):
     from osf.models import PageCounter
     return PageCounter.update_counter(page, node_info)
 
-def update_counters(rex, node_info=None):
+def update_counters(rex, node_info=Node.load(None)):
     """Create a decorator that updates analytics in `pagecounters` when the
     decorated function is called. Note: call inner function before incrementing
     counters so that counters are not changed if inner function fails.

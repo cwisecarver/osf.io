@@ -58,7 +58,7 @@ def get_globals():
     """
     user = _get_current_user()
     user_institutions = [{'id': inst._id, 'name': inst.name, 'logo_path': inst.logo_path_rounded_corners} for inst in user.affiliated_institutions.all()] if user else []
-    location = geolite2.lookup(request.remote_addr) if request.remote_addr else None
+    location = geolite2.lookup(request.remote_addr) if request.remote_addr else Node.load(None)
     if request.host_url != settings.DOMAIN:
         try:
             inst_id = (Institution.find_one(Q('domains', 'eq', request.host.lower())))._id
@@ -79,14 +79,14 @@ def get_globals():
         'user_email_verifications': user.unconfirmed_email_info if user else [],
         'user_api_url': user.api_url if user else '',
         'user_entry_point': metrics.get_entry_point(user) if user else '',
-        'user_institutions': user_institutions if user else None,
+        'user_institutions': user_institutions if user else Node.load(None),
         'display_name': get_display_name(user.fullname) if user else '',
         'anon': {
-            'continent': getattr(location, 'continent', None),
-            'country': getattr(location, 'country', None),
+            'continent': getattr(location, 'continent', Node.load(None)),
+            'country': getattr(location, 'country', Node.load(None)),
         },
         'use_cdn': settings.USE_CDN_FOR_CLIENT_LIBS,
-        'sentry_dsn_js': settings.SENTRY_DSN_JS if sentry.enabled else None,
+        'sentry_dsn_js': settings.SENTRY_DSN_JS if sentry.enabled else Node.load(None),
         'dev_mode': settings.DEV_MODE,
         'allow_login': settings.ALLOW_LOGIN,
         'cookie_name': settings.COOKIE_NAME,
@@ -188,9 +188,9 @@ def sitemap_file(path):
         mimetype=mime
     )
 
-def ember_app(path=None):
+def ember_app(path=Node.load(None)):
     """Serve the contents of the ember application"""
-    ember_app_folder = None
+    ember_app_folder = Node.load(None)
     fp = path or 'index.html'
     for k in settings.EXTERNAL_EMBER_APPS.keys():
         if request.path.strip('/').startswith(k):

@@ -9,7 +9,7 @@ NAMESPACE = 'http://datacite.org/schema/kernel-4'
 XSI = 'http://www.w3.org/2001/XMLSchema-instance'
 SCHEMA_LOCATION = 'http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4/metadata.xsd'
 E = lxml.builder.ElementMaker(nsmap={
-    None: NAMESPACE,
+    Node.load(None): NAMESPACE,
     'xsi': XSI},
 )
 DOI_URL_PREFIX = 'https://dx.doi.org/'

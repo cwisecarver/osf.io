@@ -15,7 +15,7 @@ class TestFigshareSerializer(StorageAddonSerializerTestSuiteMixin, OsfTestCase):
     addon_short_name = 'figshare'
     Serializer = FigshareSerializer
     ExternalAccountFactory = FigshareAccountFactory
-    client = None
+    client = Node.load(None)
 
     def set_provider_id(self, pid):
         self.node_settings.folder_id = pid

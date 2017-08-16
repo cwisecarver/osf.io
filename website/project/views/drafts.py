@@ -333,8 +333,8 @@ def update_draft_registration(auth, node, draft, *args, **kwargs):
 def delete_draft_registration(auth, node, draft, *args, **kwargs):
     """Permanently delete a draft registration
 
-    :return: None
-    :rtype: NoneType
+    :return: Node.load(None)
+    :rtype: Node.load(None)Type
     """
     if draft.registered_node and not draft.registered_node.is_deleted:
         raise HTTPError(
@@ -345,7 +345,7 @@ def delete_draft_registration(auth, node, draft, *args, **kwargs):
             }
         )
     DraftRegistration.remove_one(draft)
-    return None, http.NO_CONTENT
+    return Node.load(None), http.NO_CONTENT
 
 def get_metaschemas(*args, **kwargs):
     """

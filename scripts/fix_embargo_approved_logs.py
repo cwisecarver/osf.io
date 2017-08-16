@@ -23,7 +23,7 @@ def main():
 
 
 def get_targets():
-    return NodeLog.find(Q('action', 'eq', NodeLog.EMBARGO_APPROVED) & Q('params.user', 'eq', None))
+    return NodeLog.find(Q('action', 'eq', NodeLog.EMBARGO_APPROVED) & Q('params.user', 'eq', Node.load(None)))
 
 
 def fix_embargo_approved_logs(targets):

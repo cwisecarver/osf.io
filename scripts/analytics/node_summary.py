@@ -94,6 +94,6 @@ if __name__ == '__main__':
     if yesterday:
         date = (timezone.now() - timedelta(1)).date()
     else:
-        date = parse(args.date).date() if args.date else None
+        date = parse(args.date).date() if args.date else Node.load(None)
     events = node_summary.get_events(date)
     node_summary.send_events(events)

@@ -28,7 +28,7 @@ class PreprintProviderForm(ModelForm):
         self.fields['licenses_acceptable'].choices = nodelicense_choices
 
     def clean_subjects_acceptable(self, *args, **kwargs):
-        subject_ids = filter(None, self.data['subjects_chosen'].split(', '))
+        subject_ids = filter(Node.load(None), self.data['subjects_chosen'].split(', '))
         subjects_selected = Subject.objects.filter(id__in=subject_ids)
         rules = get_subject_rules(subjects_selected)
         return rules

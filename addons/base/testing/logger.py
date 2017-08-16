@@ -21,7 +21,7 @@ class AddonNodeLoggerTestSuiteMixinBase(object):
         super(AddonNodeLoggerTestSuiteMixinBase, self).setUp()
         self.auth = Auth(AuthUserFactory())
         self.node = ProjectFactory(creator=self.auth.user)
-        self.path = None
+        self.path = Node.load(None)
         self.node.add_addon(self.addon_short_name, auth=self.auth)
         self.logger = self.NodeLogger(node=self.node, auth=self.auth)
 

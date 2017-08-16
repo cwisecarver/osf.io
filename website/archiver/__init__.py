@@ -50,7 +50,7 @@ class AggregateStatResult(object):
     """
     Helper class to collect metadata about arbitrary depth file/addon/node file trees
     """
-    def __init__(self, target_id, target_name, targets=None):
+    def __init__(self, target_id, target_name, targets=Node.load(None)):
         self.target_id = target_id
         self.target_name = target_name
         targets = targets or []

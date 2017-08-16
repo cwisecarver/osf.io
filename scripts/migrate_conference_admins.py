@@ -44,7 +44,7 @@ def migrate_node(node, conference, staff_user, personal_accounts, dry_run=True):
                 )
             )
             if not dry_run:
-                node.remove_contributor(admin, log=False, auth=None)
+                node.remove_contributor(admin, log=False, auth=Node.load(None))
     if staff_user not in node.contributors:
         logger.info(
             u'Adding staff email {0} to node {1}'.format(

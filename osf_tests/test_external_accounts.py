@@ -77,7 +77,7 @@ class TestEncryptedTextField:
         my_value_encrypted = field.get_db_prep_value(my_value)
         assert isinstance(my_value_encrypted, bytes)
 
-        my_value_decrypted = field.from_db_value(my_value_encrypted, None, None, None)
+        my_value_decrypted = field.from_db_value(my_value_encrypted, Node.load(None), Node.load(None), Node.load(None))
         assert isinstance(my_value_decrypted, bytes)
         assert my_value_decrypted == ensure_bytes(my_value)
 
@@ -87,13 +87,13 @@ class TestEncryptedTextField:
         my_value_encrypted = field.get_db_prep_value(my_value)
         assert isinstance(my_value_encrypted, bytes)
 
-        my_value_decrypted = field.from_db_value(my_value_encrypted, None, None, None)
+        my_value_decrypted = field.from_db_value(my_value_encrypted, Node.load(None), Node.load(None), Node.load(None))
         assert my_value_decrypted == ensure_bytes(my_value)
 
         my_value = '찦차КЛМНО💁◕‿◕｡)╱i̲̬͇̪͙n̝̗͕v̟̜̘̦͟o̶̙̰̠kè͚̮̺̪̹̱̤  ǝɹol'
         assert isinstance(my_value, bytes)
         my_value_encrypted = field.get_db_prep_value(my_value)
-        my_value_decrypted = field.from_db_value(my_value_encrypted, None, None, None)
+        my_value_decrypted = field.from_db_value(my_value_encrypted, Node.load(None), Node.load(None), Node.load(None))
         assert isinstance(my_value_decrypted, bytes)
         assert my_value_decrypted == ensure_bytes(my_value)
 
@@ -103,7 +103,7 @@ class TestEncryptedTextField:
         my_value_encrypted = field.get_db_prep_value(my_value)
         assert isinstance(my_value_encrypted, bytes)
 
-        my_value_decrypted = field.from_db_value(my_value_encrypted, None, None, None)
+        my_value_decrypted = field.from_db_value(my_value_encrypted, Node.load(None), Node.load(None), Node.load(None))
         assert isinstance(my_value_decrypted, bytes)
         assert my_value_decrypted == ensure_bytes(my_value)
 
@@ -113,12 +113,12 @@ class TestEncryptedTextField:
         my_value_encrypted = field.get_db_prep_value(my_value)
         assert isinstance(my_value_encrypted, bytes)
 
-        my_value_decrypted = field.from_db_value(my_value_encrypted, None, None, None)
+        my_value_decrypted = field.from_db_value(my_value_encrypted, Node.load(None), Node.load(None), Node.load(None))
         assert my_value_decrypted == ensure_bytes(my_value)
 
         my_value = u'찦차КЛМНО💁◕‿◕｡)╱i̲̬͇̪͙n̝̗͕v̟̜̘̦͟o̶̙̰̠kè͚̮̺̪̹̱̤  ǝɹol'
         assert isinstance(my_value, unicode)
         my_value_encrypted = field.get_db_prep_value(my_value)
-        my_value_decrypted = field.from_db_value(my_value_encrypted, None, None, None)
+        my_value_decrypted = field.from_db_value(my_value_encrypted, Node.load(None), Node.load(None), Node.load(None))
         assert isinstance(my_value_decrypted, bytes)
         assert my_value_decrypted == ensure_bytes(my_value)

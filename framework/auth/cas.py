@@ -46,7 +46,7 @@ class CasTokenError(CasError):
 class CasResponse(object):
     """A wrapper for an HTTP response returned from CAS."""
 
-    def __init__(self, authenticated=False, status=None, user=None, attributes=None):
+    def __init__(self, authenticated=False, status=Node.load(None), user=Node.load(None), attributes=Node.load(None)):
         self.authenticated = authenticated
         self.status = status
         self.user = user
@@ -59,7 +59,7 @@ class CasClient(object):
     def __init__(self, base_url):
         self.BASE_URL = base_url
 
-    def get_login_url(self, service_url, campaign=None, username=None, verification_key=None):
+    def get_login_url(self, service_url, campaign=Node.load(None), username=Node.load(None), verification_key=Node.load(None)):
         """
         Get CAS login url with `service_url` as redirect location. There are three options:
         1. no additional parameters provided -> go to CAS login page
@@ -266,7 +266,7 @@ def make_response_from_ticket(ticket, service_url):
         if user and action == 'authenticate':
             # if we successfully authenticate and a verification key is present, invalidate it
             if user.verification_key:
-                user.verification_key = None
+                user.verification_key = Node.load(None)
                 user.save()
 
             # if user is authenticated by external IDP, ask CAS to authenticate user for a second time
@@ -325,13 +325,13 @@ def get_user_from_cas_resp(cas_resp):
         user = OSFUser.load(cas_resp.user)
         # cas returns a valid OSF user id
         if user:
-            return user, None, 'authenticate'
+            return user, Node.load(None), 'authenticate'
         # cas does not return a valid OSF user id
         else:
             external_credential = validate_external_credential(cas_resp.user)
             # invalid cas response
             if not external_credential:
-                return None, None, None
+                return Node.load(None), Node.load(None), Node.load(None)
             # cas returns a valid external credential
             user = get_user(external_id_provider=external_credential['provider'],
                             external_id=external_credential['id'])
@@ -340,7 +340,7 @@ def get_user_from_cas_resp(cas_resp):
                 return user, external_credential, 'authenticate'
             # user first time login through external identity provider
             else:
-                return None, external_credential, 'external_first_login'
+                return Node.load(None), external_credential, 'external_first_login'
 
 
 def validate_external_credential(external_credential):

@@ -79,7 +79,7 @@ class TestNodeSettings(models.OAuthAddonNodeSettingsTestSuiteMixin, unittest.Tes
         assert_equal(result['bitbucket_user'], 'abc')
         assert_true(result['is_owner'])
         assert_true(result['valid_credentials'])
-        assert_equal(result.get('repo_names', None), [])
+        assert_equal(result.get('repo_names', Node.load(None)), [])
 
     @mock.patch('addons.bitbucket.api.BitbucketClient.repos')
     @mock.patch('addons.bitbucket.api.BitbucketClient.team_repos')
@@ -92,7 +92,7 @@ class TestNodeSettings(models.OAuthAddonNodeSettingsTestSuiteMixin, unittest.Tes
         assert_equal(result['bitbucket_user'], 'abc')
         assert_false(result['is_owner'])
         assert_true(result['valid_credentials'])
-        assert_equal(result.get('repo_names', None), None)
+        assert_equal(result.get('repo_names', Node.load(None)), Node.load(None))
 
 
 class TestUserSettings(models.OAuthAddonUserSettingTestSuiteMixin, unittest.TestCase):
@@ -143,7 +143,7 @@ class TestCallbacks(OsfTestCase):
         mock_repo.side_effect = NotFoundError
 
         result = self.node_settings.before_make_public(self.project)
-        assert_is(result, None)
+        assert_is(result, Node.load(None))
 
     @mock.patch('addons.bitbucket.api.BitbucketClient.repo')
     def test_before_page_load_osf_public_bb_public(self, mock_repo):
@@ -194,7 +194,7 @@ class TestCallbacks(OsfTestCase):
         assert_false(message)
 
     def test_before_page_load_not_logged_in(self):
-        message = self.node_settings.before_page_load(self.project, None)
+        message = self.node_settings.before_page_load(self.project, Node.load(None))
         assert_false(message)
 
     def test_before_remove_contributor_authenticator(self):
@@ -215,7 +215,7 @@ class TestCallbacks(OsfTestCase):
         )
         assert_equal(
             self.node_settings.user_settings,
-            None
+            Node.load(None)
         )
         assert_true(message)
         assert_not_in("You can re-authenticate", message)
@@ -227,7 +227,7 @@ class TestCallbacks(OsfTestCase):
         )
         assert_equal(
             self.node_settings.user_settings,
-            None
+            Node.load(None)
         )
         assert_true(message)
         assert_in("You can re-authenticate", message)
@@ -238,7 +238,7 @@ class TestCallbacks(OsfTestCase):
         )
         assert_not_equal(
             self.node_settings.user_settings,
-            None,
+            Node.load(None),
         )
 
     def test_after_fork_authenticator(self):
@@ -258,14 +258,14 @@ class TestCallbacks(OsfTestCase):
         )
         assert_equal(
             clone.user_settings,
-            None,
+            Node.load(None),
         )
 
     def test_after_delete(self):
         self.project.remove_node(Auth(user=self.project.creator))
         # Ensure that changes to node settings have been saved
         self.node_settings.reload()
-        assert_true(self.node_settings.user_settings is None)
+        assert_true(self.node_settings.user_settings is Node.load(None))
 
     @mock.patch('website.archiver.tasks.archive')
     def test_does_not_get_copied_to_registrations(self, mock_archive):

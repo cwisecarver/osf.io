@@ -67,7 +67,7 @@ class TestStoredFileNode(FilesTestCase):
         assert_in(self.test_file.provider, url)
 
     def test_get_guid_no_create(self):
-        assert_is(self.test_file.get_guid(), None)
+        assert_is(self.test_file.get_guid(), Node.load(None))
 
     def test_get_guid_create(self):
         guid = self.test_file.get_guid(create=True)
@@ -186,7 +186,7 @@ class TestFileNodeObj(FilesTestCase):
         )
         item.save()
 
-        assert_is(models.BaseFileNode.load('notanid'), None)
+        assert_is(models.BaseFileNode.load('notanid'), Node.load(None))
         assert_true(isinstance(TestFolder.load(item._id), TestFolder))
         assert_true(isinstance(models.BaseFileNode.load(item._id), TestFolder))
 
@@ -209,7 +209,7 @@ class TestFileNodeObj(FilesTestCase):
         )
         child.save()
 
-        assert_is(child.parent, None)
+        assert_is(child.parent, Node.load(None))
         child.parent = parent
         child.save()
         assert_is(child.parent, parent)
@@ -278,7 +278,7 @@ class TestFileNodeObj(FilesTestCase):
 
         trashed = models.TrashedFileNode.objects.all()[0]
         assert_equal(trashed.deleted_by, self.user)
-        assert_equal(TestFile.load(fn._id), None)
+        assert_equal(TestFile.load(fn._id), Node.load(None))
 
     def test_restore_file(self):
         # import ipdb; ipdb.set_trace()
@@ -314,7 +314,7 @@ class TestFileNodeObj(FilesTestCase):
                 getattr(fn, field_name)
             )
 
-        assert_equal(models.TrashedFileNode.load(trashed._id), None)
+        assert_equal(models.TrashedFileNode.load(trashed._id), Node.load(None))
 
         # Guid is repointed
         guid.reload()
@@ -353,11 +353,11 @@ class TestFileNodeObj(FilesTestCase):
                 getattr(root, field_name)
             )
 
-        assert_equal(models.TrashedFileNode.load(trashed_root_id), None)
-        assert_equal(models.TrashedFileNode.load(fn_id), None)
+        assert_equal(models.TrashedFileNode.load(trashed_root_id), Node.load(None))
+        assert_equal(models.TrashedFileNode.load(fn_id), Node.load(None))
 
     def test_restore_folder_nested(self):
-        def build_tree(acc=None, parent=None, atleastone=False):
+        def build_tree(acc=Node.load(None), parent=Node.load(None), atleastone=False):
             import random
             acc = acc or []
             if len(acc) > 5:
@@ -425,22 +425,22 @@ class TestFileNodeObj(FilesTestCase):
 
         for data in stay_deleted:
             assert_true(models.TrashedFileNode.load(data['_id']))
-            assert_is(TestFileNode.load(data['_id']), None)
+            assert_is(TestFileNode.load(data['_id']), Node.load(None))
 
         trashed = parent.delete()
 
         for data in get_restored:
             assert_true(models.TrashedFileNode.load(data['_id']))
-            assert_is(TestFileNode.load(data['_id']), None)
+            assert_is(TestFileNode.load(data['_id']), Node.load(None))
 
         trashed.restore()
 
         for data in stay_deleted:
             assert_true(models.TrashedFileNode.load(data['_id']))
-            assert_is(TestFileNode.load(data['_id']), None)
+            assert_is(TestFileNode.load(data['_id']), Node.load(None))
 
         for data in get_restored:
-            assert_is(models.TrashedFileNode.load(data['_id']), None)
+            assert_is(models.TrashedFileNode.load(data['_id']), Node.load(None))
             assert TestFileNode.load(data['_id']).to_storage() == data
 
     def test_metadata_url(self):
@@ -502,7 +502,7 @@ class TestFileObj(FilesTestCase):
         assert_equals(file.get_version('1'), v1)
         assert_equals(file.get_version('2', required=True), v2)
 
-        assert_is(file.get_version('3'), None)
+        assert_is(file.get_version('3'), Node.load(None))
 
         with assert_raises(exceptions.VersionNotFoundError):
             file.get_version('3', required=True)
@@ -522,7 +522,7 @@ class TestFileObj(FilesTestCase):
         file.save()
 
         file.versions.add(v1)
-        file.update_version_metadata(None, {'size': 1337})
+        file.update_version_metadata(Node.load(None), {'size': 1337})
 
         with assert_raises(exceptions.VersionNotFoundError):
             file.update_version_metadata('3', {})
@@ -540,7 +540,7 @@ class TestFileObj(FilesTestCase):
         )
 
         mock_requests.return_value = mock.Mock(status_code=400)
-        assert_is(file.touch(None), None)
+        assert_is(file.touch(Node.load(None)), Node.load(None))
 
         mock_response = mock.Mock(status_code=200)
         mock_response.json.return_value = {
@@ -554,7 +554,7 @@ class TestFileObj(FilesTestCase):
             }
         }
         mock_requests.return_value = mock_response
-        v = file.touch(None)
+        v = file.touch(Node.load(None))
         assert_equals(v.size, 0xDEADBEEF)
         assert_equals(file.versions.count(), 0)
 
@@ -581,9 +581,9 @@ class TestFileObj(FilesTestCase):
         }
         mock_requests.return_value = mock_response
 
-        v = file.touch(None, revision='foo')
+        v = file.touch(Node.load(None), revision='foo')
         assert_equals(file.versions.count(), 1)
-        assert_equals(file.touch(None, revision='foo'), v)
+        assert_equals(file.touch(Node.load(None), revision='foo'), v)
 
     @mock.patch('osf.models.files.requests.get')
     def test_touch_auth(self, mock_requests):
@@ -705,12 +705,12 @@ class TestSubclasses(FilesTestCase):
             materialized_path='/long/path/to/name',
         )
 
-        file.touch(None)
+        file.touch(Node.load(None))
         file.touch('bar', version='foo')
-        file.touch(None, version='zyzz', bar='baz')
+        file.touch(Node.load(None), version='zyzz', bar='baz')
 
         mock_touch.assert_has_calls([
-            mock.call(None),
+            mock.call(Node.load(None)),
             mock.call('bar', version='foo'),
-            mock.call(None, version='zyzz', bar='baz'),
+            mock.call(Node.load(None), version='zyzz', bar='baz'),
         ])

@@ -165,7 +165,7 @@ def move_subscription(remove_users, source_event, source_node, new_event, new_no
     for notification_type in constants.NOTIFICATION_TYPES:
         if new_sub:
             for user_id in remove_users[notification_type]:
-                related_manager = getattr(new_sub, notification_type, None)
+                related_manager = getattr(new_sub, notification_type, Node.load(None))
                 subscriptions = related_manager.all() if related_manager else []
                 if user_id in subscriptions:
                     user = OSFUser.load(user_id)
@@ -186,7 +186,7 @@ def get_configured_projects(user):
     ))
 
     for subscription in user_subscriptions:
-        if subscription is None:
+        if subscription is Node.load(None):
             continue
         # If the user has opted out of emails skip
         node = subscription.owner
@@ -213,7 +213,7 @@ def check_project_subscriptions_are_all_none(user, node):
     return True
 
 
-def get_all_user_subscriptions(user, extra=None):
+def get_all_user_subscriptions(user, extra=Node.load(None)):
     """ Get all Subscription objects that the user is subscribed to"""
     NotificationSubscription = apps.get_model('osf.NotificationSubscription')
     for notification_type in constants.NOTIFICATION_TYPES:
@@ -225,7 +225,7 @@ def get_all_user_subscriptions(user, extra=None):
             yield subscription
 
 
-def get_all_node_subscriptions(user, node, user_subscriptions=None):
+def get_all_node_subscriptions(user, node, user_subscriptions=Node.load(None)):
     """ Get all Subscription objects for a node that the user is subscribed to
 
     :param user: modular odm User object
@@ -307,7 +307,7 @@ def format_user_subscriptions(user):
             event_description=user_subs_available.pop(user_subs_available.index(getattr(subscription, 'event_name')))
         )
         for subscription in get_all_user_subscriptions(user)
-        if subscription is not None and getattr(subscription, 'event_name') in user_subs_available
+        if subscription is not Node.load(None) and getattr(subscription, 'event_name') in user_subs_available
     ]
     subscriptions.extend([serialize_event(user, event_description=sub) for sub in user_subs_available])
     return subscriptions
@@ -327,7 +327,7 @@ def format_file_subscription(user, node_id, path, provider):
 all_subs = constants.NODE_SUBSCRIPTIONS_AVAILABLE.copy()
 all_subs.update(constants.USER_SUBSCRIPTIONS_AVAILABLE)
 
-def serialize_event(user, subscription=None, node=None, event_description=None):
+def serialize_event(user, subscription=Node.load(None), node=Node.load(None), event_description=Node.load(None)):
     """
     :param user: modular odm User object
     :param subscription: modular odm Subscription object, use if parsing particular subscription
@@ -391,7 +391,7 @@ def get_parent_notification_type(node, event, user):
         else:
             return get_parent_notification_type(parent, event, user)
     else:
-        return None
+        return Node.load(None)
 
 
 def get_global_notification_type(global_subscription, user):

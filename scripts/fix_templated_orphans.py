@@ -49,7 +49,7 @@ def resolve_templated_orphan(orphan):
 
 def find_templated_orphans():
     return Node.find(
-        Q('template_node', 'ne', None) &
+        Q('template_node', 'ne', Node.load(None)) &
         Q('category', 'ne', 'project') &
         Q('__backrefs.parent.node.nodes.0', 'exists', False)
     )

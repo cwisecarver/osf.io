@@ -84,7 +84,7 @@ class TestClient(DataverseAddonTestCase, unittest.TestCase):
         mock_connect.assert_called_once_with(self.host, self.token)
 
     def test_connect_from_settings_none(self):
-        connection = connect_from_settings(None)
+        connection = connect_from_settings(Node.load(None))
         assert_is_none(connection)
 
     @mock.patch('addons.dataverse.client._connect')
@@ -99,7 +99,7 @@ class TestClient(DataverseAddonTestCase, unittest.TestCase):
         mock_connect.assert_called_once_with(self.host, self.token)
 
     def test_connect_from_settings_or_401_none(self):
-        connection = connect_from_settings_or_401(None)
+        connection = connect_from_settings_or_401(Node.load(None))
         assert_is_none(connection)
 
     @mock.patch('addons.dataverse.client.Connection')
@@ -150,13 +150,13 @@ class TestClient(DataverseAddonTestCase, unittest.TestCase):
         ]
 
         datasets = get_datasets(self.mock_dataverse)
-        assert_is(self.mock_dataverse.get_datasets.assert_called_once_with(timeout=settings.REQUEST_TIMEOUT), None)
+        assert_is(self.mock_dataverse.get_datasets.assert_called_once_with(timeout=settings.REQUEST_TIMEOUT), Node.load(None))
         assert_in(mock_dataset1, datasets)
         assert_in(mock_dataset2, datasets)
         assert_in(mock_dataset3, datasets)
 
     def test_get_datasets_no_dataverse(self):
-        datasets = get_datasets(None)
+        datasets = get_datasets(Node.load(None))
         assert_equal(datasets, [])
 
     def test_get_dataset(self):
@@ -164,7 +164,7 @@ class TestClient(DataverseAddonTestCase, unittest.TestCase):
         self.mock_dataverse.get_dataset_by_doi.return_value = self.mock_dataset
 
         s = get_dataset(self.mock_dataverse, 'My hdl')
-        assert_is(self.mock_dataverse.get_dataset_by_doi.assert_called_once_with('My hdl', timeout=settings.REQUEST_TIMEOUT), None)
+        assert_is(self.mock_dataverse.get_dataset_by_doi.assert_called_once_with('My hdl', timeout=settings.REQUEST_TIMEOUT), Node.load(None))
 
         assert_equal(s, self.mock_dataset)
 
@@ -179,7 +179,7 @@ class TestClient(DataverseAddonTestCase, unittest.TestCase):
 
         with assert_raises(Exception) as e:
             get_dataset(dataverse, 'My hdl')
-        assert_is(mock_requests.get.assert_called_once_with('123', auth='me', timeout=settings.REQUEST_TIMEOUT), None)
+        assert_is(mock_requests.get.assert_called_once_with('123', auth='me', timeout=settings.REQUEST_TIMEOUT), Node.load(None))
         assert_equal(e.exception.message, 'Done Testing')
 
     def test_get_deaccessioned_dataset(self):
@@ -189,7 +189,7 @@ class TestClient(DataverseAddonTestCase, unittest.TestCase):
         with assert_raises(HTTPError) as e:
             get_dataset(self.mock_dataverse, 'My hdl')
 
-        assert_is(self.mock_dataverse.get_dataset_by_doi.assert_called_once_with('My hdl', timeout=settings.REQUEST_TIMEOUT), None)
+        assert_is(self.mock_dataverse.get_dataset_by_doi.assert_called_once_with('My hdl', timeout=settings.REQUEST_TIMEOUT), Node.load(None))
         assert_equal(e.exception.code, 410)
 
     def test_get_bad_dataset(self):
@@ -199,7 +199,7 @@ class TestClient(DataverseAddonTestCase, unittest.TestCase):
 
         with assert_raises(HTTPError) as e:
             get_dataset(self.mock_dataverse, 'My hdl')
-        assert_is(self.mock_dataverse.get_dataset_by_doi.assert_called_once_with('My hdl', timeout=settings.REQUEST_TIMEOUT), None)
+        assert_is(self.mock_dataverse.get_dataset_by_doi.assert_called_once_with('My hdl', timeout=settings.REQUEST_TIMEOUT), Node.load(None))
         assert_equal(e.exception.code, 406)
 
     def test_get_dataverses(self):

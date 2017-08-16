@@ -45,16 +45,16 @@ class LogEntryAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=Node.load(None)):
         return request.user.is_superuser and request.method != 'POST'
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=Node.load(None)):
         return False
 
     def object_link(self, obj):
         if obj.action_flag == DELETION:
             link = escape(obj.object_repr)
-        elif obj.content_type is None:
+        elif obj.content_type is Node.load(None):
             link = escape(obj.object_repr)
         else:
             ct = obj.content_type

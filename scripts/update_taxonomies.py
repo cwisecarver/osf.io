@@ -46,7 +46,7 @@ def update_taxonomies(filename):
             text = subjects[-1]
 
             # Search for parent subject, get id if it exists
-            parent = None
+            parent = Node.load(None)
             if len(subjects) > 1:
                 parent, created_p = Subject.objects.get_or_create(text=subjects[-2], provider=bepress_provider)
                 if created_p:

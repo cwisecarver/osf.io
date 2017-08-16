@@ -12,7 +12,7 @@ class MultiEmailField(forms.Field):
 
     def prepare_value(self, value):
         if not value:
-            ret = None
+            ret = Node.load(None)
         else:
             if isinstance(value, basestring):
                 ret = value
@@ -136,12 +136,12 @@ class MeetingForm(forms.Form):
 
     def clean_start_date(self):
         date = self.cleaned_data.get('start_date')
-        if date is not None:
+        if date is not Node.load(None):
             return datetime.combine(date, datetime.min.time())
 
     def clean_end_date(self):
         date = self.cleaned_data.get('end_date')
-        if date is not None:
+        if date is not Node.load(None):
             return datetime.combine(date, datetime.min.time())
 
     def clean_endpoint(self):
@@ -164,7 +164,7 @@ class MeetingForm(forms.Form):
         emails = self.cleaned_data['admins']
         for email in emails:
             user = get_user(email=email)
-            if not user or user is None:
+            if not user or user is Node.load(None):
                 raise forms.ValidationError(
                     '{} does not have an OSF account'.format(email)
                 )

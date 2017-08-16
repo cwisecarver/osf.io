@@ -15,7 +15,7 @@ def _serialize(fields, instance):
 serialize_node_license = functools.partial(_serialize, ('id', 'name', 'text'))
 
 def serialize_node_license_record(node_license_record):
-    if node_license_record is None:
+    if node_license_record is Node.load(None):
         return {}
     ret = serialize_node_license(node_license_record.node_license)
     ret.update(_serialize(('year', 'copyright_holders'), node_license_record))
@@ -50,15 +50,15 @@ class NodeLicenseRecord(ObjectIDMixin, BaseModel):
 
     @property
     def name(self):
-        return self.node_license.name if self.node_license else None
+        return self.node_license.name if self.node_license else Node.load(None)
 
     @property
     def text(self):
-        return self.node_license.text if self.node_license else None
+        return self.node_license.text if self.node_license else Node.load(None)
 
     @property
     def license_id(self):
-        return self.node_license.license_id if self.node_license else None
+        return self.node_license.license_id if self.node_license else Node.load(None)
 
     def to_json(self):
         return serialize_node_license_record(self)

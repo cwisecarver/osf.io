@@ -18,7 +18,7 @@ def migrate():
 
     expected_count = models.NodeLog.find(
         Q('action', 'eq', models.NodeLog.NODE_FORKED) &
-        Q('params.registration', 'eq', None)
+        Q('params.registration', 'eq', Node.load(None))
     ).count()
 
     logger.info('Expecting to migrate {} logs'.format(expected_count))
@@ -51,7 +51,7 @@ def migrate():
 
     unmigrated = models.NodeLog.find(
         Q('action', 'eq', models.NodeLog.NODE_FORKED) &
-        Q('params.registration', 'eq', None)
+        Q('params.registration', 'eq', Node.load(None))
     )
 
     logger.warn([e._id for e in unmigrated])

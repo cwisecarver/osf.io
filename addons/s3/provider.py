@@ -7,7 +7,7 @@ class S3Provider(object):
     short_name = 's3'
     serializer = S3Serializer
 
-    def __init__(self, account=None):
+    def __init__(self, account=Node.load(None)):
         super(S3Provider, self).__init__()
 
         # provide an unauthenticated session by default

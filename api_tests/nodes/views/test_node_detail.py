@@ -1120,11 +1120,11 @@ class TestNodeTags:
     def test_add_tag_to_project_errors(self, app, user_non_contrib, user_read_contrib, payload_public, payload_private, url_public, url_private):
 
     #   test_non_authenticated_user_cannot_add_tag_to_public_project
-        res = app.patch_json_api(url_public, payload_public, expect_errors=True, auth=None)
+        res = app.patch_json_api(url_public, payload_public, expect_errors=True, auth=Node.load(None))
         assert res.status_code == 401
 
     #   test_non_authenticated_user_cannot_add_tag_to_private_project
-        res = app.patch_json_api(url_private, payload_private, expect_errors=True, auth=None)
+        res = app.patch_json_api(url_private, payload_private, expect_errors=True, auth=Node.load(None))
         assert res.status_code == 401
 
     #   test_non_contributor_cannot_add_tag_to_public_project
@@ -1327,7 +1327,7 @@ class TestNodeUpdateLicense:
 
     @pytest.fixture()
     def make_payload(self):
-        def payload(node_id, license_id=None, license_year=None, copyright_holders=None):
+        def payload(node_id, license_id=Node.load(None), license_year=Node.load(None), copyright_holders=Node.load(None)):
             attributes = {}
 
             if license_year and copyright_holders:
@@ -1375,7 +1375,7 @@ class TestNodeUpdateLicense:
 
     @pytest.fixture()
     def make_request(self, app):
-        def request(url, data, auth=None, expect_errors=False):
+        def request(url, data, auth=Node.load(None), expect_errors=False):
             return app.patch_json_api(url, data, auth=auth, expect_errors=expect_errors)
         return request
 
@@ -1385,14 +1385,14 @@ class TestNodeUpdateLicense:
             license_id='thisisafakelicenseid'
         )
 
-        assert node.node_license is None
+        assert node.node_license is Node.load(None)
 
         res = make_request(url_node, data, auth=user_admin_contrib.auth, expect_errors=True)
         assert res.status_code == 404
         assert res.json['errors'][0]['detail'] == 'Unable to find specified license.'
 
         node.reload()
-        assert node.node_license is None
+        assert node.node_license is Node.load(None)
 
     def test_admin_can_update_license(self, user_admin_contrib, node, make_payload, make_request, license_cc0, url_node):
         data = make_payload(
@@ -1400,14 +1400,14 @@ class TestNodeUpdateLicense:
             license_id=license_cc0._id
         )
 
-        assert node.node_license is None
+        assert node.node_license is Node.load(None)
 
         res = make_request(url_node, data, auth=user_admin_contrib.auth)
         assert res.status_code == 200
         node.reload()
 
         assert node.node_license.node_license == license_cc0
-        assert node.node_license.year is None
+        assert node.node_license.year is Node.load(None)
         assert node.node_license.copyright_holders == []
 
     def test_admin_can_update_license_record(self, user_admin_contrib, node, make_payload, make_request, license_no, url_node):
@@ -1418,7 +1418,7 @@ class TestNodeUpdateLicense:
             copyright_holders=['Mr. Monument', 'Princess OSF']
         )
 
-        assert node.node_license is None
+        assert node.node_license is Node.load(None)
 
         res = make_request(url_node, data, auth=user_admin_contrib.auth)
         assert res.status_code == 200

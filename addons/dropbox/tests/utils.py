@@ -65,7 +65,7 @@ class MockDropbox(object):
 
 
 @contextmanager
-def patch_client(target, mock_client=None):
+def patch_client(target, mock_client=Node.load(None)):
     """Patches a function that returns a DropboxClient, returning an instance
     of MockDropbox instead.
 

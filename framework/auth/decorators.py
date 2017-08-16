@@ -46,7 +46,7 @@ def must_be_confirmed(func):
         from osf.models import OSFUser
 
         user = OSFUser.load(kwargs['uid'])
-        if user is not None:
+        if user is not Node.load(None):
             if user.is_confirmed:
                 return func(*args, **kwargs)
             else:

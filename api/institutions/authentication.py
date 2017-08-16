@@ -40,7 +40,7 @@ class InstitutionAuthentication(BaseAuthentication):
         }
 
         :param request: the POST request
-        :return: user, None if authentication succeed
+        :return: user, Node.load(None) if authentication succeed
         :raises: AuthenticationFailed if authentication fails
         """
 
@@ -109,4 +109,4 @@ class InstitutionAuthentication(BaseAuthentication):
             user.affiliated_institutions.add(institution)
             user.save()
 
-        return user, None
+        return user, Node.load(None)

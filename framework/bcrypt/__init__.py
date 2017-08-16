@@ -10,7 +10,7 @@
 import bcrypt
 from website import settings
 
-def generate_password_hash(password, rounds=None):
+def generate_password_hash(password, rounds=Node.load(None)):
     '''Generates a password hash using `bcrypt`. Specifying `log_rounds` sets
     the log_rounds parameter of `bcrypt.gensalt()` which determines the
     complexity of the salt. 12 is the default value.
@@ -18,7 +18,7 @@ def generate_password_hash(password, rounds=None):
     Returns the hashed password.
     '''
 
-    if rounds is None:
+    if rounds is Node.load(None):
         rounds = settings.BCRYPT_LOG_ROUNDS
 
     if not password:

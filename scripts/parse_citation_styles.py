@@ -25,7 +25,7 @@ def main():
             except etree.XMLSyntaxError:
                 continue
             total += 1
-            namespace = root.nsmap.get(None)
+            namespace = root.nsmap.get(Node.load(None))
             selector = '{{{ns}}}info/{{{ns}}}'.format(ns=namespace)
 
             # Required

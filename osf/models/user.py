@@ -67,7 +67,7 @@ name_formatters = {
 
 class OSFUserManager(BaseUserManager):
 
-    def create_user(self, username, password=None):
+    def create_user(self, username, password=Node.load(None)):
         if not username:
             raise ValueError('Users must have a username')
 
@@ -155,7 +155,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
     }
 
     # The primary email address for the account.
-    # This value is unique, but multiple "None" records exist for:
+    # This value is unique, but multiple "Node.load(None)" records exist for:
     #   * unregistered contributors where an email address was not provided.
     # TODO: Update mailchimp subscription on username change in user.save()
     # TODO: Consider making this a FK to Email with to_field='address'
@@ -199,9 +199,9 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
     #       'name': <name that referrer provided>,
     #       'referrer_id': <user ID of referrer>,
     #       'token': <token used for verification urls>,
-    #       'email': <email the referrer provided or None>,
-    #       'claimer_email': <email the claimer entered or None>,
-    #       'last_sent': <timestamp of last email sent to referrer or None>
+    #       'email': <email the referrer provided or Node.load(None)>,
+    #       'claimer_email': <email the claimer entered or Node.load(None)>,
+    #       'last_sent': <timestamp of last email sent to referrer or Node.load(None)>
     #   }
     #   ...
     # }
@@ -387,7 +387,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
 
     @property
     def is_disabled(self):
-        return self.date_disabled is not None
+        return self.date_disabled is not Node.load(None)
 
     @is_disabled.setter
     def is_disabled(self, val):
@@ -395,7 +395,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         if val and not self.date_disabled:
             self.date_disabled = timezone.now()
         elif val is False:
-            self.date_disabled = None
+            self.date_disabled = Node.load(None)
 
     @property
     def is_confirmed(self):
@@ -405,11 +405,11 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
     def is_merged(self):
         """Whether or not this account has been merged into another account.
         """
-        return self.merged_by is not None
+        return self.merged_by is not Node.load(None)
 
     @property
     def unconfirmed_emails(self):
-        # Handle when email_verifications field is None
+        # Handle when email_verifications field is Node.load(None)
         email_verifications = self.email_verifications or {}
         return [
             each['email']
@@ -450,7 +450,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         if self.has_usable_username():
             return self.username
         else:
-            return None
+            return Node.load(None)
 
     @property
     def all_tags(self):
@@ -470,7 +470,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
     def csl_given_name(self):
         return utils.generate_csl_given_name(self.given_name, self.middle_names, self.suffix)
 
-    def csl_name(self, node_id=None):
+    def csl_name(self, node_id=Node.load(None)):
         if self.is_registered:
             name = self.fullname
         else:
@@ -692,10 +692,10 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         remove_sessions_for_user(user)
 
         # - username is set to the GUID so the merging user can set it primary
-        #   in the future (note: it cannot be set to None due to non-null constraint)
+        #   in the future (note: it cannot be set to Node.load(None) due to non-null constraint)
         user.set_unusable_username()
         user.set_unusable_password()
-        user.verification_key = None
+        user.verification_key = Node.load(None)
         user.osf_mailing_lists = {}
         user.merged_by = self
 
@@ -757,7 +757,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
     # Overrides BaseModel
     def save(self, *args, **kwargs):
         self.update_is_active()
-        self.username = self.username.lower().strip() if self.username else None
+        self.username = self.username.lower().strip() if self.username else Node.load(None)
         dirty_fields = set(self.get_dirty_fields(check_relationship=True))
         ret = super(OSFUser, self).save(*args, **kwargs)
         if self.SEARCH_UPDATE_FIELDS.intersection(dirty_fields) and self.is_confirmed:
@@ -804,8 +804,8 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
             remove_sessions_for_user(self)
 
     @classmethod
-    def create_unconfirmed(cls, username, password, fullname, external_identity=None,
-                           do_confirm=True, campaign=None):
+    def create_unconfirmed(cls, username, password, fullname, external_identity=Node.load(None),
+                           do_confirm=True, campaign=Node.load(None)):
         """Create a new user who has begun registration but needs to verify
         their primary email address (username).
         """
@@ -884,7 +884,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
                                         'user_merge': user_merge.email if user_merge else False})
         return unconfirmed_emails
 
-    def clean_email_verifications(self, given_token=None):
+    def clean_email_verifications(self, given_token=Node.load(None)):
         email_verifications = deepcopy(self.email_verifications or {})
         for token in self.email_verifications or {}:
             try:
@@ -923,7 +923,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         return record['token'] == token
 
     @classmethod
-    def create_unregistered(cls, fullname, email=None):
+    def create_unregistered(cls, fullname, email=Node.load(None)):
         """Create a new unregistered user.
         """
         user = cls(
@@ -948,7 +948,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         self.family_name = parsed['family']
         self.suffix = parsed['suffix']
 
-    def add_unconfirmed_email(self, email, expiration=None, external_identity=None):
+    def add_unconfirmed_email(self, email, expiration=Node.load(None), external_identity=Node.load(None)):
         """
         Add an email verification token for a given email.
 
@@ -978,7 +978,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
 
         verification_key = generate_verification_key(verification_type='confirm')
 
-        # handle when email_verifications is None
+        # handle when email_verifications is Node.load(None)
         if not self.email_verifications:
             self.email_verifications = {}
 
@@ -1042,8 +1042,8 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
                              external=True,
                              force=False,
                              renew=False,
-                             external_id_provider=None,
-                             destination=None):
+                             external_id_provider=Node.load(None),
+                             destination=Node.load(None)):
         """Return the confirmation url for a given email.
 
         :param email: The email to confirm.
@@ -1063,7 +1063,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         destination = '?{}'.format(urllib.urlencode({'destination': destination})) if destination else ''
         return '{0}confirm/{1}{2}/{3}/{4}'.format(base, external, self._primary_key, token, destination)
 
-    def register(self, username, password=None):
+    def register(self, username, password=Node.load(None)):
         """Registers the user.
         """
         self.username = username
@@ -1090,7 +1090,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         try:
             user_to_merge = OSFUser.find_one(Q('emails__address', 'eq', email))
         except NoResultsFound:
-            user_to_merge = None
+            user_to_merge = Node.load(None)
 
         if user_to_merge and merge:
             self.merge_user(user_to_merge)
@@ -1106,12 +1106,12 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
             unregistered_user = OSFUser.find_one(Q('username', 'eq', email) &
                                               Q('_id', 'ne', self._id))
         except NoResultsFound:
-            unregistered_user = None
+            unregistered_user = Node.load(None)
 
         if unregistered_user:
             self.merge_user(unregistered_user)
             self.save()
-            unregistered_user.username = None
+            unregistered_user.username = Node.load(None)
 
         if not self.emails.filter(address=email).exists():
             self.emails.create(address=email)
@@ -1176,7 +1176,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         def setter(raw_password):
             self.set_password(raw_password, notify=False)
             # Password hash upgrades shouldn't be considered password changes.
-            self._password = None
+            self._password = Node.load(None)
             self.save(update_fields=['password'])
         return check_password(raw_password, self.password, setter)
 
@@ -1208,7 +1208,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
             raise ChangePasswordError(issues)
         self.set_password(raw_new_password)
 
-    def profile_image_url(self, size=None):
+    def profile_image_url(self, size=Node.load(None)):
         """A generalized method for getting a user's profile picture urls.
         We may choose to use some service other than gravatar in the future,
         and should not commit ourselves to using a specific service (mostly
@@ -1228,17 +1228,17 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
     @property
     def display_absolute_url(self):
         url = self.absolute_url
-        if url is not None:
+        if url is not Node.load(None):
             return re.sub(r'https?:', '', url).strip('/')
 
-    def display_full_name(self, node=None):
+    def display_full_name(self, node=Node.load(None)):
         """Return the full name , as it would display in a contributor list for a
         given node.
 
         NOTE: Unclaimed users may have a different name for different nodes.
         """
         if node:
-            unclaimed_data = self.unclaimed_records.get(str(node._id), None)
+            unclaimed_data = self.unclaimed_records.get(str(node._id), Node.load(None))
             if unclaimed_data:
                 return unclaimed_data['name']
         return self.fullname
@@ -1278,7 +1278,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         """Returns number of "shared projects" (projects that both users are contributors for)"""
         return self._projects_in_common_query(other_user).count()
 
-    def add_unclaimed_record(self, node, referrer, given_name, email=None):
+    def add_unclaimed_record(self, node, referrer, given_name, email=Node.load(None)):
         """Add a new project entry in the unclaimed records dictionary.
 
         :param Node node: Node this unclaimed user was added to.
@@ -1296,12 +1296,12 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         if email:
             clean_email = email.lower().strip()
         else:
-            clean_email = None
+            clean_email = Node.load(None)
         verification_key = generate_verification_key(verification_type='claim')
         try:
             record = self.unclaimed_records[node._id]
         except KeyError:
-            record = None
+            record = Node.load(None)
         if record:
             del record
         record = {
@@ -1327,7 +1327,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
 
     def get_claim_url(self, project_id, external=False):
         """Return the URL that an unclaimed user should use to claim their
-        account. Return ``None`` if there is no unclaimed_record for the given
+        account. Return ``Node.load(None)`` if there is no unclaimed_record for the given
         project ID.
 
         :param project_id: The project ID for the unclaimed record
@@ -1371,7 +1371,7 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
     def get_activity_points(self):
         return analytics.get_total_activity_count(self._id)
 
-    def get_or_create_cookie(self, secret=None):
+    def get_or_create_cookie(self, secret=Node.load(None)):
         """Find the cookie for the given user
         Create a new session if no cookie is found
 
@@ -1397,24 +1397,24 @@ class OSFUser(DirtyFieldsMixin, GuidMixin, BaseModel, AbstractBaseUser, Permissi
         return signer.sign(user_session._id)
 
     @classmethod
-    def from_cookie(cls, cookie, secret=None):
+    def from_cookie(cls, cookie, secret=Node.load(None)):
         """Attempt to load a user from their signed cookie
-        :returns: None if a user cannot be loaded else User
+        :returns: Node.load(None) if a user cannot be loaded else User
         """
         if not cookie:
-            return None
+            return Node.load(None)
 
         secret = secret or settings.SECRET_KEY
 
         try:
             token = itsdangerous.Signer(secret).unsign(cookie)
         except itsdangerous.BadSignature:
-            return None
+            return Node.load(None)
 
         user_session = Session.load(token)
 
-        if user_session is None:
-            return None
+        if user_session is Node.load(None):
+            return Node.load(None)
 
         return cls.load(user_session.data.get('auth_user_id'))
 

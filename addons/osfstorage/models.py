@@ -82,7 +82,7 @@ class OsfStorageFileNode(BaseFileNode):
         return cls(node=node, path=path)
 
     @classmethod
-    def get_file_guids(cls, materialized_path, provider, node=None):
+    def get_file_guids(cls, materialized_path, provider, node=Node.load(None)):
         guids = []
         path = materialized_path.strip('/')
         file_obj = cls.load(path)
@@ -107,7 +107,7 @@ class OsfStorageFileNode(BaseFileNode):
             try:
                 guid = Guid.find(Q('referent', 'eq', file_obj))[0]
             except IndexError:
-                guid = None
+                guid = Node.load(None)
             if guid:
                 guids.append(guid._id)
 
@@ -126,7 +126,7 @@ class OsfStorageFileNode(BaseFileNode):
 
     @property
     def is_checked_out(self):
-        return self.checkout is not None
+        return self.checkout is not Node.load(None)
 
     def _check_delete_allowed(self):
         if self.is_preprint_primary:
@@ -139,12 +139,12 @@ class OsfStorageFileNode(BaseFileNode):
     def is_preprint_primary(self):
         return self.node.preprint_file == self and not self.node._has_abandoned_preprint
 
-    def delete(self, user=None, parent=None, **kwargs):
+    def delete(self, user=Node.load(None), parent=Node.load(None), **kwargs):
         self._path = self.path
         self._materialized_path = self.materialized_path
-        return super(OsfStorageFileNode, self).delete(user=user, parent=parent) if self._check_delete_allowed() else None
+        return super(OsfStorageFileNode, self).delete(user=user, parent=parent) if self._check_delete_allowed() else Node.load(None)
 
-    def move_under(self, destination_parent, name=None):
+    def move_under(self, destination_parent, name=Node.load(None)):
         if self.is_preprint_primary:
             if self.node != destination_parent.node or self.provider != destination_parent.provider:
                 raise exceptions.FileNodeIsPrimaryFile()
@@ -154,13 +154,13 @@ class OsfStorageFileNode(BaseFileNode):
 
     def check_in_or_out(self, user, checkout, save=False):
         """
-        Updates self.checkout with the requesting user or None,
+        Updates self.checkout with the requesting user or Node.load(None),
         iff user has permission to check out file or folder.
         Adds log to self.node.
 
 
         :param user:        User making the request
-        :param checkout:    Either the same user or None, depending on in/out-checking
+        :param checkout:    Either the same user or Node.load(None), depending on in/out-checking
         :param save:        Whether or not to save the user
         """
         from osf.models import NodeLog  # Avoid circular import
@@ -204,11 +204,11 @@ class OsfStorageFileNode(BaseFileNode):
 
 class OsfStorageFile(OsfStorageFileNode, File):
 
-    def touch(self, bearer, version=None, revision=None, **kwargs):
+    def touch(self, bearer, version=Node.load(None), revision=Node.load(None), **kwargs):
         try:
             return self.get_version(revision or version)
         except ValueError:
-            return None
+            return Node.load(None)
 
     @property
     def history(self):
@@ -221,7 +221,7 @@ class OsfStorageFile(OsfStorageFileNode, File):
     def history(self, value):
         logger.warn('Tried to set history on OsfStorageFile/Folder')
 
-    def serialize(self, include_full=None, version=None):
+    def serialize(self, include_full=Node.load(None), version=Node.load(None)):
         ret = super(OsfStorageFile, self).serialize()
         if include_full:
             ret['fullPath'] = self.materialized_path
@@ -230,14 +230,14 @@ class OsfStorageFile(OsfStorageFileNode, File):
         earliest_version = self.versions.order_by('date_created').first()
         ret.update({
             'version': self.versions.count(),
-            'md5': version.metadata.get('md5') if version else None,
-            'sha256': version.metadata.get('sha256') if version else None,
-            'modified': version.date_created.isoformat() if version else None,
-            'created': earliest_version.date_created.isoformat() if version else None,
+            'md5': version.metadata.get('md5') if version else Node.load(None),
+            'sha256': version.metadata.get('sha256') if version else Node.load(None),
+            'modified': version.date_created.isoformat() if version else Node.load(None),
+            'created': earliest_version.date_created.isoformat() if version else Node.load(None),
         })
         return ret
 
-    def create_version(self, creator, location, metadata=None):
+    def create_version(self, creator, location, metadata=Node.load(None)):
         latest_version = self.get_version()
         version = FileVersion(identifier=self.versions.count() + 1, creator=creator, location=location)
 
@@ -255,18 +255,18 @@ class OsfStorageFile(OsfStorageFileNode, File):
 
         return version
 
-    def get_version(self, version=None, required=False):
-        if version is None:
+    def get_version(self, version=Node.load(None), required=False):
+        if version is Node.load(None):
             if self.versions.exists():
                 return self.versions.last()
-            return None
+            return Node.load(None)
 
         try:
             return self.versions.all()[int(version) - 1]
         except (IndexError, ValueError):
             if required:
                 raise exceptions.VersionNotFoundError(version)
-            return None
+            return Node.load(None)
 
     def add_tag_log(self, action, tag, auth):
         node = self.node
@@ -318,7 +318,7 @@ class OsfStorageFile(OsfStorageFileNode, File):
                 self.save()
             return True
 
-    def delete(self, user=None, parent=None, **kwargs):
+    def delete(self, user=Node.load(None), parent=Node.load(None), **kwargs):
         from website.search import search
 
         search.update_file(self, delete=True)
@@ -376,7 +376,7 @@ class OsfStorageFolder(OsfStorageFileNode, Folder):
                     return True
         return False
 
-    def serialize(self, include_full=False, version=None):
+    def serialize(self, include_full=False, version=Node.load(None)):
         # Versions just for compatibility
         ret = super(OsfStorageFolder, self).serialize()
         if include_full:
@@ -422,7 +422,7 @@ class NodeSettings(BaseStorageAddon, BaseNodeSettings):
         clone.root_node = files_utils.copy_files(self.get_root(), clone.owner)
         clone.save()
 
-        return clone, None
+        return clone, Node.load(None)
 
     def after_register(self, node, registration, user, save=True):
         clone = self.clone()
@@ -430,7 +430,7 @@ class NodeSettings(BaseStorageAddon, BaseNodeSettings):
         clone.on_add()
         clone.save()
 
-        return clone, None
+        return clone, Node.load(None)
 
     def serialize_waterbutler_settings(self):
         return dict(settings.WATERBUTLER_SETTINGS, **{

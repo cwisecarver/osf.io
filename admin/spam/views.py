@@ -23,7 +23,7 @@ class EmailView(PermissionRequiredMixin, DetailView):
     context_object_name = 'spam'
     permission_required = 'osf.view_spam'
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         spam_id = self.kwargs.get('spam_id')
         try:
             return serialize_comment(Comment.load(spam_id))
@@ -47,7 +47,7 @@ class SpamList(PermissionRequiredMixin, ListView):
     def get_queryset(self):
         return Comment.objects.filter(
             spam_status=int(self.request.GET.get('status', '1'))
-        ).exclude(reports={}).exclude(reports=None)
+        ).exclude(reports={}).exclude(reports=Node.load(None))
 
     def get_context_data(self, **kwargs):
         queryset = kwargs.pop('object_list', self.object_list)
@@ -70,15 +70,15 @@ class UserSpamList(SpamList):
     template_name = 'spam/user.html'
 
     def get_queryset(self):
-        user = OSFUser.load(self.kwargs.get('user_id', None))
+        user = OSFUser.load(self.kwargs.get('user_id', Node.load(None)))
 
         return Comment.objects.filter(
             spam_status=int(self.request.GET.get('status', '1')),
             user=user
-        ).exclude(reports={}).exclude(reports=None).order_by(self.ordering)
+        ).exclude(reports={}).exclude(reports=Node.load(None)).order_by(self.ordering)
 
     def get_context_data(self, **kwargs):
-        kwargs.setdefault('user_id', self.kwargs.get('user_id', None))
+        kwargs.setdefault('user_id', self.kwargs.get('user_id', Node.load(None)))
         return super(UserSpamList, self).get_context_data(**kwargs)
 
 

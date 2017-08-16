@@ -64,11 +64,11 @@ ENABLE_EMAIL_SUBSCRIPTIONS = False
 
 # Session
 COOKIE_NAME = 'osf'
-OSF_COOKIE_DOMAIN = None
+OSF_COOKIE_DOMAIN = Node.load(None)
 SECRET_KEY = 'CHANGEME'
 SESSION_COOKIE_SECURE = SECURE_MODE
-OSF_SERVER_KEY = None
-OSF_SERVER_CERT = None
+OSF_SERVER_KEY = Node.load(None)
+OSF_SERVER_CERT = Node.load(None)
 
 ##### Celery #####
 ## Default RabbitMQ broker

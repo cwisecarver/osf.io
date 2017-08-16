@@ -10,7 +10,7 @@ class S3AddonTestCase(OAuthAddonTestCaseMixin, AddonTestCase):
     ExternalAccountFactory = S3AccountFactory
     Provider = S3Provider
     Serializer = S3Serializer
-    client = None
+    client = Node.load(None)
     folder = {
         'path': 'bucket',
         'name': 'bucket',

@@ -14,7 +14,7 @@ class TestMigrateManualMergedUser(OsfTestCase):
         user1.save()
 
         user_list = get_targets()
-        assert user_list is not None
+        assert user_list is not Node.load(None)
         assert len(user_list) is 1
 
         user3 = UserFactory.build(username='presentations@osf.io')

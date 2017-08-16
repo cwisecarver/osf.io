@@ -14,13 +14,13 @@ def get_path(kwargs, required=True):
         raise HTTPError(http.BAD_REQUEST)
 
 
-def get_refs(addon, branch=None, sha=None, connection=None):
+def get_refs(addon, branch=Node.load(None), sha=Node.load(None), connection=Node.load(None)):
     """Get the appropriate branch name and sha given the addon settings object,
     and optionally the branch and sha from the request arguments.
-    :param str branch: Branch name. If None, return the default branch from the
+    :param str branch: Branch name. If Node.load(None), return the default branch from the
         repo settings.
     :param str sha: The SHA.
-    :param Bitbucket connection: Bitbucket API object. If None, one will be created
+    :param Bitbucket connection: Bitbucket API object. If Node.load(None), one will be created
         from the addon's user settings.
     """
     connection = connection or BitbucketClient(access_token=addon.external_account.oauth_key)
@@ -31,8 +31,8 @@ def get_refs(addon, branch=None, sha=None, connection=None):
     # Get default branch if not provided
     if not branch:
         branch = connection.repo_default_branch(addon.user, addon.repo)
-        if branch is None:
-            return None, None, None
+        if branch is Node.load(None):
+            return Node.load(None), Node.load(None), Node.load(None)
 
     # Get branch list from Bitbucket API
     branches = connection.branches(addon.user, addon.repo)

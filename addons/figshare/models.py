@@ -25,18 +25,18 @@ class FigshareFolder(FigshareFileNode, Folder):
 class FigshareFile(FigshareFileNode, File):
     version_identifier = 'ref'
 
-    def touch(self, bearer, revision=None, **kwargs):
-        return super(FigshareFile, self).touch(bearer, revision=None, **kwargs)
+    def touch(self, bearer, revision=Node.load(None), **kwargs):
+        return super(FigshareFile, self).touch(bearer, revision=Node.load(None), **kwargs)
 
-    def update(self, revision, data, user=None):
+    def update(self, revision, data, user=Node.load(None)):
         """Figshare does not support versioning.
-        Always pass revision as None to avoid conflict.
+        Always pass revision as Node.load(None) to avoid conflict.
         """
         self.name = data['name']
         self.materialized_path = data['materialized']
         self.save()
 
-        version = FileVersion(identifier=None)
+        version = FileVersion(identifier=Node.load(None))
         version.update_metadata(data, save=False)
 
         # Draft files are not renderable
@@ -100,12 +100,12 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     folder_path = models.TextField(blank=True, null=True)
     user_settings = models.ForeignKey(UserSettings, null=True, blank=True)
 
-    _api = None
+    _api = Node.load(None)
 
     @property
     def api(self):
         """authenticated ExternalProvider instance"""
-        if self._api is None:
+        if self._api is Node.load(None):
             self._api = FigshareProvider(self.external_account)
         return self._api
 
@@ -137,11 +137,11 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
                 url=self.owner.web_url_for('collect_file_trees'))
 
     def clear_settings(self):
-        self.folder_id = None
-        self.folder_name = None
-        self.folder_path = None
+        self.folder_id = Node.load(None)
+        self.folder_name = Node.load(None)
+        self.folder_path = Node.load(None)
 
-    def deauthorize(self, auth=None, add_log=True):
+    def deauthorize(self, auth=Node.load(None), add_log=True):
         """Remove user authorization from this node and log the event."""
         self.clear_settings()
 
@@ -201,7 +201,7 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
     # Callbacks #
     #############
 
-    def after_delete(self, node=None, user=None):
+    def after_delete(self, node=Node.load(None), user=Node.load(None)):
         self.deauthorize(Auth(user=user), add_log=True)
         self.save()
 

@@ -22,7 +22,7 @@ from scripts.approve_embargo_terminations import main, get_pending_embargo_termi
 class TestApproveEmbargoTerminations(OsfTestCase):
 
     def tearDown(self):
-        with mock.patch('framework.celery_tasks.handlers.queue', mock.Mock(return_value=None)):
+        with mock.patch('framework.celery_tasks.handlers.queue', mock.Mock(return_value=Node.load(None))):
             super(TestApproveEmbargoTerminations, self).tearDown()
 
     @mock.patch('website.project.sanctions.TokenApprovableSanction.ask', mock.Mock())

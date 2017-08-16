@@ -17,7 +17,7 @@ logger = logging.getLogger('fix_is_claimed')
 def main(dry=True):
     init_app(set_backends=True, routes=False)
     count = 0
-    for user in User.find(Q('is_claimed', 'eq', None)):
+    for user in User.find(Q('is_claimed', 'eq', Node.load(None))):
         is_claimed = bool(user.date_confirmed)
         logger.info('User {}: setting is_claimed to {}'.format(user._id, is_claimed))
         user.is_claimed = is_claimed

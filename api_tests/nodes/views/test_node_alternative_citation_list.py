@@ -13,15 +13,15 @@ from website.util import permissions
 
 @pytest.fixture()
 def payload():
-    def make_payload(name=None, text=None):
+    def make_payload(name=Node.load(None), text=Node.load(None)):
         data = {'data': {
             'type': 'citations',
             'attributes': {}
             }
         }
-        if name is not None:
+        if name is not Node.load(None):
             data['data']['attributes']['name'] = name
-        if text is not None:
+        if text is not Node.load(None):
             data['data']['attributes']['text'] = text
         return data
     return make_payload
@@ -52,7 +52,7 @@ def payload_empty(payload):
 
 @pytest.fixture()
 def create_project():
-    def new_project(creator, public=True, contrib=None, citation=False, registration=False):
+    def new_project(creator, public=True, contrib=Node.load(None), citation=False, registration=False):
         project = ProjectFactory(creator=creator, is_public=public)
         if contrib:
             project.add_contributor(contrib, permissions=[permissions.READ, permissions.WRITE], visible=True)
@@ -73,12 +73,12 @@ class TestCreateAlternativeCitations:
     def req(self, app, create_project):
         def make_req(data, errors=False, is_admin=False, is_contrib=True, logged_out=False, **kwargs):
             admin = AuthUserFactory()
-            registration = kwargs.get('registration', None)
+            registration = kwargs.get('registration', Node.load(None))
             if is_admin:
                 user = admin
             elif not logged_out:
                 user = AuthUserFactory()
-                kwargs['contrib'] = user if is_contrib else None
+                kwargs['contrib'] = user if is_contrib else Node.load(None)
             project = create_project(admin, **kwargs)
             if registration:
                 project_url = '/{}registrations/{}/citations/'.format(API_BASE, project._id)
@@ -619,12 +619,12 @@ class TestGetAlternativeCitations:
     def req(self, app, create_project):
         def make_req(errors=False, is_admin=False, is_contrib=True, logged_out=False, **kwargs):
             admin = AuthUserFactory()
-            registration = kwargs.get('registration', None)
+            registration = kwargs.get('registration', Node.load(None))
             if is_admin:
                 user = admin
             elif not logged_out:
                 user = AuthUserFactory()
-                kwargs['contrib'] = user if is_contrib else None
+                kwargs['contrib'] = user if is_contrib else Node.load(None)
             project = create_project(admin, citation=True, **kwargs)
             if registration:
                 project_url = '/{}registrations/{}/citations/'.format(API_BASE, project._id)

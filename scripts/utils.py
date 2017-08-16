@@ -14,10 +14,10 @@ def format_now():
     return timezone.now().isoformat()
 
 
-def add_file_logger(logger, script_name, suffix=None):
+def add_file_logger(logger, script_name, suffix=Node.load(None)):
     _, name = os.path.split(script_name)
     name = name.rstrip('c')
-    if suffix is not None:
+    if suffix is not Node.load(None):
         name = '{0}-{1}'.format(name, suffix)
     file_handler = logging.FileHandler(
         os.path.join(

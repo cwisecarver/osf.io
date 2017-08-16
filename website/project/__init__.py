@@ -10,7 +10,7 @@ from website.exceptions import NodeStateError
 from website.util.sanitize import strip_html
 
 # TODO: This should be a class method of Node
-def new_node(category, title, user, description='', parent=None):
+def new_node(category, title, user, description='', parent=Node.load(None)):
     """Create a new project or component.
 
     :param str category: Node category
@@ -84,7 +84,7 @@ def new_private_link(name, user, nodes, anonymous):
     key = str(uuid.uuid4()).replace('-', '')
     if name:
         name = strip_html(name)
-        if name is None or not name.strip():
+        if name is Node.load(None) or not name.strip():
             raise ValidationValueError('Invalid link name.')
     else:
         name = 'Shared project link'

@@ -19,7 +19,7 @@ app.debug = settings.DEBUG_MODE
 app.config['SENTRY_TAGS'] = {'App': 'web'}
 app.config['SENTRY_RELEASE'] = settings.VERSION
 
-def rm_handler(app, handler_name, func, key=None):
+def rm_handler(app, handler_name, func, key=Node.load(None)):
     """Remove a handler from an application.
     :param app: Flask app
     :param handler_name: Name of handler type, e.g. 'before_request'
@@ -33,7 +33,7 @@ def rm_handler(app, handler_name, func, key=None):
     except ValueError:
         pass
 
-def rm_handlers(app, handlers, key=None):
+def rm_handlers(app, handlers, key=Node.load(None)):
     """Remove multiple handlers from an application.
 
     :param app: Flask application
@@ -44,7 +44,7 @@ def rm_handlers(app, handlers, key=None):
 
 
 # Set up static routing for addons
-def add_handler(app, handler_name, func, key=None):
+def add_handler(app, handler_name, func, key=Node.load(None)):
     """Add handler to Flask application if handler has not already been added.
     Used to avoid attaching the same handlers more than once, e.g. when setting
     up multiple applications during testing.
@@ -62,7 +62,7 @@ def add_handler(app, handler_name, func, key=None):
         handler_adder(func)
 
 
-def add_handlers(app, handlers, key=None):
+def add_handlers(app, handlers, key=Node.load(None)):
     """Add multiple handlers to application.
 
     :param app: Flask application

@@ -53,9 +53,9 @@ def to_hgrid(node, auth, **data):
     return NodeFileCollector(node, auth, **data).to_hgrid()
 
 
-def build_addon_root(node_settings, name, permissions=None,
-                     urls=None, extra=None, buttons=None, user=None,
-                     private_key=None, **kwargs):
+def build_addon_root(node_settings, name, permissions=Node.load(None),
+                     urls=Node.load(None), extra=Node.load(None), buttons=Node.load(None), user=Node.load(None),
+                     private_key=Node.load(None), **kwargs):
     """Builds the root or "dummy" folder for an addon.
 
     :param addonNodeSettingsBase node_settings: Addon settings
@@ -82,7 +82,7 @@ def build_addon_root(node_settings, name, permissions=None,
         name = node_settings.config.full_name
     if hasattr(node_settings.config, 'urls') and node_settings.config.urls:
         urls = node_settings.config.urls
-    if urls is None:
+    if urls is Node.load(None):
         urls = default_urls(node_settings.owner.api_url, node_settings.config.short_name)
 
     forbid_edit = DISK_SAVING_MODE if node_settings.config.short_name == 'osfstorage' else False
@@ -143,7 +143,7 @@ def build_addon_button(text, action, title=''):
 
 def sort_by_name(hgrid_data):
     return_value = hgrid_data
-    if hgrid_data is not None:
+    if hgrid_data is not Node.load(None):
         return_value = sorted(hgrid_data, key=lambda item: item['name'].lower())
     return return_value
 
@@ -202,7 +202,7 @@ class NodeFileCollector(object):
 
         return node_name
 
-    def _serialize_node(self, node, visited=None, parent=None):
+    def _serialize_node(self, node, visited=Node.load(None), parent=Node.load(None)):
         """Returns the rubeus representation of a node folder.
         """
         visited = visited or []
@@ -225,8 +225,8 @@ class NodeFileCollector(object):
                 'view': can_view,
             },
             'urls': {
-                'upload': None,
-                'fetch': None,
+                'upload': Node.load(None),
+                'fetch': Node.load(None),
             },
             'children': children,
             'isPointer': is_pointer,
@@ -239,7 +239,7 @@ class NodeFileCollector(object):
         rv = []
         for addon in node.get_addons():
             if addon.config.has_hgrid_files:
-                # WARNING: get_hgrid_data can return None if the addon is added but has no credentials.
+                # WARNING: get_hgrid_data can return Node.load(None) if the addon is added but has no credentials.
                 try:
                     temp = addon.config.get_hgrid_data(addon, self.auth, **self.extra)
                 except Exception as e:
@@ -279,7 +279,7 @@ def collect_addon_assets(node):
 
 
 # TODO: Abstract static collectors
-def collect_addon_js(node, visited=None, filename='files.js', config_entry='files'):
+def collect_addon_js(node, visited=Node.load(None), filename='files.js', config_entry='files'):
     """Collect JavaScript includes for all add-ons implementing HGrid views.
 
     :return list: List of JavaScript include paths
@@ -296,7 +296,7 @@ def collect_addon_js(node, visited=None, filename='files.js', config_entry='file
     return js
 
 
-def collect_addon_css(node, visited=None):
+def collect_addon_css(node, visited=Node.load(None)):
     """Collect CSS includes for all addons-ons implementing Hgrid views.
 
     :return: List of CSS include paths

@@ -95,7 +95,7 @@ class TestAddonAuth(OsfTestCase):
         assert_equal(expected_url, observed_url)
 
     def test_auth_missing_args(self):
-        url = self.build_url(cookie=None)
+        url = self.build_url(cookie=Node.load(None))
         res = self.app.get(url, expect_errors=True)
         assert_equal(res.status_code, 401)
 
@@ -171,7 +171,7 @@ class TestAddonLogs(OsfTestCase):
         options = {
             key: value
             for key, value in options.iteritems()
-            if value is not None
+            if value is not Node.load(None)
         }
         message, signature = signing.default_signer.sign_payload(options)
         return {
@@ -195,7 +195,7 @@ class TestAddonLogs(OsfTestCase):
     def test_add_log_missing_args(self):
         path = 'pizza'
         url = self.node.api_url_for('create_waterbutler_log')
-        payload = self.build_payload(metadata={'path': path}, auth=None)
+        payload = self.build_payload(metadata={'path': path}, auth=Node.load(None))
         nlogs = self.node.logs.count()
         res = self.app.put_json(
             url,
@@ -210,7 +210,7 @@ class TestAddonLogs(OsfTestCase):
     def test_add_log_no_user(self):
         path = 'pizza'
         url = self.node.api_url_for('create_waterbutler_log')
-        payload = self.build_payload(metadata={'path': path}, auth={'id': None})
+        payload = self.build_payload(metadata={'path': path}, auth={'id': Node.load(None)})
         nlogs = self.node.logs.count()
         res = self.app.put_json(
             url,
@@ -297,27 +297,27 @@ class TestCheckAuth(OsfTestCase):
         self.node = ProjectFactory(creator=self.user)
 
     def test_has_permission(self):
-        res = views.check_access(self.node, Auth(user=self.user), 'upload', None)
+        res = views.check_access(self.node, Auth(user=self.user), 'upload', Node.load(None))
         assert_true(res)
 
     def test_not_has_permission_read_public(self):
         self.node.is_public = True
         self.node.save()
-        views.check_access(self.node, Auth(), 'download', None)
+        views.check_access(self.node, Auth(), 'download', Node.load(None))
 
     def test_not_has_permission_read_has_link(self):
         link = new_private_link('red-special', self.user, [self.node], anonymous=False)
-        views.check_access(self.node, Auth(private_key=link.key), 'download', None)
+        views.check_access(self.node, Auth(private_key=link.key), 'download', Node.load(None))
 
     def test_not_has_permission_logged_in(self):
         user2 = AuthUserFactory()
         with assert_raises(HTTPError) as exc_info:
-            views.check_access(self.node, Auth(user=user2), 'download', None)
+            views.check_access(self.node, Auth(user=user2), 'download', Node.load(None))
         assert_equal(exc_info.exception.code, 403)
 
     def test_not_has_permission_not_logged_in(self):
         with assert_raises(HTTPError) as exc_info:
-            views.check_access(self.node, Auth(), 'download', None)
+            views.check_access(self.node, Auth(), 'download', Node.load(None))
         assert_equal(exc_info.exception.code, 401)
 
     def test_has_permission_on_parent_node_copyto_pass_if_registration(self):
@@ -328,7 +328,7 @@ class TestCheckAuth(OsfTestCase):
         component_registration = registration._nodes.first()
 
         assert_false(component_registration.has_permission(self.user, 'write'))
-        res = views.check_access(component_registration, Auth(user=self.user), 'copyto', None)
+        res = views.check_access(component_registration, Auth(user=self.user), 'copyto', Node.load(None))
         assert_true(res)
 
     def test_has_permission_on_parent_node_metadata_pass_if_registration(self):
@@ -338,7 +338,7 @@ class TestCheckAuth(OsfTestCase):
         component_registration = RegistrationFactory(project=component, creator=component_admin)
 
         assert_false(component_registration.has_permission(self.user, 'read'))
-        res = views.check_access(component_registration, Auth(user=self.user), 'metadata', None)
+        res = views.check_access(component_registration, Auth(user=self.user), 'metadata', Node.load(None))
         assert_true(res)
 
     def test_has_permission_on_parent_node_copyto_fail_if_not_registration(self):
@@ -347,14 +347,14 @@ class TestCheckAuth(OsfTestCase):
 
         assert_false(component.has_permission(self.user, 'write'))
         with assert_raises(HTTPError):
-            views.check_access(component, Auth(user=self.user), 'copyto', None)
+            views.check_access(component, Auth(user=self.user), 'copyto', Node.load(None))
 
     def test_has_permission_on_parent_node_copyfrom(self):
         component_admin = AuthUserFactory()
         component = ProjectFactory(creator=component_admin, is_public=False, parent=self.node)
 
         assert_false(component.has_permission(self.user, 'write'))
-        res = views.check_access(component, Auth(user=self.user), 'copyfrom', None)
+        res = views.check_access(component, Auth(user=self.user), 'copyfrom', Node.load(None))
         assert_true(res)
 
 class TestCheckPreregAuth(OsfTestCase):
@@ -384,13 +384,13 @@ class TestCheckPreregAuth(OsfTestCase):
 
     def test_has_permission_download_prereg_challenge_admin(self):
         res = views.check_access(self.draft_registration.branched_from,
-            Auth(user=self.prereg_challenge_admin_user), 'download', None)
+            Auth(user=self.prereg_challenge_admin_user), 'download', Node.load(None))
         assert_true(res)
 
     def test_has_permission_download_on_component_prereg_challenge_admin(self):
         try:
             res = views.check_access(self.draft_registration.branched_from._nodes.first(),
-                                     Auth(user=self.prereg_challenge_admin_user), 'download', None)
+                                     Auth(user=self.prereg_challenge_admin_user), 'download', Node.load(None))
         except Exception:
             self.fail()
         assert_true(res)
@@ -399,19 +399,19 @@ class TestCheckPreregAuth(OsfTestCase):
         new_user = AuthUserFactory()
         with assert_raises(HTTPError) as exc_info:
             views.check_access(self.draft_registration.branched_from,
-                 Auth(user=new_user), 'download', None)
+                 Auth(user=new_user), 'download', Node.load(None))
             assert_equal(exc_info.exception.code, http.FORBIDDEN)
 
     def test_has_permission_download_prereg_challenge_admin_not_draft(self):
         with assert_raises(HTTPError) as exc_info:
             views.check_access(self.node,
-                 Auth(user=self.prereg_challenge_admin_user), 'download', None)
+                 Auth(user=self.prereg_challenge_admin_user), 'download', Node.load(None))
             assert_equal(exc_info.exception.code, http.FORBIDDEN)
 
     def test_has_permission_write_prereg_challenge_admin(self):
         with assert_raises(HTTPError) as exc_info:
             views.check_access(self.draft_registration.branched_from,
-                Auth(user=self.prereg_challenge_admin_user), 'write', None)
+                Auth(user=self.prereg_challenge_admin_user), 'write', Node.load(None))
             assert_equal(exc_info.exception.code, http.FORBIDDEN)
 
 class TestCheckOAuth(OsfTestCase):
@@ -434,7 +434,7 @@ class TestCheckOAuth(OsfTestCase):
     def test_has_permission_private_no_scope_forbidden(self):
         component_admin = AuthUserFactory()
         component = ProjectFactory(creator=component_admin, is_public=False, parent=self.node)
-        cas_resp = cas.CasResponse(authenticated=True, status=None, user=self.user._id,
+        cas_resp = cas.CasResponse(authenticated=True, status=Node.load(None), user=self.user._id,
                                    attributes={'accessTokenScope': {}})
 
         assert_false(component.has_permission(self.user, 'write'))
@@ -445,7 +445,7 @@ class TestCheckOAuth(OsfTestCase):
     def test_has_permission_public_irrelevant_scope_allowed(self):
         component_admin = AuthUserFactory()
         component = ProjectFactory(creator=component_admin, is_public=True, parent=self.node)
-        cas_resp = cas.CasResponse(authenticated=True, status=None, user=self.user._id,
+        cas_resp = cas.CasResponse(authenticated=True, status=Node.load(None), user=self.user._id,
                                    attributes={'accessTokenScope': {'osf.users.all_read'}})
 
         assert_false(component.has_permission(self.user, 'write'))
@@ -455,7 +455,7 @@ class TestCheckOAuth(OsfTestCase):
     def test_has_permission_private_irrelevant_scope_forbidden(self):
         component_admin = AuthUserFactory()
         component = ProjectFactory(creator=component_admin, is_public=False, parent=self.node)
-        cas_resp = cas.CasResponse(authenticated=True, status=None, user=self.user._id,
+        cas_resp = cas.CasResponse(authenticated=True, status=Node.load(None), user=self.user._id,
                                    attributes={'accessTokenScope': {'osf.users.all_read'}})
 
         assert_false(component.has_permission(self.user, 'write'))
@@ -466,7 +466,7 @@ class TestCheckOAuth(OsfTestCase):
     def test_has_permission_decommissioned_scope_no_error(self):
         component_admin = AuthUserFactory()
         component = ProjectFactory(creator=component_admin, is_public=False, parent=self.node)
-        cas_resp = cas.CasResponse(authenticated=True, status=None, user=self.user._id,
+        cas_resp = cas.CasResponse(authenticated=True, status=Node.load(None), user=self.user._id,
                                    attributes={'accessTokenScope': {
                                        'decommissioned.scope+write',
                                        'osf.nodes.data_read',
@@ -479,7 +479,7 @@ class TestCheckOAuth(OsfTestCase):
     def test_has_permission_write_scope_read_action(self):
         component_admin = AuthUserFactory()
         component = ProjectFactory(creator=component_admin, is_public=False, parent=self.node)
-        cas_resp = cas.CasResponse(authenticated=True, status=None, user=self.user._id,
+        cas_resp = cas.CasResponse(authenticated=True, status=Node.load(None), user=self.user._id,
                                    attributes={'accessTokenScope': {'osf.nodes.data_write'}})
 
         assert_false(component.has_permission(self.user, 'write'))
@@ -488,7 +488,7 @@ class TestCheckOAuth(OsfTestCase):
 
     def test_has_permission_read_scope_write_action_forbidden(self):
         component = ProjectFactory(creator=self.user, is_public=False, parent=self.node)
-        cas_resp = cas.CasResponse(authenticated=True, status=None, user=self.user._id,
+        cas_resp = cas.CasResponse(authenticated=True, status=Node.load(None), user=self.user._id,
                                    attributes={'accessTokenScope': {'osf.nodes.data_read'}})
 
         assert_true(component.has_permission(self.user, 'write'))
@@ -501,8 +501,8 @@ def assert_urls_equal(url1, url2):
     furl1 = furl.furl(url1)
     furl2 = furl.furl(url2)
     for attr in ['scheme', 'host', 'port']:
-        setattr(furl1, attr, None)
-        setattr(furl2, attr, None)
+        setattr(furl1, attr, Node.load(None))
+        setattr(furl2, attr, Node.load(None))
     # Note: furl params are ordered and cause trouble
     assert_equal(dict(furl1.args), dict(furl2.args))
     furl1.args = {}
@@ -510,15 +510,15 @@ def assert_urls_equal(url1, url2):
     assert_equal(furl1, furl2)
 
 
-def mock_touch(self, bearer, version=None, revision=None, **kwargs):
+def mock_touch(self, bearer, version=Node.load(None), revision=Node.load(None), **kwargs):
     if version:
         if self.versions:
             try:
                 return self.versions[int(version) - 1]
             except (IndexError, ValueError):
-                return None
+                return Node.load(None)
         else:
-            return None
+            return Node.load(None)
     return file_models.FileVersion()
 
 
@@ -627,7 +627,7 @@ class TestAddonFileViews(OsfTestCase):
 
         assert_equals(resp.status_code, 302)
         location = furl.furl(resp.location)
-        assert_urls_equal(location.url, file_node.generate_waterbutler_url(action='download', direct=None, version=''))
+        assert_urls_equal(location.url, file_node.generate_waterbutler_url(action='download', direct=Node.load(None), version=''))
 
     def test_action_download_redirects_to_download_with_version(self):
         file_node = self.get_test_file()
@@ -638,7 +638,7 @@ class TestAddonFileViews(OsfTestCase):
         assert_equals(resp.status_code, 302)
         location = furl.furl(resp.location)
         # Note: version is added but us but all other url params are added as well
-        assert_urls_equal(location.url, file_node.generate_waterbutler_url(action='download', direct=None, revision=1, version=''))
+        assert_urls_equal(location.url, file_node.generate_waterbutler_url(action='download', direct=Node.load(None), revision=1, version=''))
 
     @mock.patch('addons.base.views.addon_view_file')
     def test_action_view_calls_view_file(self, mock_view_file):
@@ -657,7 +657,7 @@ class TestAddonFileViews(OsfTestCase):
         assert_equals(args[0].user._id, self.user._id)
         assert_equals(args[1], self.project)
         assert_equals(args[2], file_node)
-        assert_true(isinstance(args[3], file_node.touch(None).__class__))
+        assert_true(isinstance(args[3], file_node.touch(Node.load(None)).__class__))
 
     @mock.patch('addons.base.views.addon_view_file')
     def test_no_action_calls_view_file(self, mock_view_file):
@@ -676,11 +676,11 @@ class TestAddonFileViews(OsfTestCase):
         assert_equals(args[0].user._id, self.user._id)
         assert_equals(args[1], self.project)
         assert_equals(args[2], file_node)
-        assert_true(isinstance(args[3], file_node.touch(None).__class__))
+        assert_true(isinstance(args[3], file_node.touch(Node.load(None)).__class__))
 
     def test_download_create_guid(self):
         file_node = self.get_test_file()
-        assert_is(file_node.get_guid(), None)
+        assert_is(file_node.get_guid(), Node.load(None))
 
         self.app.get(
             self.project.web_url_for(
@@ -699,7 +699,7 @@ class TestAddonFileViews(OsfTestCase):
             mock_is_private.return_value = False
 
             file_node = self.get_test_file()
-            assert_is(file_node.get_guid(), None)
+            assert_is(file_node.get_guid(), Node.load(None))
 
             url = self.project.web_url_for(
                 'addon_view_or_download_file',
@@ -716,7 +716,7 @@ class TestAddonFileViews(OsfTestCase):
 
     def test_unauthorized_addons_raise(self):
         path = 'cloudfiles'
-        self.node_addon.user_settings = None
+        self.node_addon.user_settings = Node.load(None)
         self.node_addon.save()
 
         resp = self.app.get(
@@ -753,7 +753,7 @@ class TestAddonFileViews(OsfTestCase):
         resp = self.app.head('/{}/'.format(guid._id), auth=self.user.auth)
         location = furl.furl(resp.location)
         assert_equals(resp.status_code, 302)
-        assert_urls_equal(location.url, file_node.generate_waterbutler_url(direct=None, version=''))
+        assert_urls_equal(location.url, file_node.generate_waterbutler_url(direct=Node.load(None), version=''))
 
     def test_head_returns_url_with_version_and_redirect(self):
         file_node = self.get_test_file()
@@ -763,7 +763,7 @@ class TestAddonFileViews(OsfTestCase):
         location = furl.furl(resp.location)
         # Note: version is added but us but all other url params are added as well
         assert_equals(resp.status_code, 302)
-        assert_urls_equal(location.url, file_node.generate_waterbutler_url(direct=None, revision=1, version='', foo='bar'))
+        assert_urls_equal(location.url, file_node.generate_waterbutler_url(direct=Node.load(None), revision=1, version='', foo='bar'))
 
     def test_nonexistent_addons_raise(self):
         path = 'cloudfiles'
@@ -785,7 +785,7 @@ class TestAddonFileViews(OsfTestCase):
 
     def test_unauth_addons_raise(self):
         path = 'cloudfiles'
-        self.node_addon.user_settings = None
+        self.node_addon.user_settings = Node.load(None)
         self.node_addon.save()
 
         resp = self.app.get(
@@ -810,7 +810,7 @@ class TestAddonFileViews(OsfTestCase):
                 'materialized': '/test/Test'
             }
         }
-        views.addon_delete_file_node(self=None, node=self.project, user=self.user, event_type='file_removed', payload=payload)
+        views.addon_delete_file_node(self=Node.load(None), node=self.project, user=self.user, event_type='file_removed', payload=payload)
         assert_false(GithubFileNode.load(file_node._id))
         assert_true(TrashedFileNode.load(file_node._id))
 
@@ -830,7 +830,7 @@ class TestAddonFileViews(OsfTestCase):
                 'materialized': '/test/'
             }
         }
-        views.addon_delete_file_node(self=None, node=self.project, user=self.user, event_type='file_removed', payload=payload)
+        views.addon_delete_file_node(self=Node.load(None), node=self.project, user=self.user, event_type='file_removed', payload=payload)
         assert_false(GithubFileNode.load(subfolder._id))
         assert_true(TrashedFileNode.load(file_node._id))
 
@@ -843,7 +843,7 @@ class TestAddonFileViews(OsfTestCase):
         registered_node = self.project.register_node(
             schema=get_default_metaschema(),
             auth=Auth(self.user),
-            data=None,
+            data=Node.load(None),
         )
 
         archived_from_url = views.get_archived_from_url(registered_node, file_node)
@@ -858,7 +858,7 @@ class TestAddonFileViews(OsfTestCase):
         registered_node = self.project.register_node(
             schema=get_default_metaschema(),
             auth=Auth(self.user),
-            data=None,
+            data=Node.load(None),
         )
         archived_from_url = views.get_archived_from_url(registered_node, file_node)
         assert_false(archived_from_url)
@@ -871,7 +871,7 @@ class TestAddonFileViews(OsfTestCase):
         self.project.register_node(
             schema=get_default_metaschema(),
             auth=Auth(self.user),
-            data=None,
+            data=Node.load(None),
         )
         trashed_node = second_file_node.delete()
         assert_false(trashed_node.copied_from)
@@ -882,22 +882,22 @@ class TestAddonFileViews(OsfTestCase):
         file_data = {
             'name': 'Test File Update',
             'materialized': file_node.materialized_path,
-            'modified': None
+            'modified': Node.load(None)
         }
-        file_node.update(revision=None, data=file_data)
+        file_node.update(revision=Node.load(None), data=file_data)
         assert_equal(len(file_node.history), 1)
         assert_equal(file_node.history[0], file_data)
 
     @mock.patch('website.archiver.tasks.archive')
     def test_missing_modified_date_in_file_history(self, mock_archive):
         file_node = self.get_test_file()
-        file_node.history.append({'modified': None})
+        file_node.history.append({'modified': Node.load(None)})
         file_data = {
             'name': 'Test File Update',
             'materialized': file_node.materialized_path,
-            'modified': None
+            'modified': Node.load(None)
         }
-        file_node.update(revision=None, data=file_data)
+        file_node.update(revision=Node.load(None), data=file_data)
         assert_equal(len(file_node.history), 2)
         assert_equal(file_node.history[1], file_data)
 

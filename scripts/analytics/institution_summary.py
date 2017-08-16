@@ -20,7 +20,7 @@ class InstitutionSummary(SummaryAnalytics):
         return 'institution_summary'
 
     def get_institutions(self):
-        institutions = Institution.find(Q('_id', 'ne', None))
+        institutions = Institution.find(Q('_id', 'ne', Node.load(None)))
         return institutions
 
     def get_events(self, date):
@@ -40,7 +40,7 @@ class InstitutionSummary(SummaryAnalytics):
                 Q('date_created', 'lt', query_datetime)
             )
 
-            project_query = node_query & Q('parent_nodes', 'eq', None)
+            project_query = node_query & Q('parent_nodes', 'eq', Node.load(None))
             public_query = Q('is_public', 'eq', True)
             private_query = Q('is_public', 'eq', False)
             node_public_query = node_query & public_query
@@ -106,6 +106,6 @@ if __name__ == '__main__':
     if yesterday:
         date = (datetime.today() - timedelta(1)).date()
     else:
-        date = parse(args.date).date() if args.date else None
+        date = parse(args.date).date() if args.date else Node.load(None)
     events = institution_summary.get_events(date)
     institution_summary.send_events(events)

@@ -223,7 +223,7 @@ def find_registration_file(value, node):
         registered_from_id = AbstractNode.load(node_id).registered_from._id
         if sha256 == orig_sha256 and registered_from_id == orig_node and orig_name == value['name']:
             return value, node_id
-    return None, None
+    return Node.load(None), Node.load(None)
 
 def find_registration_files(values, node):
     ret = []
@@ -234,7 +234,7 @@ def find_registration_files(values, node):
 def get_title_for_question(schema, path):
     path = path.split('.')
     root = path.pop(0)
-    item = None
+    item = Node.load(None)
     for page in schema['pages']:
         questions = {
             q['qid']: q
@@ -276,7 +276,7 @@ VIEW_FILE_URL_TEMPLATE = '/project/{node_id}/files/osfstorage/{path}/'
 def deep_get(obj, path):
     parts = path.split('.')
     item = obj
-    key = None
+    key = Node.load(None)
     while len(parts):
         key = parts.pop(0)
         item[key] = item.get(key, {})

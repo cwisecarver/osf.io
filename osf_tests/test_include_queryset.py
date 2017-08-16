@@ -26,10 +26,10 @@ class TestIncludeQuerySet:
         # Sanity check with no .include
         with django_assert_num_queries(4):
             for node in Node.objects.all():
-                assert node._id is not None
+                assert node._id is not Node.load(None)
         with django_assert_num_queries(1):
             for node in Node.objects.include('guids').all():
-                assert node._id is not None
+                assert node._id is not Node.load(None)
 
     @pytest.mark.django_assert_num_queries
     def test_include_guids_filter(self, create_n_nodes, django_assert_num_queries):
@@ -38,7 +38,7 @@ class TestIncludeQuerySet:
 
         with django_assert_num_queries(1):
             for node in Node.objects.include('guids').filter(id__in=nids):
-                assert node._id is not None
+                assert node._id is not Node.load(None)
 
     @pytest.mark.django_assert_num_queries
     def test_include_root_guids(self, create_n_nodes, django_assert_num_queries):
@@ -47,7 +47,7 @@ class TestIncludeQuerySet:
         queryset = Node.objects.filter(id__in=[e.id for e in nodes]).include('root__guids')
         with django_assert_num_queries(1):
             for node in queryset:
-                assert node.root._id is not None
+                assert node.root._id is not Node.load(None)
 
     @pytest.mark.django_assert_num_queries
     def test_include_contributor_user_guids(self, create_n_nodes, django_assert_num_queries):
@@ -61,4 +61,4 @@ class TestIncludeQuerySet:
         for node in nodes:
             with django_assert_num_queries(0):
                 for contributor in node.contributor_set.all():
-                    assert contributor.user._id is not None
+                    assert contributor.user._id is not Node.load(None)

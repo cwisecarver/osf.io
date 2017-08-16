@@ -26,7 +26,7 @@ preprint_node_swapped_ids_map = {}
 
 
 def get_targets():
-    return database.node.find({'preprint_file': {'$ne': None}})
+    return database.node.find({'preprint_file': {'$ne': Node.load(None)}})
 
 def validate_node_document(document):
     logger.info('* Validating and repairing node {}'.format(document['_id']))    
@@ -166,7 +166,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    bus_og = list(database['boxusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    bus_og = list(database['boxusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if bus_og:
         logger.info('** Updating {} BoxUserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in bus_og]))
         for doc in bus_og:
@@ -189,7 +189,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    advus_og = list(database['addondataverseusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    advus_og = list(database['addondataverseusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if advus_og:
         logger.info('** Updating {} AddonDataverseUserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in advus_og]))
         for doc in advus_og:
@@ -213,7 +213,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    dbus_og = list(database['dropboxusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    dbus_og = list(database['dropboxusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if dbus_og:
         logger.info('** Updating {} DropboxUserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in dbus_og]))
         for doc in dbus_og:
@@ -261,7 +261,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    ghus_og = list(database['githubusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    ghus_og = list(database['githubusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if ghus_og:
         logger.info('** Updating {} GithubUserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in ghus_og]))
         for doc in ghus_og:
@@ -285,7 +285,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    gdus_og = list(database['googledriveusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    gdus_og = list(database['googledriveusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if gdus_og:
         logger.info('** Updating {} GoogleDriveUserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in gdus_og]))
         for doc in gdus_og:
@@ -309,7 +309,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    mus_og = list(database['mendeleyusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    mus_og = list(database['mendeleyusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if mus_og:
         logger.info('** Updating {} MendeleyUserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in mus_og]))
         for doc in mus_og:
@@ -344,7 +344,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    ocus_og = list(database['addonowncloudusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    ocus_og = list(database['addonowncloudusersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if ocus_og:
         logger.info('** Updating {} AddonOwnCloudUserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in ocus_og]))
         for doc in ocus_og:
@@ -368,7 +368,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    s3us_og = list(database['s3usersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    s3us_og = list(database['s3usersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if s3us_og:
         logger.info('** Updating {} S3UserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in s3us_og]))
         for doc in s3us_og:
@@ -414,7 +414,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    zus_og = list(database['zoterousersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': None}}))
+    zus_og = list(database['zoterousersettings'].find({'oauth_grants.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if zus_og:
         logger.info('** Updating {} ZoteroUserSettings (oauth_grants) {}'.format(old_id, [d['_id'] for d in zus_og]))
         for doc in zus_og:
@@ -605,7 +605,7 @@ def update_foreign_fields(old_id, node):
         for doc in nl_pdn:
             params = doc['params']
             params['destination']['nid'] = node._id
-            if params['destination'].get('url', None):
+            if params['destination'].get('url', Node.load(None)):
                 params['destination']['url'] = params['destination']['url'].replace('{}/'.format(old_id), '{}/'.format(node._id))
             database['nodelog'].find_and_modify(
                 {'_id': doc['_id']},
@@ -633,7 +633,7 @@ def update_foreign_fields(old_id, node):
         for doc in nl_pdni:
             params = doc['params']
             params['destination']['node']['_id'] = node._id
-            if params['destination']['node'].get('url', None):
+            if params['destination']['node'].get('url', Node.load(None)):
                 params['destination']['node']['url'] = params['destination']['node']['url'].replace('{}/'.format(old_id), '{}/'.format(node._id))
             database['nodelog'].find_and_modify(
                 {'_id': doc['_id']},
@@ -648,7 +648,7 @@ def update_foreign_fields(old_id, node):
         for doc in nl_ppi:
             params = doc['params']
             params['pointer']['id'] = node._id
-            if params['pointer'].get('url', None):
+            if params['pointer'].get('url', Node.load(None)):
                 params['pointer']['url'] = params['pointer']['url'].replace('{}/'.format(old_id), '{}/'.format(node._id))
             database['nodelog'].find_and_modify(
                 {'_id': doc['_id']},
@@ -663,7 +663,7 @@ def update_foreign_fields(old_id, node):
         for doc in nl_psn:
             params = doc['params']
             params['source']['nid'] = node._id
-            if params['source'].get('url', None):
+            if params['source'].get('url', Node.load(None)):
                 params['source']['url'] = params['source']['url'].replace('{}/'.format(old_id), '{}/'.format(node._id))
             database['nodelog'].find_and_modify(
                 {'_id': doc['_id']},
@@ -678,7 +678,7 @@ def update_foreign_fields(old_id, node):
         for doc in nl_psni:
             params = doc['params']
             params['source']['node']['_id'] = node._id
-            if params['source']['node'].get('url', None):
+            if params['source']['node'].get('url', Node.load(None)):
                 params['source']['node']['url'] = params['source']['node']['url'].replace('{}/'.format(old_id), '{}/'.format(node._id))
             database['nodelog'].find_and_modify(
                 {'_id': doc['_id']},
@@ -706,7 +706,7 @@ def update_foreign_fields(old_id, node):
         for doc in nl_ptni:
             params = doc['params']
             params['template_node']['_id'] = node._id
-            if params['template_node'].get('url', None):
+            if params['template_node'].get('url', Node.load(None)):
                 params['template_node']['url'] = params['template_node']['url'].replace('{}/'.format(old_id), '{}/'.format(node._id))
             database['nodelog'].find_and_modify(
                 {'_id': doc['_id']},
@@ -721,7 +721,7 @@ def update_foreign_fields(old_id, node):
         for doc in nl_pud:
             params = doc['params']
             params['urls']['download'] = params['urls']['download'].replace('{}/'.format(old_id), '{}/'.format(node._id))
-            if params['urls'].get('view', None):
+            if params['urls'].get('view', Node.load(None)):
                 params['urls']['view'] = params['urls']['view'].replace('{}/'.format(old_id), '{}/'.format(node._id))
             database['nodelog'].find_and_modify(
                 {'_id': doc['_id']},
@@ -840,7 +840,7 @@ def update_foreign_fields(old_id, node):
             )
             database['notificationsubscription'].remove({'_id': doc['_id']})
 
-    u_uc = list(database['user'].find({'unclaimed_records.{}'.format(old_id): {'$ne': None}}))
+    u_uc = list(database['user'].find({'unclaimed_records.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if u_uc:
         logger.info('** Updating {} Users (unclaimed_records) {}'.format(old_id, [d['_id'] for d in u_uc]))
         for doc in u_uc:
@@ -853,7 +853,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    u_caer = list(database['user'].find({'contributor_added_email_records.{}'.format(old_id): {'$ne': None}}))
+    u_caer = list(database['user'].find({'contributor_added_email_records.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if u_caer:
         logger.info('** Updating {} Users (contributor_added_email_records) {}'.format(old_id, [d['_id'] for d in u_caer]))
         for doc in u_caer:
@@ -866,7 +866,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    u_nc = list(database['user'].find({'notifications_configured.{}'.format(old_id): {'$ne': None}}))
+    u_nc = list(database['user'].find({'notifications_configured.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if u_nc:
         logger.info('** Updating {} Users (notifications_configured) {}'.format(old_id, [d['_id'] for d in u_nc]))
         for doc in u_nc:
@@ -879,7 +879,7 @@ def update_foreign_fields(old_id, node):
                 }}
             )
 
-    u_cvt = list(database['user'].find({'comments_viewed_timestamp.{}'.format(old_id): {'$ne': None}}))
+    u_cvt = list(database['user'].find({'comments_viewed_timestamp.{}'.format(old_id): {'$ne': Node.load(None)}}))
     if u_cvt:
         logger.info('** Updating {} Users (comments_viewed_timestamp) {}'.format(old_id, [d['_id'] for d in u_cvt]))
         for doc in u_cvt:
@@ -1111,7 +1111,7 @@ def main():
     if not dry_run:
         script_utils.add_file_logger(logger, __file__)
     init_app(set_backends=True, routes=False)
-    settings.SHARE_API_TOKEN = None
+    settings.SHARE_API_TOKEN = Node.load(None)
     with TokuTransaction():
         migrate(swap_cutoff=td)
         if dry_run:

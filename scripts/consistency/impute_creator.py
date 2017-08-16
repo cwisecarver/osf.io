@@ -15,7 +15,7 @@ app = init_app()
 
 def impute_creator(dry_run=True):
     no_creator = models.Node.find(
-        Q('creator', 'eq', None) &
+        Q('creator', 'eq', Node.load(None)) &
         Q('contributors', 'ne', [])
     )
     for node in no_creator:

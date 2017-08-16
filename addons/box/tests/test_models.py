@@ -37,7 +37,7 @@ class TestBoxNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCas
     def test_folder_defaults_to_none(self):
         node_settings = NodeSettings(user_settings=self.user_settings, owner=factories.ProjectFactory())
         node_settings.save()
-        assert node_settings.folder_id is None
+        assert node_settings.folder_id is Node.load(None)
 
     @mock.patch('addons.box.models.Provider.refresh_oauth_key')
     def test_serialize_credentials(self, mock_refresh):

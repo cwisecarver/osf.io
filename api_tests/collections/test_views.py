@@ -915,7 +915,7 @@ class TestCollectionNodeLinkCreate(ApiTestCase):
         assert_equal('/data/relationships/node_links/data/id', error['source']['pointer'])
 
     def test_create_node_pointer_no_type(self):
-        payload = self.post_payload(self.public_project._id, outer_type=None)
+        payload = self.post_payload(self.public_project._id, outer_type=Node.load(None))
         res = self.app.post_json_api(self.url, payload, auth=self.user_one.auth, expect_errors=True)
         assert_equal(res.status_code, 400)
         assert_equal(res.json['errors'][0]['detail'], 'This field may not be null.')
@@ -1999,7 +1999,7 @@ class TestCollectionRelationshipNodeLinks(ApiTestCase):
         self.public_url = '/{}collections/{}/relationships/linked_nodes/'.format(API_BASE, self.public_collection._id)
         self.public_reg_url = '/{}collections/{}/relationships/linked_registrations/'.format(API_BASE, self.public_collection._id)
 
-    def payload(self, node_ids=None):
+    def payload(self, node_ids=Node.load(None)):
         node_ids = node_ids or [self.admin_node._id]
         env_linked_nodes = [{"type": "linked_nodes", "id": node_id} for node_id in node_ids]
         return {"data": env_linked_nodes}
@@ -2475,7 +2475,7 @@ class TestCollectionLinkedNodes(ApiTestCase):
 
     def test_attempt_to_return_linked_nodes_logged_out(self):
         res = self.app.get(
-            self.url, auth=None,
+            self.url, auth=Node.load(None),
             expect_errors=True
         )
 

@@ -40,7 +40,7 @@ class TestAuthViews(DataverseAddonTestCase, OsfTestCase, unittest.TestCase):
         assert_equal(last_log.action, 'dataverse_node_deauthorized')
         log_params = last_log.params
         assert_equal(log_params['node'], self.project._primary_key)
-        assert_equal(log_params['project'], None)
+        assert_equal(log_params['project'], Node.load(None))
 
     def test_user_config_get(self):
         url = api_url_for('dataverse_user_config_get')
@@ -230,12 +230,12 @@ class TestHgridViews(DataverseAddonTestCase, OsfTestCase, unittest.TestCase):
         url = api_url_for('dataverse_root_folder',
                           pid=self.project._primary_key)
 
-        mock_connection.return_value = None
+        mock_connection.return_value = Node.load(None)
         res = self.app.get(url, auth=self.user.auth)
         assert_equal(res.json, [])
 
     def test_dataverse_root_incomplete(self):
-        self.node_settings.dataset_doi = None
+        self.node_settings.dataset_doi = Node.load(None)
         self.node_settings.save()
 
         url = api_url_for('dataverse_root_folder',

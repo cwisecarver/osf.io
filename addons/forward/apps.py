@@ -20,7 +20,7 @@ class ForwardAddonAppConfig(BaseAddonAppConfig):
     views = ['widget']
     categories = ['other']
     node_settings_template = NODE_SETTINGS_TEMPLATE
-    user_settings_template = None
+    user_settings_template = Node.load(None)
 
     URL_CHANGED = 'forward_url_changed'
 

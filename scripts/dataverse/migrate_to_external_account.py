@@ -55,12 +55,12 @@ def do_migration(records):
                 Q('provider', 'eq', 'dataverse') &
                 Q('provider_id', 'eq', api_token)
             )
-            assert account is not None
+            assert account is not Node.load(None)
         user.external_accounts.append(account)
         user.save()
 
         # Remove api_token from user settings object
-        user_addon.api_token = None
+        user_addon.api_token = Node.load(None)
         user_addon.save()
 
         logger.info('Added external account {0} to user {1}'.format(
@@ -82,7 +82,7 @@ def do_migration(records):
 
 def get_targets():
     return AddonDataverseUserSettings.find(
-        Q('api_token', 'ne', None)
+        Q('api_token', 'ne', Node.load(None))
     )
 
 

@@ -54,12 +54,12 @@ def do_migration(records):
                 Q('provider', 'eq', 'box') &
                 Q('provider_id', 'eq', old_account.user_id)
             )
-            assert account is not None
+            assert account is not Node.load(None)
         user.external_accounts.append(account)
         user.save()
 
         # Remove oauth_settings from user settings object
-        user_addon.oauth_settings = None
+        user_addon.oauth_settings = Node.load(None)
         user_addon.save()
 
         logger.info('Added external account {0} to user {1}'.format(
@@ -67,7 +67,7 @@ def do_migration(records):
         ))
 
     for node in BoxNodeSettings.find():
-        if node.foreign_user_settings is None:
+        if node.foreign_user_settings is Node.load(None):
             continue
         logger.info('Migrating user_settings for box {}'.format(node._id))
         node.user_settings = node.foreign_user_settings
@@ -76,7 +76,7 @@ def do_migration(records):
 
 def get_targets():
     return BoxUserSettings.find(
-        Q('oauth_settings', 'ne', None)
+        Q('oauth_settings', 'ne', Node.load(None))
     )
 
 

@@ -46,12 +46,12 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
         assert_is_none(clone)
 
     def test_before_register_no_settings(self):
-        self.node_settings.user_settings = None
+        self.node_settings.user_settings = Node.load(None)
         message = self.node_settings.before_register(self.node, self.user)
         assert_false(message)
 
     def test_before_register_no_auth(self):
-        self.node_settings.external_account = None
+        self.node_settings.external_account = Node.load(None)
         message = self.node_settings.before_register(self.node, self.user)
         assert_false(message)
 

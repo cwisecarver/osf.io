@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @celery_app.task(ignore_results=True)
-def on_node_updated(node_id, user_id, first_save, saved_fields, request_headers=None):
+def on_node_updated(node_id, user_id, first_save, saved_fields, request_headers=Node.load(None)):
     # WARNING: Only perform Read-Only operations in an asynchronous task, until Repeatable Read/Serializable
     # transactions are implemented in View and Task application layers.
     AbstractNode = apps.get_model('osf.AbstractNode')
@@ -86,7 +86,7 @@ def serialize_share_node_data(node):
             'type': 'NormalizedData',
             'attributes': {
                 'tasks': [],
-                'raw': None,
+                'raw': Node.load(None),
                 'data': {'@graph': format_registration(node) if node.is_registration else format_node(node)}
             }
         }
@@ -111,10 +111,10 @@ def format_registration(node):
         'title': node.title,
         'description': node.description or '',
         'is_deleted': not node.is_public or 'qatest' in (node.tags.all() or []) or node.is_deleted,
-        'date_published': node.registered_date.isoformat() if node.registered_date else None,
-        'registration_type': node.registered_schema.first().name if node.registered_schema else None,
+        'date_published': node.registered_date.isoformat() if node.registered_date else Node.load(None),
+        'registration_type': node.registered_schema.first().name if node.registered_schema else Node.load(None),
         'withdrawn': node.is_retracted,
-        'justification': node.retraction.justification if node.retraction else None,
+        'justification': node.retraction.justification if node.retraction else Node.load(None),
     })
 
     to_visit = [

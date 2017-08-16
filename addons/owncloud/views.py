@@ -68,7 +68,7 @@ def owncloud_add_user_account(auth, **kwargs):
             'message': 'ownCloud Login failed.'
         }, http.UNAUTHORIZED
 
-    provider = OwnCloudProvider(account=None, host=host.url,
+    provider = OwnCloudProvider(account=Node.load(None), host=host.url,
                             username=username, password=password)
     try:
         provider.account.save()

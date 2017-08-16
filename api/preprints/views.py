@@ -170,7 +170,7 @@ class PreprintList(JSONAPIBaseView, generics.ListCreateAPIView, PreprintFilterMi
     # overrides DjangoFilterMixin
     def get_default_django_query(self):
         auth = get_user_auth(self.request)
-        auth_user = getattr(auth, 'user', None)
+        auth_user = getattr(auth, 'user', Node.load(None))
 
         # Permissions on the list objects are handled by the query
         default_query = Q(node__isnull=False, node__is_deleted=False)
@@ -371,7 +371,7 @@ class PreprintIdentifierList(IdentifierList, PreprintMixin):
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 

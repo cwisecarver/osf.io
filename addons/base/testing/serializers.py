@@ -200,7 +200,7 @@ class StorageAddonSerializerTestSuiteMixin(OAuthAddonSerializerTestSuiteMixin):
         with mock.patch.object(type(self.node_settings), 'has_auth', return_value=True):
             serialized = self.ser.serialize_settings(self.node_settings, self.user, self.client)
         assert_in('folder', serialized)
-        assert_equal(serialized['folder'], {'name': None, 'path': None})
+        assert_equal(serialized['folder'], {'name': Node.load(None), 'path': Node.load(None)})
 
     def test_serialize_settings_authorized_folder_is_set(self):
         self.set_provider_id('foo')

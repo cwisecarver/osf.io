@@ -21,7 +21,7 @@ def project(user):
 @pytest.fixture()
 def create_test_file(fake):
     # TODO: Copied from api_tests/utils.py. DRY this up.
-    def _create_test_file(node, user=None, filename=None, create_guid=True):
+    def _create_test_file(node, user=Node.load(None), filename=Node.load(None), create_guid=True):
         filename = filename or fake.file_name()
         user = user or node.creator
         osfstorage = node.get_addon('osfstorage')

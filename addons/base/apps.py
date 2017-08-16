@@ -34,7 +34,7 @@ def generic_root_folder(addon_short_name):
         """Return the Rubeus/HGrid-formatted response for the root folder only."""
         # Quit if node settings does not have authentication
         if not node_settings.has_auth or not node_settings.folder_id:
-            return None
+            return Node.load(None)
         node = node_settings.owner
         root = rubeus.build_addon_root(
             node_settings=node_settings,
@@ -42,7 +42,7 @@ def generic_root_folder(addon_short_name):
             permissions=auth,
             nodeUrl=node.url,
             nodeApiUrl=node.api_url,
-            private_key=kwargs.get('view_only', None),
+            private_key=kwargs.get('view_only', Node.load(None)),
         )
         return [root]
     _root_folder.__name__ = '{0}_root_folder'.format(addon_short_name)
@@ -54,8 +54,8 @@ class BaseAddonAppConfig(AppConfig):
     label = 'addons_base'
 
     actions = tuple()
-    user_settings = None
-    node_settings = None
+    user_settings = Node.load(None)
+    node_settings = Node.load(None)
     node_settings_template = NODE_SETTINGS_TEMPLATE_DEFAULT
     user_settings_template = USER_SETTINGS_TEMPLATE_DEFAULT
     views = []
@@ -65,8 +65,8 @@ class BaseAddonAppConfig(AppConfig):
     include_css = {}  # TODO: Deprecate these elsewhere and remove
     configs = []
     has_hgrid_files = False
-    get_hgrid_data = None
-    max_file_size = None
+    get_hgrid_data = Node.load(None)
+    max_file_size = Node.load(None)
     accept_extensions = True
     # NOTE: Subclasses may make routes a property to avoid import errors
     routes = []
@@ -105,7 +105,7 @@ class BaseAddonAppConfig(AppConfig):
                 ]
             )
         else:
-            self.template_lookup = None
+            self.template_lookup = Node.load(None)
         return ret
 
     @property
@@ -131,12 +131,12 @@ class BaseAddonAppConfig(AppConfig):
             if len(image_files) == 1:
                 self._icon = image_files[0]
             else:
-                self._icon = None
+                self._icon = Node.load(None)
             return self._icon
 
     @property
     def icon_url(self):
-        return self._static_url(self.icon) if self.icon else None
+        return self._static_url(self.icon) if self.icon else Node.load(None)
 
     def _static_url(self, filename):
         """Build static URL for file; use the current addon if relative path,

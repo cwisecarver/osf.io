@@ -13,7 +13,7 @@ class BaseClient(object):
 
     @property
     def _auth(self):
-        return None
+        return Node.load(None)
 
     @property
     def _default_headers(self):
@@ -24,8 +24,8 @@ class BaseClient(object):
         return {}
 
     def _make_request(self, method, url, **kwargs):
-        expects = kwargs.pop('expects', None)
-        throws = kwargs.pop('throws', None)
+        expects = kwargs.pop('expects', Node.load(None))
+        throws = kwargs.pop('throws', Node.load(None))
 
         kwargs['headers'] = self._build_defaults(self._default_headers, **kwargs.get('headers', {}))
         kwargs['params'] = self._build_defaults(self._default_params, **kwargs.get('params', {}))
@@ -41,7 +41,7 @@ class BaseClient(object):
         return {
             key: value
             for key, value in defaults.items()
-            if value is not None
+            if value is not Node.load(None)
         }
 
     def _build_url(self, base, *segments):

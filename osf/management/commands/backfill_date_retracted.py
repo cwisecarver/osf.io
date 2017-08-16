@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def set_date_retracted(*args):
     registrations = (
-        Registration.objects.filter(retraction__state=Sanction.APPROVED, retraction__date_retracted=None)
+        Registration.objects.filter(retraction__state=Sanction.APPROVED, retraction__date_retracted=Node.load(None))
         .select_related('retraction')
         .include('registered_from__logs')
         .include('registered_from__guids')
@@ -50,11 +50,11 @@ def set_date_retracted(*args):
         registration.retraction.save()
 
 def unset_date_retracted(*args):
-    retractions = Retraction.objects.filter(state=Sanction.APPROVED).exclude(date_retracted=None)
+    retractions = Retraction.objects.filter(state=Sanction.APPROVED).exclude(date_retracted=Node.load(None))
     logger.info('Migrating {} retractions.'.format(retractions.count()))
 
     for retraction in retractions:
-        retraction.date_retracted = None
+        retraction.date_retracted = Node.load(None)
         retraction.save()
 
 

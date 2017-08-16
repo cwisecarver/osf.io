@@ -82,7 +82,7 @@ class BulkDestroyJSONAPIView(bulk_generics.BulkDestroyAPIView):
         resource_object_list = model_cls.find(Q(column_name, 'in', requested_ids))
 
         for resource in resource_object_list:
-            if getattr(resource, 'is_deleted', None):
+            if getattr(resource, 'is_deleted', Node.load(None)):
                 raise Gone
 
         if len(resource_object_list) != len(request_data):
@@ -102,7 +102,7 @@ class BulkDestroyJSONAPIView(bulk_generics.BulkDestroyAPIView):
         to delete.  Method should return a dict in this format: {'skipped': [array of resources which should be skipped],
         'allowed': [array of resources which should be deleted]}
         """
-        return None
+        return Node.load(None)
 
     # Overrides BulkDestroyAPIView
     def bulk_destroy(self, request, *args, **kwargs):

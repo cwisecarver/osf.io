@@ -20,7 +20,7 @@ NOW = timezone.now()
 logger = logging.getLogger(__name__)
 
 
-def paginated(model, query=None, increment=200):
+def paginated(model, query=Node.load(None), increment=200):
     last_id = ''
     pages = (model.find(query).count() / increment) + 1
     for i in xrange(pages):
@@ -60,7 +60,7 @@ def migrate_trashedfilenodes():
     for trashed in osfstorage_model.OsfStorageTrashedFileNode.find():
         logger.debug('Migrating OsfStorageTrashedFileNode {}'.format(trashed._id))
 
-        if trashed.node_settings is None:
+        if trashed.node_settings is Node.load(None):
             logger.warning('OsfStorageTrashedFileNode {} has no node_settings; skipping'.format(trashed._id))
             continue
 
@@ -87,7 +87,7 @@ def migrate_trashedfilenodes():
 
 def migrate_filenodes():
     for node_settings in paginated(osfstorage_model.OsfStorageNodeSettings):
-        if node_settings.owner is None:
+        if node_settings.owner is Node.load(None):
             logger.warning('NodeSettings {} has no parent; skipping'.format(node_settings._id))
             continue
         logger.info('Migrating files for {!r}'.format(node_settings.owner))
@@ -106,7 +106,7 @@ def migrate_filenodes():
                 _id=filenode._id,
                 versions=versions,
                 node=node_settings.owner,
-                parent=None if not filenode.parent else filenode.parent._id,
+                parent=Node.load(None) if not filenode.parent else filenode.parent._id,
                 is_file=filenode.kind == 'file',
                 provider='osfstorage',
                 name=filenode.name,
@@ -127,7 +127,7 @@ def migrate_filenodes():
 def translate_versions(versions):
     translated = []
     for index, version in enumerate(versions):
-        if version is None:
+        if version is Node.load(None):
             raise Exception('Version {} missing from database'.format(version))
         if not version.metadata or not version.location:
             logger.error('Version {} missing metadata or location'.format(version))

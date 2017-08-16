@@ -92,7 +92,7 @@ class BaseUserSettings(BaseAddonSettings):
 
     @property
     def public_id(self):
-        return None
+        return Node.load(None)
 
     @property
     def has_auth(self):
@@ -163,7 +163,7 @@ class BaseOAuthUserSettings(BaseUserSettings):
     # The existence of this property is used to determine whether or not
     #   an addon instance is an "OAuth addon" in
     #   AddonModelMixin.get_oauth_addons().
-    oauth_provider = None
+    oauth_provider = Node.load(None)
 
     serializer = serializer.OAuthAddonSerializer
 
@@ -184,7 +184,7 @@ class BaseOAuthUserSettings(BaseUserSettings):
             self.revoke_oauth_access(account, save=False)
         super(BaseOAuthUserSettings, self).delete(save=save)
 
-    def grant_oauth_access(self, node, external_account, metadata=None):
+    def grant_oauth_access(self, node, external_account, metadata=Node.load(None)):
         """Give a node permission to use an ``ExternalAccount`` instance."""
         # ensure the user owns the external_account
         if not self.owner.external_accounts.filter(id=external_account.id).exists():
@@ -227,7 +227,7 @@ class BaseOAuthUserSettings(BaseUserSettings):
             self.revoke_remote_oauth_access(external_account)
 
         for key in self.oauth_grants:
-            self.oauth_grants[key].pop(external_account._id, None)
+            self.oauth_grants[key].pop(external_account._id, Node.load(None))
         if save:
             self.save()
 
@@ -243,7 +243,7 @@ class BaseOAuthUserSettings(BaseUserSettings):
         """
         pass
 
-    def verify_oauth_access(self, node, external_account, metadata=None):
+    def verify_oauth_access(self, node, external_account, metadata=Node.load(None)):
         """Verify that access has been previously granted.
 
         If metadata is not provided, this checks only if the node can access the
@@ -280,11 +280,11 @@ class BaseOAuthUserSettings(BaseUserSettings):
 
     def get_attached_nodes(self, external_account):
         for node in self.get_nodes_with_oauth_grants(external_account):
-            if node is None:
+            if node is Node.load(None):
                 continue
             node_settings = node.get_addon(self.oauth_provider.short_name)
 
-            if node_settings is None:
+            if node_settings is Node.load(None):
                 continue
 
             if node_settings.external_account == external_account:
@@ -411,7 +411,7 @@ class BaseNodeSettings(BaseAddonSettings):
         """
         pass
 
-    def after_remove_contributor(self, node, removed, auth=None):
+    def after_remove_contributor(self, node, removed, auth=Node.load(None)):
         """
         :param Node node:
         :param User removed:
@@ -422,7 +422,7 @@ class BaseNodeSettings(BaseAddonSettings):
         """
 
         :param Node node:
-        :returns: Alert message or None
+        :returns: Alert message or Node.load(None)
 
         """
         pass
@@ -431,7 +431,7 @@ class BaseNodeSettings(BaseAddonSettings):
         """
 
         :param Node node:
-        :returns: Alert message or None
+        :returns: Alert message or Node.load(None)
 
         """
         pass
@@ -454,7 +454,7 @@ class BaseNodeSettings(BaseAddonSettings):
         """
 
         if hasattr(self, 'user_settings'):
-            if self.user_settings is None:
+            if self.user_settings is Node.load(None):
                 return (
                     u'Because you have not configured the {addon} add-on, your authentication will not be '
                     u'transferred to the forked {category}. You may authorize and configure the {addon} add-on '
@@ -495,7 +495,7 @@ class BaseNodeSettings(BaseAddonSettings):
 
         """
         clone = self.clone()
-        clone.user_settings = None
+        clone.user_settings = Node.load(None)
         clone.owner = fork
 
         if save:
@@ -523,7 +523,7 @@ class BaseNodeSettings(BaseAddonSettings):
         :returns: Tuple of cloned settings and alert message
 
         """
-        return None, None
+        return Node.load(None), Node.load(None)
 
     def after_delete(self, node, user):
         """
@@ -562,7 +562,7 @@ class BaseStorageAddon(BaseModel):
             name = name + ': {folder}'.format(folder=folder_name)
         return name
 
-    def _get_fileobj_child_metadata(self, filenode, user, cookie=None, version=None):
+    def _get_fileobj_child_metadata(self, filenode, user, cookie=Node.load(None), version=Node.load(None)):
         kwargs = dict(
             provider=self.config.short_name,
             path=filenode.get('path', ''),
@@ -584,7 +584,7 @@ class BaseStorageAddon(BaseModel):
         time.sleep(1.0 / 5.0)
         return res.json().get('data', [])
 
-    def _get_file_tree(self, filenode=None, user=None, cookie=None, version=None):
+    def _get_file_tree(self, filenode=Node.load(None), user=Node.load(None), cookie=Node.load(None), version=Node.load(None)):
         """
         Recursively get file metadata
         """
@@ -619,7 +619,7 @@ class BaseOAuthNodeSettings(BaseNodeSettings):
     # The existence of this property is used to determine whether or not
     #   an addon instance is an "OAuth addon" in
     #   AddonModelMixin.get_oauth_addons().
-    oauth_provider = None
+    oauth_provider = Node.load(None)
 
     class Meta:
         abstract = True
@@ -647,7 +647,7 @@ class BaseOAuthNodeSettings(BaseNodeSettings):
 
     @property
     def nodelogger(self):
-        auth = None
+        auth = Node.load(None)
         if self.user_settings:
             auth = Auth(self.user_settings.owner)
         self._logger_class = getattr(
@@ -699,7 +699,7 @@ class BaseOAuthNodeSettings(BaseNodeSettings):
             "BaseOAuthNodeSettings subclasses must expose a 'clear_settings' method."
         )
 
-    def set_auth(self, external_account, user, metadata=None, log=True):
+    def set_auth(self, external_account, user, metadata=Node.load(None), log=True):
         """Connect the node addon to a user's external account.
 
         This method also adds the permission to use the account in the user's
@@ -722,7 +722,7 @@ class BaseOAuthNodeSettings(BaseNodeSettings):
             self.nodelogger.log(action='node_authorized', save=True)
         self.save()
 
-    def deauthorize(self, auth=None, add_log=False):
+    def deauthorize(self, auth=Node.load(None), add_log=False):
         """Remove authorization from this node.
 
         This method should be overridden for addon-specific behavior,
@@ -736,8 +736,8 @@ class BaseOAuthNodeSettings(BaseNodeSettings):
         This method does not remove the node's permission in the user's addon
         settings.
         """
-        self.external_account = None
-        self.user_settings = None
+        self.external_account = Node.load(None)
+        self.user_settings = Node.load(None)
         self.save()
 
     def before_remove_contributor_message(self, node, removed):
@@ -758,7 +758,7 @@ class BaseOAuthNodeSettings(BaseNodeSettings):
     # backwards compatibility
     before_remove_contributor = before_remove_contributor_message
 
-    def after_remove_contributor(self, node, removed, auth=None):
+    def after_remove_contributor(self, node, removed, auth=Node.load(None)):
         """If removed contributor authorized this addon, remove addon authorization
         from owner.
         """
@@ -799,7 +799,7 @@ class BaseOAuthNodeSettings(BaseNodeSettings):
             save=False,
         )
         if self.has_auth and self.user_settings.owner == user:
-            metadata = None
+            metadata = Node.load(None)
             if self.complete:
                 try:
                     metadata = self.user_settings.oauth_grants[node._id][self.external_account._id]
@@ -857,7 +857,7 @@ class BaseCitationsNodeSettings(BaseOAuthNodeSettings):
     @property
     def api(self):
         """authenticated ExternalProvider instance"""
-        if self._api is None:
+        if self._api is Node.load(None):
             self._api = self.oauth_provider(account=self.external_account)
         return self._api
 
@@ -890,7 +890,7 @@ class BaseCitationsNodeSettings(BaseOAuthNodeSettings):
     @property
     def fetch_folder_name(self):
         """Returns a displayable folder name"""
-        if self.list_id is None:
+        if self.list_id is Node.load(None):
             return ''
         elif self.list_id == 'ROOT':
             return 'All Documents'
@@ -899,7 +899,7 @@ class BaseCitationsNodeSettings(BaseOAuthNodeSettings):
 
     def clear_settings(self):
         """Clears selected folder configuration"""
-        self.list_id = None
+        self.list_id = Node.load(None)
 
     def set_auth(self, *args, **kwargs):
         """Connect the node addon to a user's external account.
@@ -907,12 +907,12 @@ class BaseCitationsNodeSettings(BaseOAuthNodeSettings):
         This method also adds the permission to use the account in the user's
         addon settings.
         """
-        self.list_id = None
+        self.list_id = Node.load(None)
         self.save()
 
         return super(BaseCitationsNodeSettings, self).set_auth(*args, **kwargs)
 
-    def deauthorize(self, auth=None, add_log=True):
+    def deauthorize(self, auth=Node.load(None), add_log=True):
         """Remove user authorization from this node and log the event."""
         if add_log:
             self.owner.add_log(
@@ -928,7 +928,7 @@ class BaseCitationsNodeSettings(BaseOAuthNodeSettings):
         self.clear_auth()
         self.save()
 
-    def after_delete(self, node=None, user=None):
+    def after_delete(self, node=Node.load(None), user=Node.load(None)):
         self.deauthorize(Auth(user=user), add_log=True)
 
     def on_delete(self):

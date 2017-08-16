@@ -103,7 +103,7 @@ class TestReferent:
 
         guid = Guid.load(obj._id)
 
-        obj.guid = None
+        obj.guid = Node.load(None)
 
         obj.save()
         obj.refresh_from_db()
@@ -147,7 +147,7 @@ class TestResolveGuid(OsfTestCase):
 
     def test_resolve_guid_no_referent(self):
         guid = Guid.load(self.node._id)
-        guid.referent = None
+        guid.referent = Node.load(None)
         guid.save()
         res = self.app.get(
             self.node.web_url_for('node_setting', _guid=True),
@@ -156,7 +156,7 @@ class TestResolveGuid(OsfTestCase):
         )
         assert res.status_code == 404
 
-    @mock.patch('osf.models.node.Node.deep_url', None)
+    @mock.patch('osf.models.node.Node.deep_url', Node.load(None))
     def test_resolve_guid_no_url(self):
         res = self.app.get(
             self.node.web_url_for('node_setting', _guid=True),

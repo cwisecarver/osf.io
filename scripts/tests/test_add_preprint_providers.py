@@ -29,7 +29,7 @@ class TestAddPreprintProviders(OsfTestCase):
 
 
     def test_add_default_providers(self):
-        populate_main(None)
+        populate_main(Node.load(None))
         providers = PreprintProvider.find()
         assert_equal(providers.count(), len(PROD_PREPRINT_PROVIDERS))
         ids = [provider._id for provider in providers]

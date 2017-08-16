@@ -107,7 +107,7 @@ def disable_addon(auth, **kwargs):
     node = kwargs['node'] or kwargs['project']
 
     addon_name = kwargs.get('addon')
-    if addon_name is None:
+    if addon_name is Node.load(None):
         raise HTTPError(httplib.BAD_REQUEST)
 
     deleted = node.delete_addon(addon_name, auth)
@@ -121,11 +121,11 @@ def get_addon_user_config(**kwargs):
     user = kwargs['auth'].user
 
     addon_name = kwargs.get('addon')
-    if addon_name is None:
+    if addon_name is Node.load(None):
         raise HTTPError(httplib.BAD_REQUEST)
 
     addon = user.get_addon(addon_name)
-    if addon is None:
+    if addon is Node.load(None):
         raise HTTPError(httplib.BAD_REQUEST)
 
     return addon.to_json(user)
@@ -151,8 +151,8 @@ def check_access(node, auth, action, cas_resp):
     """Verify that user can perform requested action on resource. Raise appropriate
     error code if action cannot proceed.
     """
-    permission = permission_map.get(action, None)
-    if permission is None:
+    permission = permission_map.get(action, Node.load(None))
+    if permission is Node.load(None):
         raise HTTPError(httplib.BAD_REQUEST)
 
     if cas_resp:
@@ -207,7 +207,7 @@ def check_access(node, auth, action, cas_resp):
             Q('registration_schema', 'eq', prereg_schema)
         )
         if action == 'download' and \
-                    auth.user is not None and \
+                    auth.user is not Node.load(None) and \
                     prereg_draft_registration.count() > 0 and \
                     settings.PREREG_ADMIN_TAG in auth.user.system_tags:
             return True
@@ -218,7 +218,7 @@ def check_access(node, auth, action, cas_resp):
 
 
 def make_auth(user):
-    if user is not None:
+    if user is not Node.load(None):
         return {
             'id': user._id,
             'email': '{}@osf.io'.format(user._id),
@@ -229,7 +229,7 @@ def make_auth(user):
 
 @collect_auth
 def get_auth(auth, **kwargs):
-    cas_resp = None
+    cas_resp = Node.load(None)
     if not auth.user:
         # Central Authentication Server OAuth Bearer Token
         authorization = request.headers.get('Authorization')
@@ -320,7 +320,7 @@ def create_waterbutler_log(payload, **kwargs):
             raise HTTPError(httplib.BAD_REQUEST)
 
         user = OSFUser.load(auth['id'])
-        if user is None:
+        if user is Node.load(None):
             raise HTTPError(httplib.BAD_REQUEST)
 
         auth = Auth(user=user)
@@ -336,7 +336,7 @@ def create_waterbutler_log(payload, **kwargs):
             dest = payload['destination']
             src = payload['source']
 
-            if src is not None and dest is not None:
+            if src is not Node.load(None) and dest is not Node.load(None):
                 dest_path = dest['materialized']
                 src_path = src['materialized']
                 if dest_path.endswith('/') and src_path.endswith('/'):
@@ -424,7 +424,7 @@ def create_waterbutler_log(payload, **kwargs):
             except KeyError:
                 raise HTTPError(httplib.BAD_REQUEST)
 
-            if node_addon is None:
+            if node_addon is Node.load(None):
                 raise HTTPError(httplib.BAD_REQUEST)
 
             metadata['path'] = metadata['path'].lstrip('/')
@@ -445,7 +445,7 @@ def addon_delete_file_node(self, node, user, event_type, payload):
     Required so that the guids of deleted addon files are not re-pointed when an
     addon file or folder is moved or renamed.
     """
-    if event_type == 'file_removed' and payload.get('provider', None) != 'osfstorage':
+    if event_type == 'file_removed' and payload.get('provider', Node.load(None)) != 'osfstorage':
         provider = payload['provider']
         path = payload['metadata']['path']
         materialized_path = payload['metadata']['materialized']
@@ -467,7 +467,7 @@ def addon_delete_file_node(self, node, user, event_type, payload):
                     Q('_materialized_path', 'eq', materialized_path)
                 )
             except NoResultsFound:
-                file_node = None
+                file_node = Node.load(None)
 
             if file_node and not TrashedFileNode.load(file_node._id):
                 file_node.delete(user=user)
@@ -526,14 +526,14 @@ def addon_deleted_file(auth, node, error_type='BLAME_PROVIDER', **kwargs):
     # Allow file_node to be passed in so other views can delegate to this one
     file_node = kwargs.get('file_node') or TrashedFileNode.load(kwargs.get('trashed_id'))
 
-    deleted_by, deleted_on = None, None
+    deleted_by, deleted_on = Node.load(None), Node.load(None)
     if isinstance(file_node, TrashedFileNode):
         deleted_by = file_node.deleted_by
-        deleted_by_guid = file_node.deleted_by._id if deleted_by else None
+        deleted_by_guid = file_node.deleted_by._id if deleted_by else Node.load(None)
         deleted_on = file_node.deleted_on.strftime('%c') + ' UTC'
         if file_node.suspended:
             error_type = 'FILE_SUSPENDED'
-        elif file_node.deleted_by is None:
+        elif file_node.deleted_by is Node.load(None):
             if file_node.provider == 'osfstorage':
                 error_type = 'FILE_GONE_ACTOR_UNKNOWN'
             else:
@@ -550,7 +550,7 @@ def addon_deleted_file(auth, node, error_type='BLAME_PROVIDER', **kwargs):
     try:
         file_guid = file_node.get_guid()._id
     except AttributeError:
-        file_guid = None
+        file_guid = Node.load(None)
 
     format_params = dict(
         file_name=markupsafe.escape(file_name),
@@ -566,20 +566,20 @@ def addon_deleted_file(auth, node, error_type='BLAME_PROVIDER', **kwargs):
     ret.update({
         'error': ERROR_MESSAGES[error_type].format(**format_params),
         'urls': {
-            'render': None,
-            'sharejs': None,
+            'render': Node.load(None),
+            'sharejs': Node.load(None),
             'mfr': settings.MFR_SERVER_URL,
             'gravatar': get_gravatar(auth.user, 25),
             'files': node.web_url_for('collect_file_trees'),
         },
         'extra': {},
         'size': 9966699,  # Prevent file from being edited, just in case
-        'sharejs_uuid': None,
+        'sharejs_uuid': Node.load(None),
         'file_name': file_name,
         'file_path': file_path,
         'file_name_title': file_name_title,
         'file_name_ext': file_name_ext,
-        'version_id': None,
+        'version_id': Node.load(None),
         'file_guid': file_guid,
         'file_id': file_node._id,
         'provider': file_node.provider,
@@ -596,7 +596,7 @@ def addon_deleted_file(auth, node, error_type='BLAME_PROVIDER', **kwargs):
 @must_be_contributor_or_public
 def addon_view_or_download_file(auth, path, provider, **kwargs):
     extras = request.args.to_dict()
-    extras.pop('_', None)  # Clean up our url params a bit
+    extras.pop('_', Node.load(None))  # Clean up our url params a bit
     action = extras.get('action', 'view')
     node = kwargs.get('node') or kwargs['project']
 
@@ -641,7 +641,7 @@ def addon_view_or_download_file(auth, path, provider, **kwargs):
         )
     )
 
-    if version is None:
+    if version is Node.load(None):
         # File is either deleted or unable to be found in the provider location
         # Rollback the insertion of the file_node
         transaction.savepoint_rollback(savepoint_id)
@@ -663,7 +663,7 @@ def addon_view_or_download_file(auth, path, provider, **kwargs):
     # TODO clean up these urls and unify what is used as a version identifier
     if request.method == 'HEAD':
         return make_response(('', httplib.FOUND, {
-            'Location': file_node.generate_waterbutler_url(**dict(extras, direct=None, version=version.identifier, _internal=extras.get('mode') == 'render'))
+            'Location': file_node.generate_waterbutler_url(**dict(extras, direct=Node.load(None), version=version.identifier, _internal=extras.get('mode') == 'render'))
         }))
 
     if action == 'download':
@@ -672,14 +672,14 @@ def addon_view_or_download_file(auth, path, provider, **kwargs):
         # avoid rendering files with the same format type.
         if format and '.{}'.format(format) != extension:
             return redirect('{}/export?format={}&url={}'.format(MFR_SERVER_URL, format, urllib.quote(file_node.generate_waterbutler_url(
-                **dict(extras, direct=None, version=version.identifier, _internal=extras.get('mode') == 'render')
+                **dict(extras, direct=Node.load(None), version=version.identifier, _internal=extras.get('mode') == 'render')
             ))))
-        return redirect(file_node.generate_waterbutler_url(**dict(extras, direct=None, version=version.identifier, _internal=extras.get('mode') == 'render')))
+        return redirect(file_node.generate_waterbutler_url(**dict(extras, direct=Node.load(None), version=version.identifier, _internal=extras.get('mode') == 'render')))
 
     if action == 'get_guid':
         draft_id = extras.get('draft')
         draft = DraftRegistration.load(draft_id)
-        if draft is None or draft.is_approved:
+        if draft is Node.load(None) or draft.is_approved:
             raise HTTPError(httplib.BAD_REQUEST, data={
                 'message_short': 'Bad Request',
                 'message_long': 'File not associated with required object.'
@@ -702,7 +702,7 @@ def addon_view_file(auth, node, file_node, version):
         version, error = version
         error = error.replace('\n', '').strip()
     else:
-        error = None
+        error = Node.load(None)
 
     ret = serialize_node(node, auth, primary=True)
 
@@ -713,13 +713,13 @@ def addon_view_file(auth, node, file_node, version):
     if ret['user']['can_edit']:
         sharejs_uuid = str(node.file_guid_to_share_uuids[file_node._id + '-' + version._id])
     else:
-        sharejs_uuid = None
+        sharejs_uuid = Node.load(None)
 
     internal_furl = furl.furl(settings.INTERNAL_DOMAIN)
     download_url = furl.furl(request.url.encode('utf-8')).set(
         netloc=internal_furl.netloc,
         args=dict(request.args, **{
-            'direct': None,
+            'direct': Node.load(None),
             'mode': 'render',
             'action': 'download',
         })
@@ -737,7 +737,7 @@ def addon_view_file(auth, node, file_node, version):
             'sharejs': wiki_settings.SHAREJS_URL,
             'gravatar': get_gravatar(auth.user, 25),
             'files': node.web_url_for('collect_file_trees'),
-            'archived_from': get_archived_from_url(node, file_node) if node.is_registration else None,
+            'archived_from': get_archived_from_url(node, file_node) if node.is_registration else Node.load(None),
         },
         'error': error,
         'file_name': file_node.name,
@@ -749,13 +749,13 @@ def addon_view_file(auth, node, file_node, version):
         'provider': file_node.provider,
         'materialized_path': file_node.materialized_path,
         'extra': version.metadata.get('extra', {}),
-        'size': version.size if version.size is not None else 9966699,
+        'size': version.size if version.size is not Node.load(None) else 9966699,
         'private': getattr(node.get_addon(file_node.provider), 'is_private', False),
         'file_tags': list(file_node.tags.filter(system=False).values_list('name', flat=True)) if not file_node._state.adding else [],  # Only access ManyRelatedManager if saved
         'file_guid': file_node.get_guid()._id,
         'file_id': file_node._id,
         'allow_comments': file_node.provider in settings.ADDONS_COMMENTABLE,
-        'checkout_user': file_node.checkout._id if file_node.checkout else None,
+        'checkout_user': file_node.checkout._id if file_node.checkout else Node.load(None),
         'pre_reg_checkout': is_pre_reg_checkout(node, file_node),
     })
 
@@ -777,4 +777,4 @@ def get_archived_from_url(node, file_node):
         trashed = TrashedFileNode.load(file_node.copied_from._id)
         if not trashed:
             return node.registered_from.web_url_for('addon_view_or_download_file', provider=file_node.provider, path=file_node.copied_from._id)
-    return None
+    return Node.load(None)

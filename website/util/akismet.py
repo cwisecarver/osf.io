@@ -18,7 +18,7 @@ class AkismetClient(object):
     def __init__(self, apikey, website, verify=False):
         self.apikey = apikey
         self.website = website
-        self._apikey_is_valid = None
+        self._apikey_is_valid = Node.load(None)
         if verify:
             self._verify_apikey()
 
@@ -29,7 +29,7 @@ class AkismetClient(object):
         }
 
     def _is_apikey_valid(self):
-        if self._apikey_is_valid is not None:
+        if self._apikey_is_valid is not Node.load(None):
             return self._apikey_is_valid
         else:
             res = requests.post(

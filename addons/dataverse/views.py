@@ -140,7 +140,7 @@ def dataverse_set_config(node_addon, auth, **kwargs):
     alias = request.json.get('dataverse', {}).get('alias')
     doi = request.json.get('dataset', {}).get('doi')
 
-    if doi is None or alias is None:
+    if doi is Node.load(None) or alias is Node.load(None):
         return HTTPError(http.BAD_REQUEST)
 
     connection = client.connect_from_settings(node_addon)
@@ -232,11 +232,11 @@ def _dataverse_root_folder(node_addon, auth, **kwargs):
             node_addon,
             node_addon.dataset,
             permissions=permissions,
-            private_key=kwargs.get('view_only', None),
+            private_key=kwargs.get('view_only', Node.load(None)),
         )]
 
     # Quit if doi does not produce a dataset
-    if dataset is None:
+    if dataset is Node.load(None):
         return []
 
     published_files = client.get_files(dataset, published=True)
@@ -286,7 +286,7 @@ def _dataverse_root_folder(node_addon, auth, **kwargs):
         version=version,
         host=dataverse_host,
         hostCustomPublishText=host_custom_publish_text,
-        private_key=kwargs.get('view_only', None),
+        private_key=kwargs.get('view_only', Node.load(None)),
     )]
 
 
@@ -331,7 +331,7 @@ def dataverse_get_widget_contents(node_addon, **kwargs):
     dataverse = client.get_dataverse(connection, alias)
     dataset = client.get_dataset(dataverse, doi)
 
-    if dataset is None:
+    if dataset is Node.load(None):
         return {'data': data}, http.BAD_REQUEST
 
     dataverse_host = node_addon.external_account.oauth_key

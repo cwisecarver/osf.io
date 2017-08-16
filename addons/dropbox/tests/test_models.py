@@ -32,7 +32,7 @@ class TestDropboxNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.Tes
             user_settings=self.user_settings
         )
         node_settings.save()
-        assert node_settings.folder is None
+        assert node_settings.folder is Node.load(None)
 
     @mock.patch(
         'addons.dropbox.models.UserSettings.revoke_remote_oauth_access',

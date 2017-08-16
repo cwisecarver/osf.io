@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def do_migration():
-    for node_addon in BoxNodeSettings.find(Q('foreign_user_settings', 'ne', None)):
+    for node_addon in BoxNodeSettings.find(Q('foreign_user_settings', 'ne', Node.load(None))):
         user_addon = node_addon.foreign_user_settings
         user = user_addon.owner
         if not user_addon.external_accounts:

@@ -107,7 +107,7 @@ def node_registration_retraction_post(auth, node, **kwargs):
 
     data = request.get_json()
     try:
-        node.retract_registration(auth.user, data.get('justification', None))
+        node.retract_registration(auth.user, data.get('justification', Node.load(None)))
         node.save()
         node.retraction.ask(node.get_active_contributors_recursive(unique_users=True))
     except NodeStateError as err:
@@ -182,8 +182,8 @@ def project_before_register(auth, node, **kwargs):
     for addon in itertools.chain(*addon_set):
         if not addon.complete:
             continue
-        archive_errors = getattr(addon, 'archive_errors', None)
-        error = None
+        archive_errors = getattr(addon, 'archive_errors', Node.load(None))
+        error = Node.load(None)
         if archive_errors:
             error = archive_errors()
             if error:

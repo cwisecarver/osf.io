@@ -17,10 +17,10 @@ from website import settings
 
 def get_session_from_cookie(cookie_val):
     """
-    Given a cookie value, return the `Session` object or `None`.
+    Given a cookie value, return the `Session` object or `Node.load(None)`.
 
     :param cookie_val: the cookie
-    :return: the `Session` object or None
+    :return: the `Session` object or Node.load(None)
     """
 
     session_id = itsdangerous.Signer(settings.SECRET_KEY).unsign(cookie_val)
@@ -28,7 +28,7 @@ def get_session_from_cookie(cookie_val):
         session = Session.objects.get(_id=session_id)
         return session
     except Session.DoesNotExist:
-        return None
+        return Node.load(None)
 
 
 def check_user(user):
@@ -90,16 +90,16 @@ class OSFSessionAuthentication(authentication.BaseAuthentication):
         """
         cookie_val = request.COOKIES.get(settings.COOKIE_NAME)
         if not cookie_val:
-            return None
+            return Node.load(None)
         session = get_session_from_cookie(cookie_val)
         if not session:
-            return None
+            return Node.load(None)
         user_id = session.data.get('auth_user_id')
         user = OSFUser.load(user_id)
         if user:
             check_user(user)
-            return user, None
-        return None
+            return user, Node.load(None)
+        return Node.load(None)
 
 
 class OSFBasicAuthentication(BasicAuthentication):
@@ -118,7 +118,7 @@ class OSFBasicAuthentication(BasicAuthentication):
         """
 
         user_auth_tuple = super(OSFBasicAuthentication, self).authenticate(request)
-        if user_auth_tuple is not None:
+        if user_auth_tuple is not Node.load(None):
             self.authenticate_twofactor_credentials(user_auth_tuple[0], request)
         return user_auth_tuple
 
@@ -137,11 +137,11 @@ class OSFBasicAuthentication(BasicAuthentication):
 
         if userid and not user:
             raise exceptions.AuthenticationFailed(_('Invalid username/password.'))
-        elif userid is None and password is None:
+        elif userid is Node.load(None) and password is Node.load(None):
             raise exceptions.NotAuthenticated()
 
         check_user(user)
-        return user, None
+        return user, Node.load(None)
 
     @staticmethod
     def authenticate_twofactor_credentials(user, request):
@@ -157,10 +157,10 @@ class OSFBasicAuthentication(BasicAuthentication):
         try:
             two_factor = TwoFactorUserSettings.objects.get(owner_id=user.pk)
         except TwoFactorUserSettings.DoesNotExist:
-            two_factor = None
+            two_factor = Node.load(None)
         if two_factor and two_factor.is_confirmed:
             otp = request.META.get('HTTP_X_OSF_OTP')
-            if otp is None:
+            if otp is Node.load(None):
                 raise TwoFactorRequiredError()
             if not two_factor.verify_code(otp):
                 raise exceptions.AuthenticationFailed(_('Invalid two-factor authentication OTP code.'))
@@ -189,7 +189,7 @@ class OSFCASAuthentication(authentication.BaseAuthentication):
             auth_header_field = request.META['HTTP_AUTHORIZATION']
             auth_token = cas.parse_auth_header(auth_header_field)
         except (cas.CasTokenError, KeyError):
-            return None
+            return Node.load(None)
 
         try:
             cas_auth_response = client.profile(auth_token)

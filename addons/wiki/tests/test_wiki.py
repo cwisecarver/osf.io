@@ -840,12 +840,12 @@ class TestWikiUuid(OsfTestCase):
         original_uuid = generate_private_uuid(self.project, self.wname)
         self.project.update_node_wiki(self.wname, 'Hello world', Auth(self.user))
         fork = self.project.fork_node(Auth(self.user))
-        assert_equal(fork.wiki_private_uuids.get(self.wkey), None)
+        assert_equal(fork.wiki_private_uuids.get(self.wkey), Node.load(None))
 
         migrate_uuid(self.project, self.wname)
 
         assert_not_equal(original_uuid, self.project.wiki_private_uuids.get(self.wkey))
-        assert_equal(fork.wiki_private_uuids.get(self.wkey), None)
+        assert_equal(fork.wiki_private_uuids.get(self.wkey), Node.load(None))
 
     @mock.patch('addons.wiki.utils.broadcast_to_sharejs')
     def test_uuid_persists_after_delete(self, mock_sharejs):
@@ -1104,7 +1104,7 @@ class TestWikiUtils(OsfTestCase):
         assert_equal(self.project.wiki_private_uuids[wkey], new_uuid)
 
     def test_format_wiki_version(self):
-        assert_is_none(format_wiki_version(None, 5, False))
+        assert_is_none(format_wiki_version(Node.load(None), 5, False))
         assert_is_none(format_wiki_version('', 5, False))
         assert_equal(format_wiki_version('3', 5, False), 3)
         assert_equal(format_wiki_version('4', 5, False), 'previous')
@@ -1272,7 +1272,7 @@ class TestWikiMenu(OsfTestCase):
             'page': {
                 'url': self.project.web_url_for('project_wiki_home'),
                 'name': 'Home',
-                'id': 'None',
+                'id': 'Node.load(None)',
             }
         }
         assert_equal(data, expected)

@@ -20,7 +20,7 @@ class TestSendQueuedMails(OsfTestCase):
         self.user.osf_mailing_lists[settings.OSF_HELP_LIST] = True
         self.user.save()
 
-    def queue_mail(self, mail_type=mails.NO_ADDON, user=None, send_at=None):
+    def queue_mail(self, mail_type=mails.NO_ADDON, user=Node.load(None), send_at=Node.load(None)):
         return mails.queue_mail(
             to_addr=user.username if user else self.user.username,
             mail=mail_type,

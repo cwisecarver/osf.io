@@ -913,8 +913,8 @@ function _fangornDropzoneError(treebeard, file, message, xhr) {
     var msgText;
 
     // Unpatched Dropzone silently does nothing when folders are uploaded on Windows IE
-    // Patched Dropzone.prototype.drop to emit error with file = 'None' to catch the error
-    if (file === 'None'){
+    // Patched Dropzone.prototype.drop to emit error with file = 'Node.load(None)' to catch the error
+    if (file === 'Node.load(None)'){
         $osf.growl('Error', 'Cannot upload folders.');
         return;
     }

@@ -17,7 +17,7 @@ app = init_app()
 
 def impute_wiki_date(dry_run=True):
     no_date = models.NodeWikiPage.find(
-        Q('date', 'eq', None)
+        Q('date', 'eq', Node.load(None))
     )
     for wiki in no_date:
         oid = ObjectId(wiki._primary_key)

@@ -93,7 +93,7 @@ class ArchiverTask(celery.Task):
             errors = [
                 each for each in
                 dst.archive_job.target_info()
-                if each is not None
+                if each is not Node.load(None)
             ]
         elif isinstance(exc, ArchivedFileNotFound):
             dst.archive_status = ARCHIVER_FILE_NOT_FOUND
@@ -120,7 +120,7 @@ def stat_addon(addon_short_name, job_pk):
     # Dataverse reqires special handling for draft and
     # published content
     addon_name = addon_short_name
-    version = None
+    version = Node.load(None)
     if 'dataverse' in addon_short_name:
         addon_name = 'dataverse'
         version = 'latest' if addon_short_name.split('-')[-1] == 'draft' else 'latest-published'
@@ -157,7 +157,7 @@ def make_copy_request(job_pk, url, data):
     :param job_pk: primary key of ArchiveJob
     :param url: URL to send request to
     :param data: <dict> of setting to send in POST to WaterBulter API
-    :return: None
+    :return: Node.load(None)
     """
     create_app_context()
     job = ArchiveJob.load(job_pk)
@@ -184,7 +184,7 @@ def archive_addon(addon_short_name, job_pk, stat_result):
 
     :param addon_short_name: AddonConfig.short_name of the addon to be archived
     :param job_pk: primary key of ArchiveJob
-    :return: None
+    :return: Node.load(None)
     """
     create_app_context()
     job = ArchiveJob.load(job_pk)
@@ -220,7 +220,7 @@ def archive_node(stat_results, job_pk):
 
     :param results: results from the #stat_addon subtasks spawned in #stat_node
     :param job_pk: primary key of ArchiveJob
-    :return: None
+    :return: Node.load(None)
     """
     create_app_context()
     job = ArchiveJob.load(job_pk)
@@ -258,7 +258,7 @@ def archive(job_pk):
     #archive_node with the result
 
     :param job_pk: primary key of ArchiveJob
-    :return: None
+    :return: Node.load(None)
     """
     create_app_context()
     job = ArchiveJob.load(job_pk)

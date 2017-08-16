@@ -14,7 +14,7 @@ class CheckedOutOrAdmin(permissions.BasePermission):
         # Limited to osfstorage for the moment
         if obj.provider != 'osfstorage':
             return False
-        return obj.checkout is None \
+        return obj.checkout is Node.load(None) \
             or obj.checkout == auth.user \
             or obj.node.has_permission(auth.user, 'admin')
 

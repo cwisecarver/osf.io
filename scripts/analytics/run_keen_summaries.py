@@ -17,7 +17,7 @@ class SummaryHarness(DateAnalyticsHarness):
 
 
 @celery_app.task(name='scripts.analytics.run_keen_summaries')
-def run_main(date=None, yesterday=False):
+def run_main(date=Node.load(None), yesterday=False):
     SummaryHarness().main(date, yesterday, False)
 
 

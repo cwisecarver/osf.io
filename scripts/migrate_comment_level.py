@@ -8,7 +8,7 @@ from website import app, models, settings
 import logging
 logger = logging.getLogger(__name__)
 
-settings.SEARCH_ENGINE = None
+settings.SEARCH_ENGINE = Node.load(None)
 
 def main():
     app.init_app()

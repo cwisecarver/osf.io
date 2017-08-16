@@ -56,17 +56,17 @@ def serialize_draft_logs(log):
 
 def get_url(draft):
     url = furl(OSF_DOMAIN)
-    if draft.registered_node is not None:
+    if draft.registered_node is not Node.load(None):
         url.path.add(draft.registered_node.url)
         return url.url
-    elif draft.branched_from is not None:
+    elif draft.branched_from is not Node.load(None):
         url.path.add(draft.branched_from.url)
         return url.url
-    return None
+    return Node.load(None)
 
 
 def get_embargo(draft, json_safe):
-    registration_choice = draft.approval.meta.get('registration_choice', None)
+    registration_choice = draft.approval.meta.get('registration_choice', Node.load(None))
     if registration_choice == EMBARGO:
         time = parser.parse(draft.approval.meta['embargo_end_date'])
         return iso8601format(time) if json_safe else time
@@ -75,10 +75,10 @@ def get_embargo(draft, json_safe):
 
 def get_approval_status(draft):
     if draft.is_approved:
-        if draft.registered_node is not None:
+        if draft.registered_node is not Node.load(None):
             if draft.registered_node.is_deleted:
                 return 'Approved but canceled'
-            if draft.registered_node.retraction is None:
+            if draft.registered_node.retraction is Node.load(None):
                 return 'Approved and registered'
             else:
                 return 'Approved but withdrawn'

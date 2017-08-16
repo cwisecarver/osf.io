@@ -48,7 +48,7 @@ class Mail(object):
         See https://sendgrid.com/docs/User_Guide/Statistics/categories.html
     """
 
-    def __init__(self, tpl_prefix, subject, categories=None):
+    def __init__(self, tpl_prefix, subject, categories=Node.load(None)):
         self.tpl_prefix = tpl_prefix
         self._subject = subject
         self.categories = categories
@@ -73,8 +73,8 @@ def render_message(tpl_name, **context):
     return tpl.render(**context)
 
 
-def send_mail(to_addr, mail, mimetype='plain', from_addr=None, mailer=None,
-            username=None, password=None, callback=None, attachment_name=None, attachment_content=None, **context):
+def send_mail(to_addr, mail, mimetype='plain', from_addr=Node.load(None), mailer=Node.load(None),
+            username=Node.load(None), password=Node.load(None), callback=Node.load(None), attachment_name=Node.load(None), attachment_content=Node.load(None), **context):
     """Send an email from the OSF.
     Example: ::
 

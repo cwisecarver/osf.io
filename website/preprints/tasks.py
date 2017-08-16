@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 @celery_app.task(ignore_results=True)
-def on_preprint_updated(preprint_id, update_share=True, share_type=None, old_subjects=None):
+def on_preprint_updated(preprint_id, update_share=True, share_type=Node.load(None), old_subjects=Node.load(None)):
     # WARNING: Only perform Read-Only operations in an asynchronous task, until Repeatable Read/Serializable
     # transactions are implemented in View and Task application layers.
     from osf.models import PreprintService
     preprint = PreprintService.load(preprint_id)
-    if old_subjects is None:
+    if old_subjects is Node.load(None):
         old_subjects = []
     if preprint.node:
         status = 'public' if preprint.node.is_public else 'unavailable'
@@ -35,7 +35,7 @@ def on_preprint_updated(preprint_id, update_share=True, share_type=None, old_sub
     if update_share:
         update_preprint_share(preprint, old_subjects, share_type)
 
-def update_preprint_share(preprint, old_subjects=None, share_type=None):
+def update_preprint_share(preprint, old_subjects=Node.load(None), share_type=Node.load(None)):
     if settings.SHARE_URL:
         if not preprint.provider.access_token:
             raise ValueError('No access_token for {}. Unable to send {} to SHARE.'.format(preprint.provider, preprint))
@@ -69,7 +69,7 @@ def _async_update_preprint_share(self, preprint_id, old_subjects, share_type):
                 'type': 'NormalizedData',
                 'attributes': {
                     'tasks': [],
-                    'raw': None,
+                    'raw': Node.load(None),
                     'data': {'@graph': format_preprint(preprint, share_type, old_subjects)}
                 }
             }
@@ -93,7 +93,7 @@ def serialize_share_preprint_data(preprint, share_type, old_subjects):
             'type': 'NormalizedData',
             'attributes': {
                 'tasks': [],
-                'raw': None,
+                'raw': Node.load(None),
                 'data': {'@graph': format_preprint(preprint, share_type, old_subjects)}
             }
         }
@@ -104,8 +104,8 @@ def send_share_preprint_data(preprint, data):
     logger.debug(resp.content)
     return resp
 
-def format_preprint(preprint, share_type, old_subjects=None):
-    if old_subjects is None:
+def format_preprint(preprint, share_type, old_subjects=Node.load(None)):
+    if old_subjects is Node.load(None):
         old_subjects = []
     from osf.models import Subject
     old_subjects = [Subject.objects.get(id=s) for s in old_subjects]
@@ -126,7 +126,7 @@ def format_preprint(preprint, share_type, old_subjects=None):
         # because it looks like a race condition that arose from preprints being resent to SHARE on
         # every step of preprint creation.
         'date_updated': max(preprint.date_modified, preprint.node.date_modified).isoformat(),
-        'date_published': preprint.date_published.isoformat() if preprint.date_published else None
+        'date_published': preprint.date_published.isoformat() if preprint.date_published else Node.load(None)
     })
 
     to_visit = [

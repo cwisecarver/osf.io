@@ -37,5 +37,5 @@ class TestUtils(OsfTestCase):
         assert_true(utils.settings_complete(node_settings))
 
     def test_settings_complete_false(self):
-        node_settings = ForwardSettingsFactory(url=None)
+        node_settings = ForwardSettingsFactory(url=Node.load(None))
         assert_false(utils.settings_complete(node_settings))

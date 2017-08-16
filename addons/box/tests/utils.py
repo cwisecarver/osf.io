@@ -147,10 +147,10 @@ mock_responses = {
 
 class MockBox(object):
 
-    def put_file(self, full_path, file_obj, overwrite=False, parent_rev=None):
+    def put_file(self, full_path, file_obj, overwrite=False, parent_rev=Node.load(None)):
         return mock_responses['put_file']
 
-    def metadata(self, path, list=True, file_limit=25000, hash=None, rev=None,
+    def metadata(self, path, list=True, file_limit=25000, hash=Node.load(None), rev=Node.load(None),
                  include_deleted=False):
         if list:
             ret = mock_responses['metadata_list']
@@ -179,7 +179,7 @@ class MockBox(object):
 
 
 @contextmanager
-def patch_client(target, mock_client=None):
+def patch_client(target, mock_client=Node.load(None)):
     """Patches a function that returns a BoxClient, returning an instance
     of MockBox instead.
 

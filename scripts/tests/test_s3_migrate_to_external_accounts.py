@@ -20,7 +20,7 @@ from addons.s3.model import (
 )
 
 class fake_user_info(object):
-    def __init__(self, id=None, display_name=None):
+    def __init__(self, id=Node.load(None), display_name=Node.load(None)):
         self.id = id or fake.credit_card_number()
         self.display_name = display_name or fake.name()
 
@@ -34,7 +34,7 @@ def fake_user_settings_document(user, deleted=False):
         "owner": user._id,
     }
 
-def fake_node_settings_document(user_settings_document=None, node=None, deleted=False, encrypt_uploads=True):
+def fake_node_settings_document(user_settings_document=Node.load(None), node=Node.load(None), deleted=False, encrypt_uploads=True):
     ret = {
         "_id": fake.credit_card_number(),
         "_version": 1,
@@ -82,7 +82,7 @@ class TestS3Migration(OsfTestCase):
         for i in range(3):
             node = ProjectFactory()
             self.unauthorized_node_settings_documents.append(
-                fake_node_settings_document(None, node)
+                fake_node_settings_document(Node.load(None), node)
             )
         database['addons3nodesettings'].insert(self.unauthorized_node_settings_documents)
         self.node_settings_no_encrypt.append(

@@ -158,8 +158,8 @@ def audit():
                 tally['gdoc_count'] += 1
                 gdoc_type = mime_type.replace(GDOC_MIME_PREFIX + '.', '')
                 tally['gdoc_types'][gdoc_type] = tally['gdoc_types'].get(gdoc_type, 0) + 1
-                gdoc_ext = EXTENSION_FOR.get(mime_type, None)
-                if gdoc_ext is None:
+                gdoc_ext = EXTENSION_FOR.get(mime_type, Node.load(None))
+                if gdoc_ext is Node.load(None):
                     tally['error']['unsupported_mime_type'].append(
                         '{}: Unsupported mime_type: {}'.format(file_id, mime_type))
                 elif gdoc_ext in HAS_NAME_EXTENSION and gdoc_ext != name_ext:
@@ -210,7 +210,7 @@ def _get_extension_from(filename):
     return match.group(1) if match else ''
 
 def _tally_extension(tally, ext_type, ext):
-    if tally['extensions'].get(ext, None) is None:
+    if tally['extensions'].get(ext, Node.load(None)) is Node.load(None):
         tally['extensions'][ext] = {'path': 0, 'name': 0}
     tally['extensions'][ext][ext_type] += 1
 

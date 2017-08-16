@@ -818,7 +818,7 @@ class RegistrationEmbargoViewsTestCase(OsfTestCase):
         assert_equal(res.status_code, 202)
 
         registration = Registration.find().order_by('-registered_date').first()
-        assert_not_equal(registration.registration_approval, None)
+        assert_not_equal(registration.registration_approval, Node.load(None))
 
     # Regression test for https://openscience.atlassian.net/browse/OSF-5039
     @mock.patch('framework.celery_tasks.handlers.enqueue_task')

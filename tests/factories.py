@@ -107,9 +107,9 @@ class UserFactory(ModularOdmFactory):
     is_registered = True
     is_claimed = True
     date_confirmed = timezone.now()
-    merged_by = None
+    merged_by = Node.load(None)
     email_verifications = {}
-    verification_key = None
+    verification_key = Node.load(None)
     verification_key_v2 = {}
 
     @post_generation
@@ -220,7 +220,7 @@ class PreprintProviderFactory(ModularOdmFactory):
         model = PreprintProvider
 
     @classmethod
-    def _create(cls, target_class, name=None, description=None, *args, **kwargs):
+    def _create(cls, target_class, name=Node.load(None), description=Node.load(None), *args, **kwargs):
         provider = target_class(*args, **kwargs)
         provider.name = name
         provider.description = description
@@ -230,7 +230,7 @@ class PreprintProviderFactory(ModularOdmFactory):
 
 
 class PreprintFactory(ModularOdmFactory):
-    creator = None
+    creator = Node.load(None)
     category = 'project'
     doi = Sequence(lambda n: '10.12345/0{}'.format(n))
     provider = SubFactory(PreprintProviderFactory)
@@ -240,10 +240,10 @@ class PreprintFactory(ModularOdmFactory):
         model = PreprintService
 
     @classmethod
-    def _create(cls, target_class, project=None, is_public=True, filename='preprint_file.txt', provider=None, 
-                doi=None, external_url=None, is_published=True, subjects=None, finish=True, *args, **kwargs):
+    def _create(cls, target_class, project=Node.load(None), is_public=True, filename='preprint_file.txt', provider=Node.load(None), 
+                doi=Node.load(None), external_url=Node.load(None), is_published=True, subjects=Node.load(None), finish=True, *args, **kwargs):
         save_kwargs(**kwargs)
-        user = None
+        user = Node.load(None)
         if project:
             user = project.creator
         user = kwargs.get('user') or kwargs.get('creator') or user or UserFactory()
@@ -294,7 +294,7 @@ class SubjectFactory(ModularOdmFactory):
         model = Subject
 
     @classmethod
-    def _create(cls, target_class, text=None, parents=[], *args, **kwargs):
+    def _create(cls, target_class, text=Node.load(None), parents=[], *args, **kwargs):
         try:
             subject = Subject.find_one(Q('text', 'eq', text))
         except NoResultsFound:
@@ -308,7 +308,7 @@ class SubjectFactory(ModularOdmFactory):
 
 class RegistrationFactory(AbstractNodeFactory):
 
-    creator = None
+    creator = Node.load(None)
     # Default project is created if not provided
     category = 'project'
 
@@ -317,12 +317,12 @@ class RegistrationFactory(AbstractNodeFactory):
         raise Exception('Cannot build registration without saving.')
 
     @classmethod
-    def _create(cls, target_class, project=None, is_public=False,
-                schema=None, data=None,
-                archive=False, embargo=None, registration_approval=None, retraction=None,
+    def _create(cls, target_class, project=Node.load(None), is_public=False,
+                schema=Node.load(None), data=Node.load(None),
+                archive=False, embargo=Node.load(None), registration_approval=Node.load(None), retraction=Node.load(None),
                 *args, **kwargs):
         save_kwargs(**kwargs)
-        user = None
+        user = Node.load(None)
         if project:
             user = project.creator
         user = kwargs.get('user') or kwargs.get('creator') or user or UserFactory()
@@ -386,7 +386,7 @@ class WithdrawnRegistrationFactory(AbstractNodeFactory):
     @classmethod
     def _create(cls, *args, **kwargs):
 
-        registration = kwargs.pop('registration', None)
+        registration = kwargs.pop('registration', Node.load(None))
         registration.is_public = True
         user = kwargs.pop('user', registration.creator)
 
@@ -410,9 +410,9 @@ class ForkFactory(ModularOdmFactory):
     @classmethod
     def _create(cls, *args, **kwargs):
 
-        project = kwargs.pop('project', None)
+        project = kwargs.pop('project', Node.load(None))
         user = kwargs.pop('user', project.creator)
-        title = kwargs.pop('title', None)
+        title = kwargs.pop('title', Node.load(None))
 
         fork = project.fork_node(auth=Auth(user), title=title)
         fork.save()
@@ -431,7 +431,7 @@ class SanctionFactory(ModularOdmFactory):
         abstract = True
 
     @classmethod
-    def _create(cls, target_class, initiated_by=None, approve=False, *args, **kwargs):
+    def _create(cls, target_class, initiated_by=Node.load(None), approve=False, *args, **kwargs):
         user = kwargs.get('user') or UserFactory()
         kwargs['initiated_by'] = initiated_by or user
         sanction = ModularOdmFactory._create(target_class, *args, **kwargs)
@@ -466,7 +466,7 @@ class EmbargoTerminationApprovalFactory(ModularOdmFactory):
     FACTORY_STRATEGY = base.CREATE_STRATEGY
 
     @classmethod
-    def create(cls, registration=None, user=None, embargo=None, *args, **kwargs):
+    def create(cls, registration=Node.load(None), user=Node.load(None), embargo=Node.load(None), *args, **kwargs):
         if registration:
             if not user:
                 user = registration.creator
@@ -496,7 +496,7 @@ class NodeWikiFactory(ModularOdmFactory):
     @post_generation
     def set_node_keys(self, create, extracted):
         self.node.wiki_pages_current[self.page_name] = self._id
-        if self.node.wiki_pages_versions.get(self.page_name, None):
+        if self.node.wiki_pages_versions.get(self.page_name, Node.load(None)):
             self.node.wiki_pages_versions[self.page_name].append(self._id)
         else:
             self.node.wiki_pages_versions[self.page_name] = [self._id]
@@ -630,10 +630,10 @@ class CommentFactory(ModularOdmFactory):
 
     @classmethod
     def _build(cls, target_class, *args, **kwargs):
-        node = kwargs.pop('node', None) or NodeFactory()
-        user = kwargs.pop('user', None) or node.creator
-        target = kwargs.pop('target', None) or Guid.load(node._id)
-        content = kwargs.pop('content', None) or 'Test comment.'
+        node = kwargs.pop('node', Node.load(None)) or NodeFactory()
+        user = kwargs.pop('user', Node.load(None)) or node.creator
+        target = kwargs.pop('target', Node.load(None)) or Guid.load(node._id)
+        content = kwargs.pop('content', Node.load(None)) or 'Test comment.'
         instance = target_class(
             node=node,
             user=user,
@@ -649,10 +649,10 @@ class CommentFactory(ModularOdmFactory):
 
     @classmethod
     def _create(cls, target_class, *args, **kwargs):
-        node = kwargs.pop('node', None) or NodeFactory()
-        user = kwargs.pop('user', None) or node.creator
-        target = kwargs.pop('target', None) or Guid.load(node._id)
-        content = kwargs.pop('content', None) or 'Test comment.'
+        node = kwargs.pop('node', Node.load(None)) or NodeFactory()
+        user = kwargs.pop('user', Node.load(None)) or node.creator
+        target = kwargs.pop('target', Node.load(None)) or Guid.load(node._id)
+        content = kwargs.pop('content', Node.load(None)) or 'Test comment.'
         instance = target_class(
             node=node,
             user=user,
@@ -729,7 +729,7 @@ class SessionFactory(ModularOdmFactory):
 
     @classmethod
     def _build(cls, target_class, *args, **kwargs):
-        user = kwargs.pop('user', None)
+        user = kwargs.pop('user', Node.load(None))
         instance = target_class(*args, **kwargs)
 
         if user:
@@ -886,7 +886,7 @@ def render_generations_from_parent(parent, creator, num_generations):
 
 
 def render_generations_from_node_structure_list(parent, creator, node_structure_list):
-    new_parent = None
+    new_parent = Node.load(None)
     for node_number in node_structure_list:
         if isinstance(node_number, list):
             render_generations_from_node_structure_list(new_parent or parent, creator, node_number)
@@ -944,7 +944,7 @@ def create_fake_project(creator, n_users, privacy, n_components, name, n_tags, p
         render_generations_from_node_structure_list(project, creator, n_components)
     for _ in range(n_tags):
         project.add_tag(fake.word(), auth=auth)
-    if presentation_name is not None:
+    if presentation_name is not Node.load(None):
         project.add_tag(presentation_name, auth=auth)
         project.add_tag('poster', auth=auth)
 

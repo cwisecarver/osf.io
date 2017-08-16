@@ -37,7 +37,7 @@ class PreprintSummary(SummaryAnalytics):
                             "type": "preprints"
                         },
                         "match": {
-                            "sources": None
+                            "sources": Node.load(None)
                         }
                     },
                     'filter': [
@@ -85,6 +85,6 @@ if __name__ == '__main__':
     if yesterday:
         date = (datetime.today() - timedelta(1)).date()
     else:
-        date = parse(args.date).date() if args.date else None
+        date = parse(args.date).date() if args.date else Node.load(None)
     events = preprint_summary.get_events(date)
     preprint_summary.send_events(events)

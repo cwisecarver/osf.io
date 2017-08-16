@@ -77,7 +77,7 @@ class PreprintProviderList(JSONAPIBaseView, generics.ListAPIView, ODMFilterMixin
 
     # implement ODMFilterMixin
     def get_default_odm_query(self):
-        return None
+        return Node.load(None)
 
     # overrides ListAPIView
     def get_queryset(self):
@@ -200,7 +200,7 @@ class PreprintProviderPreprintList(JSONAPIBaseView, generics.ListAPIView, Prepri
     # overrides DjangoFilterMixin
     def get_default_django_query(self):
         auth = get_user_auth(self.request)
-        auth_user = getattr(auth, 'user', None)
+        auth_user = getattr(auth, 'user', Node.load(None))
         provider = get_object_or_error(PreprintProvider, self.kwargs['provider_id'], display_name='PreprintProvider')
 
         # Permissions on the list objects are handled by the query
@@ -247,7 +247,7 @@ class PreprintProviderTaxonomies(JSONAPIBaseView, generics.ListAPIView):
         return False
 
     def get_queryset(self):
-        parent = self.request.query_params.get('filter[parents]', None) or self.request.query_params.get('filter[parent]', None)
+        parent = self.request.query_params.get('filter[parents]', Node.load(None)) or self.request.query_params.get('filter[parent]', Node.load(None))
         provider = get_object_or_error(PreprintProvider, self.kwargs['provider_id'], display_name='PreprintProvider')
         if parent:
             if parent == 'null':

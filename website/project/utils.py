@@ -90,7 +90,7 @@ def activity():
 
         for nid in node_data:
             node = Node.load(nid)
-            if node is None:
+            if node is Node.load(None):
                 continue
             if node.is_public and not node.is_registration and not node.is_deleted:
                 if len(popular_public_projects) < max_projects_to_display:

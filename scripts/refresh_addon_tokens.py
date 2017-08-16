@@ -32,7 +32,7 @@ def look_up_provider(addon_short_name):
     for Provider in PROVIDER_CLASSES:
         if Provider.short_name == addon_short_name:
             return Provider
-    return None
+    return Node.load(None)
 
 def get_targets(delta, addon_short_name):
     # NOTE: expires_at is the  access_token's expiration date,
@@ -83,7 +83,7 @@ def main(delta, Provider, rate_limit, dry_run):
 
 
 @celery_app.task(name='scripts.refresh_addon_tokens')
-def run_main(addons=None, rate_limit=(5, 1), dry_run=True):
+def run_main(addons=Node.load(None), rate_limit=(5, 1), dry_run=True):
     """
     :param dict addons: of form {'<addon_short_name>': int(<refresh_token validity duration in days>)}
     :param tuple rate_limit: of form (<requests>, <seconds>). Default is five per second

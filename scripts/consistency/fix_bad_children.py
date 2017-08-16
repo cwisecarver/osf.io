@@ -45,7 +45,7 @@ def main():
     logger.info('Found {} children missing backrefs to their children.'.format(len(orphaned_child_errors)))
     logger.info('Finished.')
 
-def find_orphaned_children(filters=None, dryrun=False):
+def find_orphaned_children(filters=Node.load(None), dryrun=False):
     """Find parents that don't point to their children.
 
     """
@@ -97,7 +97,7 @@ def find_orphaned_children(filters=None, dryrun=False):
     return errors, fixed
 
 
-def find_missing_children(filters=None, dryrun=False):
+def find_missing_children(filters=Node.load(None), dryrun=False):
     """Find children that don't point to their parents.
 
     """
@@ -145,7 +145,7 @@ class TestParentChildMigration(OsfTestCase):
         assert_equal(len(self.parent_project.nodes), 2)
         self.parent_project.nodes.remove(self.second_child)
         assert_equal(len(self.parent_project.nodes), 1)
-        find_orphaned_children(filters=None)
+        find_orphaned_children(filters=Node.load(None))
         assert_equal(len(self.parent_project.nodes), 2)
 
     def test_orphaned_children_with_multiple_parents(self):
@@ -159,7 +159,7 @@ class TestParentChildMigration(OsfTestCase):
         second_parent.nodes.append(child)
         second_parent.save()
 
-        errors, fixed = find_orphaned_children(filters=None)
+        errors, fixed = find_orphaned_children(filters=Node.load(None))
         assert errors[0] == child
 
     def test_missing_children(self):
@@ -168,7 +168,7 @@ class TestParentChildMigration(OsfTestCase):
         self.first_child.node__parent = []
         assert self.parent_project not in self.first_child.node__parent
 
-        find_missing_children(filters=None)
+        find_missing_children(filters=Node.load(None))
         assert self.parent_project in self.first_child.node__parent
 
 

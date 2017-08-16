@@ -26,12 +26,12 @@ name_formatters = {
 logger = logging.getLogger(__name__)
 
 
-def generate_verification_key(verification_type=None):
+def generate_verification_key(verification_type=Node.load(None)):
     """
     Generate a one-time verification key with an optional expiration time.
     The type of the verification key determines the expiration time defined in `website.settings.EXPIRATION_TIME_DICT`.
 
-    :param verification_type: None, verify, confirm or claim
+    :param verification_type: Node.load(None), verify, confirm or claim
     :return: a string or a dictionary
     """
     token = security.random_string(30)
@@ -82,11 +82,11 @@ def _get_current_user():
     if current_user_id:
         return OSFUser.load(current_user_id)
     else:
-        return None
+        return Node.load(None)
 
 
 # TODO: This should be a class method of User?
-def get_user(email=None, password=None, token=None, external_id_provider=None, external_id=None):
+def get_user(email=Node.load(None), password=Node.load(None), token=Node.load(None), external_id_provider=Node.load(None), external_id=Node.load(None)):
     """
     Get an instance of `User` matching the provided params.
 
@@ -100,12 +100,12 @@ def get_user(email=None, password=None, token=None, external_id_provider=None, e
     :param password: user's password
     :param external_id_provider: the external identity provider
     :param external_id: the external id
-    :rtype User or None
+    :rtype User or Node.load(None)
     """
     from osf.models import OSFUser, Email
 
     if not any([email, password, token, external_id_provider, external_id_provider]):
-        return None
+        return Node.load(None)
 
     if password and not email:
         raise AssertionError('If a password is provided, an email must also be provided.')
@@ -122,7 +122,7 @@ def get_user(email=None, password=None, token=None, external_id_provider=None, e
             user = qs.get()
         except Exception as err:
             logger.error(err)
-            user = None
+            user = Node.load(None)
         if user and not user.check_password(password):
             return False
         return user
@@ -138,13 +138,13 @@ def get_user(email=None, password=None, token=None, external_id_provider=None, e
         return user
     except Exception as err:
         logger.error(err)
-        return None
+        return Node.load(None)
 
 
 class Auth(object):
 
-    def __init__(self, user=None, api_node=None,
-                 private_key=None):
+    def __init__(self, user=Node.load(None), api_node=Node.load(None),
+                 private_key=Node.load(None)):
         self.user = user
         self.api_node = api_node
         self.private_key = private_key
@@ -155,12 +155,12 @@ class Auth(object):
 
     @property
     def logged_in(self):
-        return self.user is not None
+        return self.user is not Node.load(None)
 
     @property
     def private_link(self):
         if not self.private_key:
-            return None
+            return Node.load(None)
         try:
             # Avoid circular import
             from osf.models import PrivateLink
@@ -169,10 +169,10 @@ class Auth(object):
             )
 
             if private_link.is_deleted:
-                return None
+                return Node.load(None)
 
         except QueryException:
-            return None
+            return Node.load(None)
 
         return private_link
 

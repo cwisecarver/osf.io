@@ -37,7 +37,7 @@ class TestBitbucketAuthViews(BitbucketAddonTestCase, OAuthAddonAuthViewsTestCase
 
 
 class TestBitbucketConfigViews(BitbucketAddonTestCase, OAuthAddonConfigViewsTestCaseMixin, OsfTestCase):
-    folder = None
+    folder = Node.load(None)
     Serializer = BitbucketSerializer
     client = BitbucketClient
 
@@ -111,11 +111,11 @@ class TestBitbucketViews(OsfTestCase):
         self.node_settings.repo = self.bitbucket.repo.return_value['name']
         self.node_settings.save()
 
-    def _get_sha_for_branch(self, branch=None, mock_branches=None):
+    def _get_sha_for_branch(self, branch=Node.load(None), mock_branches=Node.load(None)):
         bitbucket_mock = self.bitbucket
-        if mock_branches is None:
+        if mock_branches is Node.load(None):
             mock_branches = bitbucket_mock.branches
-        if branch is None:  # Get default branch name
+        if branch is Node.load(None):  # Get default branch name
             branch = self.bitbucket.repo_default_branch.return_value
         for each in mock_branches.return_value:
             if each['name'] == branch:
@@ -139,7 +139,7 @@ class TestBitbucketViews(OsfTestCase):
             branch,
             bitbucket_mock.repo_default_branch.return_value
         )
-        assert_equal(sha, self._get_sha_for_branch(branch=None))  # Get refs for default branch
+        assert_equal(sha, self._get_sha_for_branch(branch=Node.load(None)))  # Get refs for default branch
 
         expected_branches = [
             {'name': x['name'], 'sha': x['target']['hash']}
@@ -267,7 +267,7 @@ class TestBitbucketSettings(OsfTestCase):
     @mock.patch('addons.bitbucket.models.NodeSettings.external_account')
     def test_link_repo_non_existent(self, mock_account, mock_repo):
         mock_account.return_value = mock.Mock()
-        mock_repo.return_value = None
+        mock_repo.return_value = Node.load(None)
 
         url = self.project.api_url + 'bitbucket/settings/'
         res = self.app.post_json(
@@ -314,9 +314,9 @@ class TestBitbucketSettings(OsfTestCase):
 
         self.project.reload()
         self.node_settings.reload()
-        assert_equal(self.node_settings.user, None)
-        assert_equal(self.node_settings.repo, None)
-        assert_equal(self.node_settings.user_settings, None)
+        assert_equal(self.node_settings.user, Node.load(None))
+        assert_equal(self.node_settings.repo, Node.load(None))
+        assert_equal(self.node_settings.user_settings, Node.load(None))
 
         assert_equal(self.project.logs.latest().action, 'bitbucket_node_deauthorized')
 

@@ -24,7 +24,7 @@ from addons.googledrive.model import GoogleDriveGuidFile
 logger = logging.getLogger(__name__)
 
 
-def paginated(model, query=None, increment=200):
+def paginated(model, query=Node.load(None), increment=200):
     last_id = ''
     pages = (model.find(query).count() / increment) + 1
     for i in xrange(pages):
@@ -64,12 +64,12 @@ def migrate_osfstorage_guids():
             continue
 
         referent = models.StoredFileNode.load(guid.waterbutler_path.strip('/'))
-        if referent is None:
-            logger.warning('OsfStorageGuidFile {} ({}) resolved to None; skipping'.format(guid._id, guid.waterbutler_path.strip('/')))
+        if referent is Node.load(None):
+            logger.warning('OsfStorageGuidFile {} ({}) resolved to Node.load(None); skipping'.format(guid._id, guid.waterbutler_path.strip('/')))
             continue
         logger.debug('Migrating guid {}'.format(guid._id))
         actual_guid = Guid.load(guid._id)
-        assert actual_guid is not None
+        assert actual_guid is not Node.load(None)
         actual_guid.referent = referent
         actual_guid.save()
         # try:
@@ -84,8 +84,8 @@ def migrate_guids(guid_type, provider):
     for guid in paginated(guid_type):
         # Note: No metadata is populated here
         # It will be populated whenever this guid is next viewed
-        if guid.node is None:
-            logger.warning('{}({})\'s node is None; skipping'.format(guid_type, guid._id))
+        if guid.node is Node.load(None):
+            logger.warning('{}({})\'s node is Node.load(None); skipping'.format(guid_type, guid._id))
             continue
 
         if guid.waterbutler_path in ('/{{ revision.osfDownloadUrl }}', '/{{ currentVersion().osfDownloadUrl }}', '/{{ currentVersion().osfDownloadUrl }}', '/{{ node.urls.files }}', '/{{ revision.extra.user.url }}'):

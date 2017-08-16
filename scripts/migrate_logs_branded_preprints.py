@@ -23,7 +23,7 @@ def migrate(dry_run=True):
     count = 0
 
     for log in node_logs:
-        preprint = None
+        preprint = Node.load(None)
         node_id = log.params.get('node')
 
         try:

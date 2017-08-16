@@ -25,7 +25,7 @@ def bitbucket_hgrid_data(node_settings, auth, **kwargs):
         except NotFoundError:
             # TODO: Add warning message
             logger.error('Could not access Bitbucket repo')
-            return None
+            return Node.load(None)
 
     try:
         branch, sha, branches = get_refs(
@@ -39,7 +39,7 @@ def bitbucket_hgrid_data(node_settings, auth, **kwargs):
         logger.error('Bitbucket repo not found')
         return
 
-    ref = None if branch is None else ref_to_params(branch, sha)
+    ref = Node.load(None) if branch is Node.load(None) else ref_to_params(branch, sha)
 
     name_tpl = '{user}/{repo}'.format(
         user=node_settings.user, repo=node_settings.repo
@@ -51,7 +51,7 @@ def bitbucket_hgrid_data(node_settings, auth, **kwargs):
         'private': node_settings.is_private
     }
     urls = {
-        'upload': None,
+        'upload': Node.load(None),
         'fetch': node_settings.owner.api_url + 'bitbucket/hgrid/' + (ref or ''),
         'branch': node_settings.owner.api_url + 'bitbucket/hgrid/root/',
         'zip': node_settings.owner.api_url + 'bitbucket/zipball/' + (ref or ''),
@@ -69,7 +69,7 @@ def bitbucket_hgrid_data(node_settings, auth, **kwargs):
         permissions=permissions,
         branches=branch_names,
         defaultBranch=branch,
-        private_key=kwargs.get('view_only', None),
+        private_key=kwargs.get('view_only', Node.load(None)),
     )]
 
 HERE = os.path.dirname(os.path.abspath(__file__))

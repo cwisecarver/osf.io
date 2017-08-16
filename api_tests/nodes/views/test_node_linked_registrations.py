@@ -54,7 +54,7 @@ class TestNodeLinkedRegistrationsList(LinkedRegistrationsTestCase):
 
     @pytest.fixture()
     def make_request(self, app):
-        def request(node_id=None, auth=None, expect_errors=False):
+        def request(node_id=Node.load(None), auth=Node.load(None), expect_errors=False):
             url = '/{}nodes/{}/linked_registrations/'.format(API_BASE, node_id)
             if auth:
                 return app.get(url, auth=auth, expect_errors=expect_errors)
@@ -99,7 +99,7 @@ class TestNodeLinkedRegistrationsRelationshipRetrieve(LinkedRegistrationsTestCas
 
     @pytest.fixture()
     def make_request(self, app):
-        def request(node_id=None, auth=None, expect_errors=False):
+        def request(node_id=Node.load(None), auth=Node.load(None), expect_errors=False):
             url = '/{}nodes/{}/relationships/linked_registrations/'.format(API_BASE, node_id)
             if auth:
                 return app.get(url, auth=auth, expect_errors=expect_errors)
@@ -144,7 +144,7 @@ class TestNodeLinkedRegistrationsRelationshipCreate(LinkedRegistrationsTestCase)
 
     @pytest.fixture()
     def make_payload(self):
-        def payload(registration_id=None):
+        def payload(registration_id=Node.load(None)):
             return {
                 'data': [{
                     'type': 'linked_registrations',
@@ -155,7 +155,7 @@ class TestNodeLinkedRegistrationsRelationshipCreate(LinkedRegistrationsTestCase)
 
     @pytest.fixture()
     def make_request(self, app, make_payload):
-        def request(node_id=None, auth=None, reg_id=None, expect_errors=False):
+        def request(node_id=Node.load(None), auth=Node.load(None), reg_id=Node.load(None), expect_errors=False):
             url = '/{}nodes/{}/relationships/linked_registrations/'.format(API_BASE, node_id)
             if auth:
                 return app.post_json_api(url, make_payload(registration_id=reg_id), auth=auth, expect_errors=expect_errors)
@@ -291,7 +291,7 @@ class TestNodeLinkedRegistrationsRelationshipUpdate(LinkedRegistrationsTestCase)
 
     @pytest.fixture()
     def make_payload(self):
-        def payload(registration_id=None):
+        def payload(registration_id=Node.load(None)):
             return {
                 'data': [{
                     'type': 'linked_registrations',
@@ -302,7 +302,7 @@ class TestNodeLinkedRegistrationsRelationshipUpdate(LinkedRegistrationsTestCase)
 
     @pytest.fixture()
     def make_request(self, app, make_payload):
-        def request(node_id=None, auth=None, reg_id=None, expect_errors=False):
+        def request(node_id=Node.load(None), auth=Node.load(None), reg_id=Node.load(None), expect_errors=False):
             url = '/{}nodes/{}/relationships/linked_registrations/'.format(API_BASE, node_id)
             if auth:
                 return app.put_json_api(url, make_payload(registration_id=reg_id), auth=auth, expect_errors=expect_errors)
@@ -380,7 +380,7 @@ class TestNodeLinkedRegistrationsRelationshipDelete(LinkedRegistrationsTestCase)
 
     @pytest.fixture()
     def make_payload(self):
-        def payload(registration_id=None):
+        def payload(registration_id=Node.load(None)):
             return {
                 'data': [{
                     'type': 'linked_registrations',
@@ -391,7 +391,7 @@ class TestNodeLinkedRegistrationsRelationshipDelete(LinkedRegistrationsTestCase)
 
     @pytest.fixture()
     def make_request(self, app, make_payload):
-        def request(node_id=None, auth=None, reg_id=None, expect_errors=False):
+        def request(node_id=Node.load(None), auth=Node.load(None), reg_id=Node.load(None), expect_errors=False):
             url = '/{}nodes/{}/relationships/linked_registrations/'.format(API_BASE, node_id)
             if auth:
                 return app.delete_json_api(url, make_payload(reg_id), auth=auth, expect_errors=expect_errors)

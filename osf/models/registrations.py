@@ -69,7 +69,7 @@ class Registration(AbstractNode):
     def registered_schema_id(self):
         if self.registered_schema:
             return self.registered_schema.first()._id
-        return None
+        return Node.load(None)
 
     @property
     def is_registration(self):
@@ -83,7 +83,7 @@ class Registration(AbstractNode):
 
     @property
     def archive_job(self):
-        return self.archive_jobs.first() if self.archive_jobs.count() else None
+        return self.archive_jobs.first() if self.archive_jobs.count() else Node.load(None)
 
     @property
     def sanction(self):
@@ -98,11 +98,11 @@ class Registration(AbstractNode):
         elif self.parent_node:
             return self.parent_node.sanction
         else:
-            return None
+            return Node.load(None)
 
     @property
     def is_registration_approved(self):
-        if self.registration_approval is None:
+        if self.registration_approval is Node.load(None):
             if self.parent_node:
                 return self.parent_node.is_registration_approved
             return False
@@ -110,7 +110,7 @@ class Registration(AbstractNode):
 
     @property
     def is_pending_embargo(self):
-        if self.embargo is None:
+        if self.embargo is Node.load(None):
             if self.parent_node:
                 return self.parent_node.is_pending_embargo
             return False
@@ -123,7 +123,7 @@ class Registration(AbstractNode):
         registrations pre-dating the Embargo feature do not get deleted if
         their respective Embargo request is rejected.
         """
-        if self.embargo is None:
+        if self.embargo is Node.load(None):
             if self.parent_node:
                 return self.parent_node.is_pending_embargo_for_existing_registration
             return False
@@ -131,7 +131,7 @@ class Registration(AbstractNode):
 
     @property
     def is_retracted(self):
-        if self.retraction is None:
+        if self.retraction is Node.load(None):
             if self.parent_node:
                 return self.parent_node.is_retracted
             return False
@@ -139,7 +139,7 @@ class Registration(AbstractNode):
 
     @property
     def is_pending_registration(self):
-        if self.registration_approval is None:
+        if self.registration_approval is Node.load(None):
             if self.parent_node:
                 return self.parent_node.is_pending_registration
             return False
@@ -147,7 +147,7 @@ class Registration(AbstractNode):
 
     @property
     def is_pending_retraction(self):
-        if self.retraction is None:
+        if self.retraction is Node.load(None):
             if self.parent_node:
                 return self.parent_node.is_pending_retraction
             return False
@@ -160,14 +160,14 @@ class Registration(AbstractNode):
         - that record has been approved
         - the node is not public (embargo not yet lifted)
         """
-        if self.embargo is None:
+        if self.embargo is Node.load(None):
             if self.parent_node:
                 return self.parent_node.is_embargoed
         return self.embargo and self.embargo.is_approved and not self.is_public
 
     @property
     def embargo_end_date(self):
-        if self.embargo is None:
+        if self.embargo is Node.load(None):
             if self.parent_node:
                 return self.parent_node.embargo_end_date
             return False
@@ -270,27 +270,27 @@ class Registration(AbstractNode):
                 'node': self.registered_from._id,
                 'registration': self._id,
             },
-            auth=None,
+            auth=Node.load(None),
             save=True
         )
         self.embargo.mark_as_completed()
         for node in self.node_and_primary_descendants():
             node.set_privacy(
                 self.PUBLIC,
-                auth=None,
+                auth=Node.load(None),
                 log=False,
                 save=True
             )
         return True
 
-    def _initiate_retraction(self, user, justification=None):
+    def _initiate_retraction(self, user, justification=Node.load(None)):
         """Initiates the retraction process for a registration
         :param user: User who initiated the retraction
         :param justification: Justification, if given, for retraction
         """
         self.retraction = Retraction.objects.create(
             initiated_by=user,
-            justification=justification or None,  # make empty strings None
+            justification=justification or Node.load(None),  # make empty strings Node.load(None)
             state=Retraction.UNAPPROVED
         )
         self.save()
@@ -300,7 +300,7 @@ class Registration(AbstractNode):
         self.retraction.save()  # Save retraction approval state
         return self.retraction
 
-    def retract_registration(self, user, justification=None, save=True):
+    def retract_registration(self, user, justification=Node.load(None), save=True):
         """Retract public registration. Instantiate new Retraction object
         and associate it with the respective registration.
         """
@@ -332,10 +332,10 @@ class Registration(AbstractNode):
         for draft_registration in DraftRegistration.objects.filter(registered_node=self):
             # Allow draft registration to be submitted
             if draft_registration.approval:
-                draft_registration.approval = None
+                draft_registration.approval = Node.load(None)
                 draft_registration.save()
         if not getattr(self.embargo, 'for_existing_registration', False):
-            self.registered_from = None
+            self.registered_from = Node.load(None)
         if save:
             self.save()
         self.update_search()
@@ -491,7 +491,7 @@ class DraftRegistration(ObjectIDMixin, BaseModel):
         return self.logs.all().order_by('date')
 
     @classmethod
-    def create_from_node(cls, node, user, schema, data=None):
+    def create_from_node(cls, node, user, schema, data=Node.load(None)):
         draft = cls(
             initiator=user,
             branched_from=node,

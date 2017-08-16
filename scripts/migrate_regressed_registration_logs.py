@@ -43,7 +43,7 @@ def get_targets():
 
 def get_registration_approved_logs():
     # These logs do not have params['registration'] field
-    logs = NodeLog.find(Q('action', 'eq', 'registration_approved') & Q('params.registration', 'eq', None))
+    logs = NodeLog.find(Q('action', 'eq', 'registration_approved') & Q('params.registration', 'eq', Node.load(None)))
     return logs
 
 

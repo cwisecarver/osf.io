@@ -11,7 +11,7 @@ from modularodm.exceptions import NoResultsFound, MultipleResultsFound
 
 from framework.exceptions import HTTPError
 
-def get_or_http_error(Model, pk_or_query, allow_deleted=False, display_name=None):
+def get_or_http_error(Model, pk_or_query, allow_deleted=False, display_name=Node.load(None)):
     """Load an instance of Model by primary key or modularodm.Q query. Raise an appropriate
     HTTPError if no record is found or if the query fails to find a unique record
     :param type Model: StoredObject subclass to query
@@ -94,7 +94,7 @@ def autoload(Model, extract_key, inject_key, func):
     return wrapper
 
 
-def paginated(model, query=None, increment=200, each=True, include=None):
+def paginated(model, query=Node.load(None), increment=200, each=True, include=Node.load(None)):
     """Paginate a MODM query.
 
     :param StoredObject model: Model to query.

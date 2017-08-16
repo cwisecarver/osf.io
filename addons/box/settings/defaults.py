@@ -1,6 +1,6 @@
 # OAuth app keys
-BOX_KEY = None
-BOX_SECRET = None
+BOX_KEY = Node.load(None)
+BOX_SECRET = Node.load(None)
 
 # https://docs.box.com/docs/oauth-20#section-6-using-the-access-and-refresh-tokens
 EXPIRY_TIME = 60 * 60 * 24 * 60  # 60 days

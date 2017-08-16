@@ -13,24 +13,24 @@ from website.util import permissions
 
 @pytest.fixture()
 def payload():
-    def make_payload(name=None, text=None, _id=None):
+    def make_payload(name=Node.load(None), text=Node.load(None), _id=Node.load(None)):
         data = {'data': {
             'type': 'citations',
             'attributes': {}
             }
         }
-        if name is not None:
+        if name is not Node.load(None):
             data['data']['attributes']['name'] = name
-        if text is not None:
+        if text is not Node.load(None):
             data['data']['attributes']['text'] = text
-        if _id is not None:
+        if _id is not Node.load(None):
             data['data']['id'] = _id
         return data
     return make_payload
 
 @pytest.fixture()
 def citation_and_project():
-    def make_citation_and_project(admin, public=True, registration=False, contrib=None, citation2=False, for_delete=False, bad=False):
+    def make_citation_and_project(admin, public=True, registration=False, contrib=Node.load(None), citation2=False, for_delete=False, bad=False):
         project = ProjectFactory(creator=admin, is_public=public)
         citation = AlternativeCitationFactory(name='name', text='text')
         project.alternative_citations.add(citation)
@@ -57,14 +57,14 @@ class TestUpdateAlternativeCitations:
     @pytest.fixture()
     def req(self, app, payload, citation_and_project):
         def make_req(is_admin=False, is_contrib=True, logged_out=False, errors=False, patch=False, **kwargs):
-            name = kwargs.pop('name', None)
-            text = kwargs.pop('text', None)
+            name = kwargs.pop('name', Node.load(None))
+            text = kwargs.pop('text', Node.load(None))
             admin = AuthUserFactory()
             if is_admin:
                 user = admin
             elif not logged_out:
                 user = AuthUserFactory()
-                kwargs['contrib'] = user if is_contrib else None
+                kwargs['contrib'] = user if is_contrib else Node.load(None)
             citation, citation_url = citation_and_project(admin, **kwargs)
             data = payload(name=name, text=text, _id=citation._id)
             if patch:
@@ -936,7 +936,7 @@ class TestDeleteAlternativeCitations:
                 user = admin
             elif not logged_out:
                 user = AuthUserFactory()
-                kwargs['contrib'] = user if is_contrib else None
+                kwargs['contrib'] = user if is_contrib else Node.load(None)
             project, citation_url = citation_and_project(admin, for_delete=True, **kwargs)
             if not logged_out:
                 res = app.delete_json_api(citation_url, auth=user.auth, expect_errors=errors)
@@ -1139,7 +1139,7 @@ class TestGetAlternativeCitations:
                 user = admin
             elif not logged_out:
                 user = AuthUserFactory()
-                kwargs['contrib'] = user if is_contrib else None
+                kwargs['contrib'] = user if is_contrib else Node.load(None)
             citation, citation_url = citation_and_project(admin, **kwargs)
             if not logged_out:
                 res = app.get(citation_url, auth=user.auth, expect_errors=errors)

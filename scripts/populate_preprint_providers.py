@@ -26,7 +26,7 @@ PROD_PREPRINT_PROVIDERS = ['osf', 'psyarxiv', 'engrxiv', 'socarxiv', 'agrixiv', 
 
 def get_subject_id(name):
     if name not in SUBJECTS_CACHE:
-        subject = None
+        subject = Node.load(None)
         try:
             subject = Subject.objects.get(provider___id='osf', text=name)
         except Subject.DoesNotExist:

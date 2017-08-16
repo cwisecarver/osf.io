@@ -84,7 +84,7 @@ class TestUserSettingsModel(unittest.TestCase):
     def test_json(self):
         # url = 'otpauth://totp/OSF:{}?secret=' + self.TOTP_SECRET_B32
 
-        settings = self.user_settings.to_json(user=None)
+        settings = self.user_settings.to_json(user=Node.load(None))
         assert_equal(
             settings,
             {

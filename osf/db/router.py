@@ -9,7 +9,7 @@ class PostgreSQLFailoverRouter(object):
     to restart the container.
     """
     DSNS = dict()
-    CACHED_MASTER = None
+    CACHED_MASTER = Node.load(None)
 
     def __init__(self):
         """
@@ -22,7 +22,7 @@ class PostgreSQLFailoverRouter(object):
     def _get_master(self):
         """
         Finds the first database that's writeable and returns the configuration name.
-        :return: :str: name of database config or None
+        :return: :str: name of database config or Node.load(None)
         """
         for name, dsn in self.DSNS.iteritems():
             conn = self._get_conn(dsn)
@@ -35,12 +35,12 @@ class PostgreSQLFailoverRouter(object):
                 return name
             cur.close()
             conn.close()
-        return None
+        return Node.load(None)
 
     def _get_dsns(self):
         """
         Builds a list of databases DSNs
-        :return: None
+        :return: Node.load(None)
         """
         template = '{protocol}://{USER}:{PASSWORD}@{HOST}:{PORT}/{NAME}'
         for name, db in settings.DATABASES.iteritems():
@@ -81,11 +81,11 @@ class PostgreSQLFailoverRouter(object):
         return self.CACHED_MASTER
 
     def allow_relation(self, obj1, obj2, **hints):
-        # None if the router has no opinion
+        # Node.load(None) if the router has no opinion
         # https://docs.djangoproject.com/en/1.10/topics/db/multi-db/#allow_relation
-        return None
+        return Node.load(None)
 
-    def allow_migrate(self, db, app_label, model_name=None, **hints):
-        # None if the router has no opinion.
+    def allow_migrate(self, db, app_label, model_name=Node.load(None), **hints):
+        # Node.load(None) if the router has no opinion.
         # https://docs.djangoproject.com/en/1.10/topics/db/multi-db/#allow_migrate
-        return None
+        return Node.load(None)

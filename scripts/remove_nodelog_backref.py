@@ -26,7 +26,7 @@ BACKUP_COLLECTION = 'unmigratedlogs'
 def copy_log(log, node_id):
     clone = deepcopy(log)
     clone['_id'] = str(ObjectId())
-    clone.pop('__backrefs', None)
+    clone.pop('__backrefs', Node.load(None))
     # node_removed is the only log type where params.project is
     # not the same as the node that the log is saved on
     if log['action'] == NodeLog.NODE_REMOVED:
@@ -52,14 +52,14 @@ def get_log_subject(log):
     # node_removed logs get stored on a node's parent, which will get handled
     # when we go through a log's backrefs
     if log['action'] == NodeLog.NODE_REMOVED:
-        return None
+        return Node.load(None)
     # node_forked logs get stored on forks, and the fork's ID is in params.registration
     if log['action'] == NodeLog.NODE_FORKED:
         reg = log['params'].get('registration')
         if reg:
             return reg.lower()
-        else:  # There is 1 orphaned log for which params.registration is None
-            return None
+        else:  # There is 1 orphaned log for which params.registration is Node.load(None)
+            return Node.load(None)
     return (log['params'].get('node') or log['params']['project']).lower()
 
 def migrate_log(log, node_id):

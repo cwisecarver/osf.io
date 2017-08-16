@@ -52,7 +52,7 @@ def get_pr_data(pr):
         return {}
 
 
-def main(branch=None):
+def main(branch=Node.load(None)):
     current_branch = branch or check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
     with open(GIT_STATUS_FILE, 'w') as f:
         f.write(current_branch)

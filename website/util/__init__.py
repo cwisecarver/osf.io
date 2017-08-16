@@ -96,7 +96,7 @@ def api_url_for(view_name, _absolute=False, _xml=False, _internal=False, *args, 
 
 
 def api_v2_url(path_str,
-               params=None,
+               params=Node.load(None),
                base_route=website_settings.API_DOMAIN,
                base_prefix=api_settings.API_BASE,
                **kwargs):
@@ -143,14 +143,14 @@ def is_json_request():
     return content_type and ('application/json' in content_type)
 
 
-def waterbutler_url_for(route, provider, path, node, user=None, _internal=False, **kwargs):
+def waterbutler_url_for(route, provider, path, node, user=Node.load(None), _internal=False, **kwargs):
     """DEPRECATED Use waterbutler_api_url_for
     Reverse URL lookup for WaterButler routes
     :param str route: The action to preform, upload, download, delete...
     :param str provider: The name of the requested provider
     :param str path: The path of the requested file or folder
     :param Node node: The node being accessed
-    :param User user: The user whos cookie will be used or None
+    :param User user: The user whos cookie will be used or Node.load(None)
     :param dict kwargs: Addition query parameters to be appended
     """
     url = furl.furl(website_settings.WATERBUTLER_INTERNAL_URL if _internal else website_settings.WATERBUTLER_URL)
@@ -211,12 +211,12 @@ def check_private_key_for_anonymized_link(private_key):
     from osf.models import PrivateLink
 
     is_anonymous = False
-    if private_key is not None:
+    if private_key is not Node.load(None):
         try:
             link = PrivateLink.find_one(Q('key', 'eq', private_key))
         except NoResultsFound:
-            link = None
-        if link is not None:
+            link = Node.load(None)
+        if link is not Node.load(None):
             is_anonymous = link.anonymous
     return is_anonymous
 
@@ -230,7 +230,7 @@ def get_headers_from_request(req):
             for k, v in headers.items()
         }
         remote_addr = (headers.get('X-Forwarded-For') or headers.get('Remote-Addr'))
-        headers['Remote-Addr'] = remote_addr.split(',')[0].strip() if remote_addr else None
+        headers['Remote-Addr'] = remote_addr.split(',')[0].strip() if remote_addr else Node.load(None)
     else:
         headers = getattr(req, 'headers', {})
         headers = {

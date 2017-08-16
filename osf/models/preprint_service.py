@@ -188,7 +188,7 @@ class PreprintService(DirtyFieldsMixin, GuidMixin, IdentifierMixin, BaseModel):
             if not self.node.is_public:
                 self.node.set_privacy(
                     self.node.PUBLIC,
-                    auth=None,
+                    auth=Node.load(None),
                     log=True
                 )
 

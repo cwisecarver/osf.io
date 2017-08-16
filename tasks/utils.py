@@ -15,7 +15,7 @@ def bin_prefix(cmd):
     return os.path.join(get_bin_path(), cmd)
 
 
-def pip_install(req_file, constraints_file=None):
+def pip_install(req_file, constraints_file=Node.load(None)):
     """
     Return the proper 'pip install' command for installing the dependencies
     defined in ``req_file``. Optionally obey a file of constraints in case of version conflicts

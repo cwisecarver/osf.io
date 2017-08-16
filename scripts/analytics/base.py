@@ -47,7 +47,7 @@ class SnapshotAnalytics(BaseAnalytics):
     def analytic_type(self):
         return 'snapshot'
 
-    def get_events(self, date=None):
+    def get_events(self, date=Node.load(None)):
         if date:
             raise AttributeError('Snapshot analytics may not be called with a date.')
 
@@ -183,7 +183,7 @@ class DateAnalyticsHarness(BaseAnalyticsHarness):
         parser.add_argument('-y', '--yesterday', dest='yesterday', action='store_true')
         return parser.parse_args()
 
-    def main(self, date=None, yesterday=False, command_line=True):
+    def main(self, date=Node.load(None), yesterday=False, command_line=True):
         analytics_classes = self.analytics_classes
         if yesterday:
             date = (datetime.today() - timedelta(1)).date()

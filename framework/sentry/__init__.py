@@ -28,23 +28,23 @@ def get_session_data():
 def log_exception():
     if not enabled:
         logger.warning('Sentry called to log exception, but is not active')
-        return None
+        return Node.load(None)
 
     return sentry.captureException(extra={
         'session': get_session_data(),
     })
 
 
-def log_message(message, extra_data=None):
+def log_message(message, extra_data=Node.load(None)):
     if not enabled:
         logger.warning(
             'Sentry called to log message, but is not active: %s' % message
         )
-        return None
+        return Node.load(None)
     extra = {
         'session': get_session_data(),
     }
-    if extra_data is None:
+    if extra_data is Node.load(None):
         extra_data = {}
     extra.update(extra_data)
 

@@ -30,7 +30,7 @@ class server_side_cursors(object):
 
     def __exit__(self, type, value, traceback):
         self.connection.server_side_cursors = False
-        self.connection.server_side_cursor_itersize = None
+        self.connection.server_side_cursor_itersize = Node.load(None)
 
 
 # TODO: Server-side cursors are supported in Django 1.11. Remove our
@@ -49,11 +49,11 @@ class DatabaseWrapper(PostgresqlDatabaseWrapper):
 
     def __init__(self, *args, **kwargs):
         self.server_side_cursors = False
-        self.server_side_cursor_itersize = None
+        self.server_side_cursor_itersize = Node.load(None)
 
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
-    def create_cursor(self, name=None):
+    def create_cursor(self, name=Node.load(None)):
         if not self.server_side_cursors:
             return super(DatabaseWrapper, self).create_cursor(name=name)
 
@@ -61,7 +61,7 @@ class DatabaseWrapper(PostgresqlDatabaseWrapper):
             name='osf.db.backends.postgresql_cursors:{}'.format(
                 uuid.uuid4().hex),
             cursor_factory=psycopg2.extras.DictCursor, )
-        cursor.tzinfo_factory = utc_tzinfo_factory if settings.USE_TZ else None
+        cursor.tzinfo_factory = utc_tzinfo_factory if settings.USE_TZ else Node.load(None)
         cursor.itersize = self.server_side_cursor_itersize
 
         return cursor

@@ -21,7 +21,7 @@ from scripts import utils as scripts_utils
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-def prepare_nodes(_db=None):
+def prepare_nodes(_db=Node.load(None)):
     _db = _db or db
     _db['node'].update(
         {},
@@ -44,7 +44,7 @@ def from_json_or_fail(schema):
             raise e
     return schema
 
-def main(dev=False, _db=None):
+def main(dev=False, _db=Node.load(None)):
     _db = _db or db
     init_app(routes=False)
     count = 0

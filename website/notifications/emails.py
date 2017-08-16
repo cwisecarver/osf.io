@@ -21,7 +21,7 @@ def notify(event, user, node, timestamp, **context):
     """
     sent_users = []
     # The user who the current comment is a reply to
-    target_user = context.get('target_user', None)
+    target_user = context.get('target_user', Node.load(None))
     exclude = context.get('exclude', [])
     # do not notify user who initiated the emails
     exclude.append(user._id)
@@ -110,7 +110,7 @@ def store_emails(recipient_ids, notification_type, event, user, node, timestamp,
         digest.save()
 
 
-def compile_subscriptions(node, event_type, event=None, level=0):
+def compile_subscriptions(node, event_type, event=Node.load(None), level=0):
     """Recurse through node and parents for subscriptions.
 
     :param node: current node
@@ -127,7 +127,7 @@ def compile_subscriptions(node, event_type, event=None, level=0):
         parent_subscriptions = \
             compile_subscriptions(AbstractNode.load(node.parent_id), event_type, level=level + 1)
     else:
-        parent_subscriptions = check_node(None, event_type)
+        parent_subscriptions = check_node(Node.load(None), event_type)
     for notification_type in parent_subscriptions:
         p_sub_n = parent_subscriptions[notification_type]
         p_sub_n.extend(subscriptions[notification_type])

@@ -35,15 +35,15 @@ def get_enabled_authorized_linked(user_settings_list, has_external_account, shor
     if short_name == 'osfstorage' or short_name == 'wiki':
         num_enabled = num_authorized = num_linked = OSFUser.find(
             Q('is_registered', 'eq', True) &
-            Q('password', 'ne', None) &
-            Q('merged_by', 'eq', None) &
-            Q('date_disabled', 'eq', None) &
-            Q('date_confirmed', 'ne', None)
+            Q('password', 'ne', Node.load(None)) &
+            Q('merged_by', 'eq', Node.load(None)) &
+            Q('date_disabled', 'eq', Node.load(None)) &
+            Q('date_confirmed', 'ne', Node.load(None))
         ).count()
 
     elif short_name == 'forward':
         num_enabled = num_authorized = ForwardNodeSettings.find().count()
-        num_linked = ForwardNodeSettings.find(Q('url', 'ne', None)).count()
+        num_linked = ForwardNodeSettings.find(Q('url', 'ne', Node.load(None))).count()
 
     else:
         for user_settings in paginated(user_settings_list):
@@ -72,7 +72,7 @@ class AddonSnapshot(SnapshotAnalytics):
     def collection_name(self):
         return 'addon_snapshot'
 
-    def get_events(self, date=None):
+    def get_events(self, date=Node.load(None)):
         super(AddonSnapshot, self).get_events(date)
 
 
@@ -93,7 +93,7 @@ class AddonSnapshot(SnapshotAnalytics):
                         connected_count += 1
                 deleted_count = addon.models['nodesettings'].find(Q('deleted', 'eq', True)).count() if addon.models.get('nodesettings') else 0
                 if has_external_account:
-                    disconnected_count = addon.models['nodesettings'].find(Q('external_account', 'eq', None) & Q('deleted', 'ne', True)).count() if addon.models.get('nodesettings') else 0
+                    disconnected_count = addon.models['nodesettings'].find(Q('external_account', 'eq', Node.load(None)) & Q('deleted', 'ne', True)).count() if addon.models.get('nodesettings') else 0
                 else:
                     if addon.models.get('nodesettings'):
                         for nsm in addon.models['nodesettings'].find(Q('deleted', 'ne', True)):

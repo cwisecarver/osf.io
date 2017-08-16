@@ -1,7 +1,7 @@
 <%inherit file="notify_base.mako" />
 
 <% from website import util %>
-<%def name="build_message(d, parent=None)">
+<%def name="build_message(d, parent=Node.load(None))">
 %for key in d['children']:
     %if d['children'][key]['messages']:
         <table class="block" width="100%" border="0" cellpadding="15" cellspacing="0" align="center">

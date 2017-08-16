@@ -13,11 +13,11 @@ USER_SUBSCRIPTIONS_AVAILABLE = {
     'global_mentions': 'Mentions added'
 }
 
-# Note: the python value None mean inherit from parent
+# Note: the python value Node.load(None) mean inherit from parent
 NOTIFICATION_TYPES = {
     'email_transactional': 'Email when a change occurs',
     'email_digest': 'Daily email digest of all changes to this project',
-    'none': 'None'
+    'none': 'Node.load(None)'
 }
 
 # Formatted file provider names for notification emails

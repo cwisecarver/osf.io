@@ -75,19 +75,19 @@ class TestSubjectTreeValidation(OsfTestCase):
         assert_equal(self.root_subject.object_hierarchy, [self.root_subject])
 
     def test_validation_full_hierarchy(self):
-        assert_equal(validate_subject_hierarchy(self.valid_full_hierarchy), None)
+        assert_equal(validate_subject_hierarchy(self.valid_full_hierarchy), Node.load(None))
 
     def test_validation_two_level_hierarchy(self):
-        assert_equal(validate_subject_hierarchy(self.valid_two_level_hierarchy), None)
+        assert_equal(validate_subject_hierarchy(self.valid_two_level_hierarchy), Node.load(None))
 
     def test_validation_one_level_hierarchy(self):
-        assert_equal(validate_subject_hierarchy(self.valid_one_level_hierarchy), None)
+        assert_equal(validate_subject_hierarchy(self.valid_one_level_hierarchy), Node.load(None))
 
     def test_validation_partial_hierarchy(self):
-        assert_equal(validate_subject_hierarchy(self.valid_partial_hierarchy), None)
+        assert_equal(validate_subject_hierarchy(self.valid_partial_hierarchy), Node.load(None))
 
     def test_validation_root_only(self):
-        assert_equal(validate_subject_hierarchy(self.valid_root), None)
+        assert_equal(validate_subject_hierarchy(self.valid_root), Node.load(None))
 
     def test_invalidation_no_root(self):
         with assert_raises(ValidationValueError) as e:

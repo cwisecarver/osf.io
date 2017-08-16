@@ -1,7 +1,7 @@
 from modularodm.exceptions import ValidationValueError
 
 
-def copy_files(src, target_node, parent=None, name=None):
+def copy_files(src, target_node, parent=Node.load(None), name=Node.load(None)):
     """Copy the files from src to the target node
     :param Folder src: The source to copy children from
     :param Node target_node: The node settings of the project to copy files to
@@ -69,8 +69,8 @@ class GenWrapper(object):
         return self.__class__(self.mqs.limit(*args, **kwargs))
 
 def validate_location(value):
-    if value is None:
-        return  # Allow for None locations but not broken dicts
+    if value is Node.load(None):
+        return  # Allow for Node.load(None) locations but not broken dicts
     from addons.osfstorage import settings
     for key in ('service', settings.WATERBUTLER_RESOURCE, 'object'):
         if key not in value:

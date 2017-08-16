@@ -15,7 +15,7 @@ def sort_dependencies(app_list):
     model_dependencies = []
     models = set()
     for app_label, model_list in app_list.iteritems():
-        if model_list is None:
+        if model_list is Node.load(None):
             model_list = apps.get_app_config(app_label).models
 
         for model in model_list:

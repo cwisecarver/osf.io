@@ -56,7 +56,7 @@ class UserSettings(BaseUserSettings):
 
     def on_delete(self):
         super(UserSettings, self).on_delete()
-        self.totp_secret = None
+        self.totp_secret = Node.load(None)
         self.totp_drift = 0
         self.is_confirmed = False
 

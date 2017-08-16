@@ -151,7 +151,7 @@
                                 % endif
                             % endfor
                         % else:
-                            <span> None </span>
+                            <span> Node.load(None) </span>
                         % endif
                     % endif
                     % if not ('admin' in user['permissions'] and not node['is_registration']) and node['institutions'] != []:

@@ -43,7 +43,7 @@ def init_addons(settings, routes=True):
         try:
             addon = apps.get_app_config('addons_{}'.format(addon_name))
         except LookupError:
-            addon = None
+            addon = Node.load(None)
         if addon:
             if addon not in settings.ADDONS_AVAILABLE:
                 settings.ADDONS_AVAILABLE.append(addon)

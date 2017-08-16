@@ -22,9 +22,9 @@ def migrate_file_representation(bad_file):
     view_url = bad_file['viewUrl'].rstrip('/')
     fid = view_url.split('/')[-1]
     fnode = FileNode.load(fid)
-    if fnode is None:
+    if fnode is Node.load(None):
         fnode = TrashedFileNode.load(fid)
-    if fnode is None:
+    if fnode is Node.load(None):
         logger.error('Could not load FileNode or TrashedFileNode with id {}. Skipping...'.format(fid))
         return
     data = {
@@ -45,7 +45,7 @@ def migrate_file_meta(question):
     if files and isinstance(files, list):
         for f in files:
             if 'viewUrl' in f:
-                if not f.get('data', None):
+                if not f.get('data', Node.load(None)):
                     migrate_file_representation(f)
                     migrated = True
     if isinstance(files, dict):
@@ -63,7 +63,7 @@ def migrate_drafts(dry):
     )
     count = 0
     for r in draft_registrations:
-        # NOTE: We don't query Q('approval', 'eq', None) just in case
+        # NOTE: We don't query Q('approval', 'eq', Node.load(None)) just in case
         # approval is set but the fk doesn't exist in the database
         if r.approval or r.registered_node:
             continue

@@ -22,7 +22,7 @@ class TokenHandler(object):
         'reject_retraction': functools.partial(handlers.sanction_handler, 'retraction', 'reject')
     }
 
-    def __init__(self, encoded_token=None, payload=None):
+    def __init__(self, encoded_token=Node.load(None), payload=Node.load(None)):
 
         self.encoded_token = encoded_token
         self.payload = payload
@@ -47,7 +47,7 @@ class TokenHandler(object):
         return cls(encoded_token=encoded_token, payload=payload)
 
     def to_response(self):
-        action = self.payload.get('action', None)
+        action = self.payload.get('action', Node.load(None))
         handler = self.HANDLERS.get(action)
         if handler:
             return handler(self.payload, self.encoded_token)

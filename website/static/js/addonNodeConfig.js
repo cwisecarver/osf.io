@@ -88,7 +88,7 @@ var AddonFolderPickerViewModel = oop.extend(FolderPickerViewModel, {
         self.selectedFolderName = ko.pureComputed(function() {
             var userIsOwner = self.userIsOwner();
             var selected = self.selected();
-            var name = selected.name || 'None';
+            var name = selected.name || 'Node.load(None)';
             var folder_name = self.options.decodeFolder(userIsOwner ? name : '');
             return folder_name;
         });

@@ -25,8 +25,8 @@ def main():
 MEETING_DATA = {
     'spsp2014': {
         'name': 'Society for Personality and Social Psychology 2014',
-        'info_url': None,
-        'logo_url': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
         'location': 'Austin, TX',
         'start_date': 'Feb 13 2014',
         'end_date': 'Feb 15 2014',
@@ -40,7 +40,7 @@ MEETING_DATA = {
     'asb2014': {
         'name': 'Association of Southeastern Biologists 2014',
         'info_url': 'http://www.sebiologists.org/meetings/talks_posters.html',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location': 'Spartanburg, SC',
         'start_date': 'Apr 2 2014',
         'end_date': 'Apr 4 2014',
@@ -67,11 +67,11 @@ MEETING_DATA = {
     },
     'annopeer2014': {
         'name': '#annopeer',
-        'info_url': None,
-        'logo_url': None,
-        'location': None,
-        'start_date': None,
-        'end_date': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
+        'location': Node.load(None),
+        'start_date': Node.load(None),
+        'end_date': Node.load(None),
         'active': False,
         'admins': [],
         'public_projects': True,
@@ -81,8 +81,8 @@ MEETING_DATA = {
     },
     'cpa2014': {
         'name': 'Canadian Psychological Association 2014',
-        'info_url': None,
-        'logo_url': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
         'location': 'Vancouver, BC',
         'start_date': 'Jun 05 2014',
         'end_date': 'Jun 07 2014',
@@ -95,7 +95,7 @@ MEETING_DATA = {
     },
     'filaments2014': {
         'name': 'National Radio Astronomy Observatory Filaments 2014',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': 'https://science.nrao.edu/science/meetings/2014/'
                     'filamentary-structure/images/filaments2014_660x178.png',
         'location': 'Charlottesville, VA',
@@ -113,7 +113,7 @@ MEETING_DATA = {
     },
     'bitss2014': {
         'name': 'Berkeley Initiative for Transparency in the Social Sciences Research Transparency Forum 2014',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': os.path.join(
             settings.STATIC_URL_PATH,
             'img',
@@ -135,8 +135,8 @@ MEETING_DATA = {
     },
     'spsp2015': {
         'name': 'Society for Personality and Social Psychology 2015',
-        'info_url': None,
-        'logo_url': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
         'location': 'Long Beach, CA',
         'start_date': 'Feb 26 2015',
         'end_date': 'Feb 28 2015',
@@ -150,7 +150,7 @@ MEETING_DATA = {
     },
     'aps2015': {
         'name': 'Association for Psychological Science 2015',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': 'http://www.psychologicalscience.org/images/APS_2015_Banner_990x157.jpg',
         'location': 'New York, NY',
         'start_date': 'May 21 2015',
@@ -164,7 +164,7 @@ MEETING_DATA = {
     },
     'icps2015': {
         'name': 'International Convention of Psychological Science 2015',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': 'http://icps.psychologicalscience.org/wp-content/themes/deepblue/images/ICPS_Website-header_990px.jpg',
         'location': 'Amsterdam, The Netherlands',
         'start_date': 'Mar 12 2015',
@@ -178,7 +178,7 @@ MEETING_DATA = {
     },
     'mpa2015': {
         'name': 'Midwestern Psychological Association 2015',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': 'http://www.midwesternpsych.org/resources/Pictures/MPA%20logo.jpg',
         'location': 'Chicago, IL',
         'start_date': 'Apr 30 2015',
@@ -194,8 +194,8 @@ MEETING_DATA = {
     },
     'NCCC2015': {
         'name': 'North Carolina Cognition Conference 2015',
-        'info_url': None,
-        'logo_url': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
         'location': 'Elon, NC',
         'start_date': 'Feb 21 2015',
         'end_date': 'Feb 21 2015',
@@ -210,7 +210,7 @@ MEETING_DATA = {
     },
     'VPRSF2015': {
         'name': 'Virginia Piedmont Regional Science Fair 2015',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': 'http://vprsf.org/wp-content/themes/VPRSF/images/logo.png',
         'location': 'Charlottesville, VA',
         'start_date': 'Mar 17 2015',
@@ -226,11 +226,11 @@ MEETING_DATA = {
     },
     'APRS2015': {
         'name': 'UVA Annual Postdoctoral Research Symposium 2015',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': 'http://s1.postimg.org/50qj9u6i7/GPA_Logo.jpg',
         'location': 'Charlottesville, VA',
-        'start_date': None,
-        'end_date': None,
+        'start_date': Node.load(None),
+        'end_date': Node.load(None),
         'active': False,
         'admins': [
             'mhurst@virginia.edu',
@@ -242,7 +242,7 @@ MEETING_DATA = {
     },
     'ASB2015': {
         'name': 'Association of Southeastern Biologists 2015',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': 'http://www.sebiologists.org/wp/wp-content/uploads/2014/09/banner_image_Large.png',
         'location': 'Chattanooga, TN',
         'start_date': 'Apr 01 2015',
@@ -258,8 +258,8 @@ MEETING_DATA = {
     },
     'TeaP2015': {
         'name': 'Tagung experimentell arbeitender Psychologen 2015',
-        'info_url': None,
-        'logo_url': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
         'location': 'Hildesheim, Germany',
         'start_date': 'Mar 08 2015',
         'end_date': 'Mar 11 2015',
@@ -332,7 +332,7 @@ MEETING_DATA = {
         'location': 'Charlottesville, VA',
         'start_date': 'Apr 17 2015',
         'end_date': 'Apr 17 2015',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': False,
         'admins': [],
         'public_projects': True,
@@ -346,7 +346,7 @@ MEETING_DATA = {
         'location': 'Boston, MA',
         'start_date': 'Apr 09 2015',
         'end_date': 'Apr 11 2015',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': False,
         'admins': [],
         'public_projects': True,
@@ -388,7 +388,7 @@ MEETING_DATA = {
         'location': 'Charlottesville, VA',
         'start_date': 'Oct 09 2015',
         'end_date': 'Oct 10 2015',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': False,
         'admins': [],
         'public_projects': True,
@@ -413,7 +413,7 @@ MEETING_DATA = {
     'singlecasedesigns2015': {
         'name': 'Single Case Designs in Clinical Psychology: Uniting Research and Practice',
         'info_url': 'https://www.royalholloway.ac.uk/psychology/events/eventsarticles/singlecasedesignsinclinicalpsychologyunitingresearchandpractice.aspx',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location': 'London, UK',
         'start_date': 'Apr 17 2015',
         'end_date': 'Apr 17 2015',
@@ -426,11 +426,11 @@ MEETING_DATA = {
     },
     'OSFM2015': {
         'name': 'OSF for Meetings 2015',
-        'info_url': None,
-        'logo_url': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
         'location': 'Charlottesville, VA',
-        'start_date': None,
-        'end_date': None,
+        'start_date': Node.load(None),
+        'end_date': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -441,7 +441,7 @@ MEETING_DATA = {
     'JSSP2015': {
         'name': 'Japanese Society of Social Psychology 2015',
         'info_url': 'http://www.socialpsychology.jp/conf2015/index.html',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location': 'Tokyo, Japan',
         'start_date': 'Oct 31 2015',
         'end_date': 'Nov 01 2015',
@@ -469,7 +469,7 @@ MEETING_DATA = {
     'IARR2016': {
         'name': 'International Association for Relationship Research 2016',
         'info_url': 'http://iarr.psych.utoronto.ca/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location': 'Toronto, Canada',
         'start_date': 'Jul 20 2016',
         'end_date': 'Jul 24 2016',
@@ -496,11 +496,11 @@ MEETING_DATA = {
     },
     'R2RC': {
         'name': 'Right to Research Coalition',
-        'info_url': None,
-        'logo_url': None,
-        'location': None,
-        'start_date': None,
-        'end_date': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
+        'location': Node.load(None),
+        'start_date': Node.load(None),
+        'end_date': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -526,9 +526,9 @@ MEETING_DATA = {
         'name': 'Earth Science Information Partners 2015',
         'info_url': 'http://esipfed.org/',
         'logo_url': 'http://s30.postimg.org/m2uz2g4pt/ESIP.png',
-        'location': None,
-        'start_date': None,
-        'end_date': None,
+        'location': Node.load(None),
+        'start_date': Node.load(None),
+        'end_date': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -539,7 +539,7 @@ MEETING_DATA = {
     'SPSP2016': {
         'name': 'Society for Personality and Social Psychology 2016 ',
         'info_url': 'http://meeting.spsp.org',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location': 'San Diego, CA',
         'start_date': 'Jan 28 2016',
         'end_date': 'Jan 30 2016',
@@ -553,7 +553,7 @@ MEETING_DATA = {
     'NACIII': {
         'name': '2015 National Astronomy Consortium (NAC) III Workshop',
         'info_url': 'https://info.nrao.edu/do/odi/meetings/2015/nac111/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location': 'Washington, DC',
         'start_date': 'Aug 29 2015',
         'end_date': 'Aug 30 2015',
@@ -567,7 +567,7 @@ MEETING_DATA = {
     'CDS2015': {
         'name': 'Cognitive Development Society 2015',
         'info_url': 'http://meetings.cogdevsoc.org/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location': 'Columbus, OH',
         'start_date': 'Oct 09 2015',
         'end_date': 'Oct 10 2015',
@@ -581,7 +581,7 @@ MEETING_DATA = {
     'SEASR2016': {
         'name': 'Southeastern Association of Shared Resources 2016',
         'info_url': 'http://seasr.abrf.org',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location': 'Atlanta, GA',
         'start_date': 'Jun 22 2016',
         'end_date': 'Jun 24 2016',
@@ -595,7 +595,7 @@ MEETING_DATA = {
     'Accretion2015': {
         'name': 'Observational Evidence of Gas Accretion onto Galaxies?',
         'info_url': 'https://science.nrao.edu/science/meetings/2015/accretion2015',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location':'Charlottesville, VA',
         'start_date':'Oct 09 2015',
         'end_date':'Oct 10 2015',
@@ -609,7 +609,7 @@ MEETING_DATA = {
     '2020Futures': {
         'name': 'U.S. Radio/Millimeter/Submillimeter Science Futures in the 2020s',
         'info_url': 'https://science.nrao.edu/science/meetings/2015/2020futures/home',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location':'Chicago, IL',
         'start_date':'Dec 15 2015',
         'end_date':'Dec 17 2015',
@@ -637,7 +637,7 @@ MEETING_DATA = {
     'CNI2015': {
         'name': 'Coalition for Networked Information (CNI) Fall Membership Meeting 2015',
         'info_url': 'https://wp.me/P1LncT-64s',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location':'Washington, DC',
         'start_date':'Dec 14 2015',
         'end_date':'Dec 16 2015',
@@ -679,8 +679,8 @@ MEETING_DATA = {
     'MiamiBrainhack15': {
         'name': 'University of Miami Brainhack 2015',
         'info_url': 'http://brainhack.org/americas/',
-        'logo_url': None,
-        'location': None,
+        'logo_url': Node.load(None),
+        'location': Node.load(None),
         'start_date': 'Oct 23 2015',
         'end_date': 'Oct 25 2015',
         'active': False,
@@ -692,9 +692,9 @@ MEETING_DATA = {
     },
     'PsiChiRepository': {
         'name': 'Psi Chi',
-        'location': None,
-        'start_date': None,
-        'end_date': None,
+        'location': Node.load(None),
+        'start_date': Node.load(None),
+        'end_date': Node.load(None),
         'info_url': 'http://www.psichi.org/?ResearchAdvisory#.VmBpeOMrI1g',
         'logo_url': 'http://s11.postimg.org/4g2451vcz/Psi_Chi_Logo.png',
         'active': True,
@@ -717,7 +717,7 @@ MEETING_DATA = {
     'GI2015': {
         'name': 'Genome Informatics 2015',
         'info_url': 'https://meetings.cshl.edu/meetings.aspx?meet=info&year=15',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'location':'Cold Spring Harbor, NY' ,
         'start_date': 'Oct 28 2015',
         'end_date': 'Oct 31 2015',
@@ -742,7 +742,7 @@ MEETING_DATA = {
     'SMM2015': {
         'name': 'The Society for Marine Mammalogy',
         'info_url': 'https://www.marinemammalscience.org/conference/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': False,
         'admins': [],
         'public_projects': True,
@@ -753,7 +753,7 @@ MEETING_DATA = {
     'TESS': {
         'name': 'Time-sharing Experiments for the Social Sciences',
         'info_url': 'http://www.tessexperiments.org',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': False,
         'admins': [],
         'public_projects': True,
@@ -804,8 +804,8 @@ MEETING_DATA = {
     },
     'CATALISE2016': {
         'name': 'Criteria and Terminology Applied to Language Impairments: Synthesising the Evidence (CATALISE) 2016',
-        'info_url': None,
-        'logo_url': None,
+        'info_url': Node.load(None),
+        'logo_url': Node.load(None),
         'active': False,
         'admins': [],
         'public_projects': True,
@@ -838,7 +838,7 @@ MEETING_DATA = {
     'jssp2016': {
         'name': 'Japanese Society of Social Psychology 2016',
         'info_url': 'http://www.socialpsychology.jp/conf2016/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -849,7 +849,7 @@ MEETING_DATA = {
     'sepech2016': {
         'name': 'XI SEPECH - Research Seminar in Human Sciences (Seminário de Pesquisa em Ciências Humanas)',
         'info_url': 'http://www.uel.br/eventos/sepech/sepech2016/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -860,7 +860,7 @@ MEETING_DATA = {
     'etmaal2016': {
         'name': 'Etmaal van de Communicatiewetenschap 2016 - Media Psychology',
         'info_url': 'https://etmaal2016.wordpress.com',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -871,7 +871,7 @@ MEETING_DATA = {
     'WSAN2016': {
         'name': 'WSAN2016 Erasmus University Rotterdam',
         'info_url': 'http://www.humane.eu/wsan/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -892,7 +892,7 @@ MEETING_DATA = {
     'CNI2016': {
         'name': 'Coalition for Networked Information (CNI) Spring Membership Meeting 2016',
         'info_url': 'https://wp.me/P1LncT-6fd',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -903,7 +903,7 @@ MEETING_DATA = {
     'XGAL2016': {
         'name': 'Molecular Gas in Galactic Environments 2016',
         'info_url': 'https://science.nrao.edu/science/meetings/2016/molecular-gas-in-galactic-environments/home',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -939,7 +939,7 @@ MEETING_DATA = {
     'Reid2016': {
         'name': 'L. Starling Reid Undergraduate Psychology Conference 2016',
         'info_url': 'http://cacsprd.web.virginia.edu/Psych/Conference',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -950,7 +950,7 @@ MEETING_DATA = {
     'CNS2016': {
         'name': 'The Cognitive Neuroscience Society (CNS) 2016',
         'info_url': 'http://www.cogneurosociety.org/annual-meeting/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -961,7 +961,7 @@ MEETING_DATA = {
     'HEPA2016': {
         'name': 'HEPA Europe Annual Meeting 2016',
         'info_url': 'http://www.hepaeurope2016.eu/',
-        'logo_url': None,
+        'logo_url': Node.load(None),
         'active': True,
         'admins': [],
         'public_projects': True,
@@ -971,7 +971,7 @@ MEETING_DATA = {
     },
     'OGH': {
         'name': 'Open Global Health',
-        'info_url': None,
+        'info_url': Node.load(None),
         'logo_url': 'http://s33.postimg.org/7tjjpvg4f/Drawing.png',
         'active': True,
         'admins': [],

@@ -19,7 +19,7 @@ def user():
 @pytest.mark.django_db
 class TestQueuedMail:
 
-    def queue_mail(self, mail, user, send_at=None, **kwargs):
+    def queue_mail(self, mail, user, send_at=Node.load(None), **kwargs):
         mail = queue_mail(
             to_addr=user.username if user else self.user.username,
             send_at=send_at or timezone.now(),
@@ -143,7 +143,7 @@ class TestQueuedMail:
 
     @mock.patch('osf.models.queued_mail.send_mail')
     def test_user_is_not_active_is_not_confirmed(self, mock_mail):
-        user = UserFactory(date_confirmed=None)
+        user = UserFactory(date_confirmed=Node.load(None))
         mail = self.queue_mail(
             user=user,
             mail=NO_ADDON,

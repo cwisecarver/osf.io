@@ -17,7 +17,7 @@ def registration_approval_handler(action, registration, registered_from):
         'reject': 'Your disapproval has been accepted and the registration has been cancelled.',
     }[action], kind='success', trust=False)
     # Allow decorated view function to return response
-    return None
+    return Node.load(None)
 
 def embargo_handler(action, registration, registered_from):
     status.push_status_message({
@@ -25,7 +25,7 @@ def embargo_handler(action, registration, registered_from):
         'reject': 'Your disapproval has been accepted and the embargo has been cancelled.',
     }[action], kind='success', trust=False)
     # Allow decorated view function to return response
-    return None
+    return Node.load(None)
 
 def embargo_termination_handler(action, registration, registered_from):
     status.push_status_message({
@@ -33,7 +33,7 @@ def embargo_termination_handler(action, registration, registered_from):
         'reject': 'Your disapproval has been accepted and this embargo will not be made public.',
     }[action], kind='success', trust=False)
     # Allow decorated view function to return response
-    return None
+    return Node.load(None)
 
 def retraction_handler(action, registration, registered_from):
     status.push_status_message({
@@ -41,7 +41,7 @@ def retraction_handler(action, registration, registered_from):
         'reject': 'Your disapproval has been accepted and the withdrawal has been cancelled.'
     }[action], kind='success', trust=False)
     # Allow decorated view function to return response
-    return None
+    return Node.load(None)
 
 @must_be_logged_in
 def sanction_handler(kind, action, payload, encoded_token, auth, **kwargs):
@@ -58,15 +58,15 @@ def sanction_handler(kind, action, payload, encoded_token, auth, **kwargs):
         'embargo': Embargo,
         'embargo_termination_approval': EmbargoTerminationApproval,
         'retraction': Retraction
-    }.get(kind, None)
+    }.get(kind, Node.load(None))
     if not Model:
         raise UnsupportedSanctionHandlerKind
 
-    sanction_id = payload.get('sanction_id', None)
+    sanction_id = payload.get('sanction_id', Node.load(None))
     sanction = Model.load(sanction_id)
 
-    err_code = None
-    err_message = None
+    err_code = Node.load(None)
+    err_message = Node.load(None)
     if not sanction:
         err_code = http.BAD_REQUEST
         err_message = 'There is no {0} associated with this token.'.format(
@@ -83,7 +83,7 @@ def sanction_handler(kind, action, payload, encoded_token, auth, **kwargs):
             message_long=err_message
         ))
 
-    do_action = getattr(sanction, action, None)
+    do_action = getattr(sanction, action, Node.load(None))
     if do_action:
         registration = AbstractNode.find_one(Q(sanction.SHORT_NAME, 'eq', sanction))
         registered_from = registration.registered_from

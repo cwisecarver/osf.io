@@ -21,11 +21,11 @@ class BaseThrottle(SimpleRateThrottle):
             logger.info('Bypass header (X-Throttle-Token) passed')
             return True
 
-        if self.rate is None:
+        if self.rate is Node.load(None):
             return True
 
         self.key = self.get_cache_key(request, view)
-        if self.key is None:
+        if self.key is Node.load(None):
             return True
 
         self.history = self.cache.get(self.key, [])

@@ -659,7 +659,7 @@ file_payload = OrderedDict([
     (u'auth', OrderedDict([
         (u'email', u'tgn6m@osf.io'), (u'id', u'tgn6m'), (u'name', u'aab')])),
     (u'metadata', OrderedDict([
-        (u'contentType', None),
+        (u'contentType', Node.load(None)),
         (u'etag', u'10485efa4069bb94d50588df2e7466a079d49d4f5fd7bf5b35e7c0d5b12d76b7'),
         (u'extra', OrderedDict([
             (u'downloads', 0),
@@ -706,14 +706,14 @@ def file_move_payload(new_node, old_node):
         (u'auth', OrderedDict([
             (u'email', 'Bob'), (u'id', 'bob2'), (u'name', 'Bob')])),
         (u'destination', OrderedDict([
-            (u'contentType', None),
+            (u'contentType', Node.load(None)),
             (u'etag', u'10485efa4069bb94d50588df2e7466a079d49d4f5fd7bf5b35e7c0d5b12d76b7'),
             (u'extra', OrderedDict([
                 (u'downloads', 0),
                 (u'version', 30)])),
             (u'kind', u'file'),
             (u'materialized', materialized),
-            (u'modified', None),
+            (u'modified', Node.load(None)),
             (u'name', name),
             (u'nid', str(new_node)),
             (u'path', wb_path),
@@ -733,7 +733,7 @@ def file_move_payload(new_node, old_node):
             ('addon', 'OSF Storage')])),
         (u'time', 1435158051.204264),
         ('node', u'nhgts'),
-        ('project', None)])
+        ('project', Node.load(None))])
 
 
 def file_copy_payload(new_node, old_node):
@@ -744,14 +744,14 @@ def file_copy_payload(new_node, old_node):
             (u'id', u'tgn6m'),
             (u'name', u'aab')])),
         (u'destination', OrderedDict([
-            (u'contentType', None),
+            (u'contentType', Node.load(None)),
             (u'etag', u'16075ae3e546971003095beef8323584de40b1fcbf52ed4bb9e7f8547e322824'),
             (u'extra', OrderedDict([
                 (u'downloads', 0),
                 (u'version', 30)])),
             (u'kind', u'file'),
             (u'materialized', u'Two/Paper13.txt'),
-            (u'modified', None),
+            (u'modified', Node.load(None)),
             (u'name', u'Paper13.txt'),
             (u'nid', u'nhgts'),
             (u'path', wb_path),
@@ -771,7 +771,7 @@ def file_copy_payload(new_node, old_node):
             ('addon', 'OSF Storage')])),
         (u'time', 1435157658.036183),
         ('node', u'nhgts'),
-        ('project', None)])
+        ('project', Node.load(None))])
 
 
 def file_renamed_payload():
@@ -782,7 +782,7 @@ def file_renamed_payload():
             (u'id', u'tgn6m'),
             (u'name', u'aab')])),
         (u'destination', OrderedDict([
-            (u'contentType', None),
+            (u'contentType', Node.load(None)),
             (u'etag', u'0e9bfddcb5a59956ae60e93f32df06b174ad33b53d8a2f2cd08c780cf34a9d93'),
             (u'extra', OrderedDict([
                 (u'downloads', 0),
@@ -811,6 +811,6 @@ def file_renamed_payload():
             ('addon', 'OSF Storage')])),
         (u'time', 1441905340.876648),
         ('node', u'wp6xv'),
-        ('project', None)])
+        ('project', Node.load(None))])
 
 

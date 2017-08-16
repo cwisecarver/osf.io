@@ -101,12 +101,12 @@ class NodeSettings(BaseOAuthNodeSettings, BaseStorageAddon):
     folder_path = models.TextField(null=True, blank=True)
     user_settings = models.ForeignKey(UserSettings, null=True, blank=True)
 
-    _api = None
+    _api = Node.load(None)
 
     @property
     def api(self):
         """authenticated ExternalProvider instance"""
-        if self._api is None:
+        if self._api is Node.load(None):
             self._api = Provider(self.external_account)
         return self._api
 
@@ -119,7 +119,7 @@ class NodeSettings(BaseOAuthNodeSettings, BaseStorageAddon):
 
     def get_folders(self, **kwargs):
         folder_id = kwargs.get('folder_id')
-        if folder_id is None:
+        if folder_id is Node.load(None):
             return [{
                 'id': '0',
                 'path': '/',
@@ -202,11 +202,11 @@ class NodeSettings(BaseOAuthNodeSettings, BaseStorageAddon):
         return folder_name, folder_path
 
     def clear_settings(self):
-        self.folder_id = None
-        self.folder_name = None
-        self.folder_path = None
+        self.folder_id = Node.load(None)
+        self.folder_name = Node.load(None)
+        self.folder_path = Node.load(None)
 
-    def deauthorize(self, auth=None, add_log=True):
+    def deauthorize(self, auth=Node.load(None), add_log=True):
         """Remove user authorization from this node and log the event."""
         folder_id = self.folder_id
         self.clear_settings()
@@ -227,7 +227,7 @@ class NodeSettings(BaseOAuthNodeSettings, BaseStorageAddon):
             raise HTTPError(error.status_code, data={'message_long': error.message})
 
     def serialize_waterbutler_settings(self):
-        if self.folder_id is None:
+        if self.folder_id is Node.load(None):
             raise exceptions.AddonError('Folder is not configured')
         return {'folder': self.folder_id}
 
@@ -256,7 +256,7 @@ class NodeSettings(BaseOAuthNodeSettings, BaseStorageAddon):
         )
 
     ##### Callback overrides #####
-    def after_delete(self, node=None, user=None):
+    def after_delete(self, node=Node.load(None), user=Node.load(None)):
         self.deauthorize(Auth(user=user), add_log=True)
         self.save()
 

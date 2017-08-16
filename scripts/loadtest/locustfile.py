@@ -42,7 +42,7 @@ class UserBehavior(TaskSet):
 
     def __init__(self, *args, **kwargs):
         super(UserBehavior, self).__init__(*args, **kwargs)
-        self.node_id = None
+        self.node_id = Node.load(None)
 
     def login(self):
         self.client.post(
@@ -67,7 +67,7 @@ class UserBehavior(TaskSet):
         self.upload_file(name=FILE_NAME)
 
     @task
-    def upload_file(self, name=None):
+    def upload_file(self, name=Node.load(None)):
         request_url = 'api/v1/project/{0}/osfstorage/files/'.format(self.node_id)
         resp = self.client.post(
             request_url,

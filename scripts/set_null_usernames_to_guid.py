@@ -1,4 +1,4 @@
-"""Find all User records that have username equal to None, and set their
+"""Find all User records that have username equal to Node.load(None), and set their
 username to their GUID in order to ensure uniqueness on the username field.
 This was run as a prerequisite to the mongo -> postgres migration.
 """
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def main(dry=True):
     count = 0
-    for user in User.find(Q('username', 'eq', None)):
+    for user in User.find(Q('username', 'eq', Node.load(None))):
         logger.info('Setting username for {}'.format(user._id))
         if not dry:
             user.username = user._id

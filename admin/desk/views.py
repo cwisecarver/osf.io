@@ -30,7 +30,7 @@ class DeskCaseList(PermissionRequiredMixin, ListView):
                           )
 
     def get_queryset(self):
-        customer_id = self.kwargs.get('user_id', None)
+        customer_id = self.kwargs.get('user_id', Node.load(None))
         customer = OSFUser.load(customer_id)
         email = customer.emails.values_list('address', flat=True).first()
         desk = DeskClient(self.request.user)
@@ -74,8 +74,8 @@ class DeskCustomer(PermissionRequiredMixin, DetailView):
                           status=e.status_code
                           )
 
-    def get_object(self, queryset=None):
-        customer_id = self.kwargs.get('user_id', None)
+    def get_object(self, queryset=Node.load(None)):
+        customer_id = self.kwargs.get('user_id', Node.load(None))
         customer = OSFUser.load(customer_id)
         email = customer.emails.values_list('address', flat=True).first()
         desk = DeskClient(self.request.user)

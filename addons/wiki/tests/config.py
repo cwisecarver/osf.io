@@ -23,16 +23,16 @@ EXAMPLE_DOCS = [    # Collection stored as "docs"
 
 EXAMPLE_OPS = [     # Collection stored as "docs_ops"
     {
-        "op": None,
+        "op": Node.load(None),
         "v": 0,
         "src": "94ae709f9736c24d821301de2dfc71df",
         "seq": 1,
         "create": {
             "type": "http://sharejs.org/types/textv1",
-            "data": None
+            "data": Node.load(None)
         },
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654358667
         },
@@ -46,8 +46,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 1,
         "src": "94ae709f9736c24d821301de2dfc71df",
         "seq": 2,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654363751
         },
@@ -62,8 +62,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 2,
         "src": "94ae709f9736c24d821301de2dfc71df",
         "seq": 3,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654363838
         },
@@ -78,8 +78,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 3,
         "src": "94ae709f9736c24d821301de2dfc71df",
         "seq": 4,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654364007
         },
@@ -94,8 +94,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 4,
         "src": "94ae709f9736c24d821301de2dfc71df",
         "seq": 5,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654366367
         },
@@ -110,8 +110,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 5,
         "src": "94ae709f9736c24d821301de2dfc71df",
         "seq": 6,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654366542
         },
@@ -126,8 +126,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 6,
         "src": "94ae709f9736c24d821301de2dfc71df",
         "seq": 7,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654366678
         },
@@ -142,8 +142,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 7,
         "src": "94ae709f9736c24d821301de2dfc71df",
         "seq": 8,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654366808
         },
@@ -151,16 +151,16 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "name": "26aabd89-541b-5c02-9e6a-ad332ba43118"
     },
     {
-        "op": None,
+        "op": Node.load(None),
         "v": 0,
         "src": "166028c1b14818475eec6fab9720af7b",
         "seq": 1,
         "create": {
             "type": "http://sharejs.org/types/textv1",
-            "data": None
+            "data": Node.load(None)
         },
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654381130
         },
@@ -174,8 +174,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 1,
         "src": "166028c1b14818475eec6fab9720af7b",
         "seq": 2,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654384929
         },
@@ -190,8 +190,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 2,
         "src": "166028c1b14818475eec6fab9720af7b",
         "seq": 3,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654385266
         },
@@ -206,8 +206,8 @@ EXAMPLE_OPS = [     # Collection stored as "docs_ops"
         "v": 3,
         "src": "166028c1b14818475eec6fab9720af7b",
         "seq": 4,
-        "preValidate": None,
-        "validate": None,
+        "preValidate": Node.load(None),
+        "validate": Node.load(None),
         "m": {
             "ts": 1415654385626
         },

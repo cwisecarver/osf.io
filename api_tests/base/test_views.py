@@ -69,7 +69,7 @@ class TestApiBaseViews(ApiTestCase):
                 else:
                     assert_in(cls, view.permission_classes, "{0} lacks the appropriate permission classes".format(view))
             for key in ['read', 'write']:
-                scopes = getattr(view, 'required_{}_scopes'.format(key), None)
+                scopes = getattr(view, 'required_{}_scopes'.format(key), Node.load(None))
                 assert_true(bool(scopes))
                 for scope in scopes:
                     assert_is_not_none(scope)
@@ -82,7 +82,7 @@ class TestApiBaseViews(ApiTestCase):
 
     def test_view_classes_define_or_override_serializer_class(self):
         for view in VIEW_CLASSES:
-            has_serializer_class = getattr(view, 'serializer_class', None) or getattr(view, 'get_serializer_class', None)
+            has_serializer_class = getattr(view, 'serializer_class', Node.load(None)) or getattr(view, 'get_serializer_class', Node.load(None))
             assert_true(has_serializer_class, "{0} should include serializer class or override get_serializer_class()".format(view))
 
     @mock.patch('osf.models.OSFUser.is_confirmed', mock.PropertyMock(return_value=False))
@@ -108,7 +108,7 @@ class TestStatusView(ApiTestCase):
         url = '/{}status/'.format(API_BASE)
         res = self.app.get(url)
         assert_equal(res.status_code, 200)
-        assert_equal(res.json, {'maintenance': None})
+        assert_equal(res.json, {'maintenance': Node.load(None)})
 
     def test_status_view_with_maintenance(self):
         maintenance.set_maintenance(message='test')

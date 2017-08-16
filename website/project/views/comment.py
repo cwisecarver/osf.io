@@ -20,7 +20,7 @@ from website.project.signals import comment_added, mention_added
 
 
 @file_updated.connect
-def update_file_guid_referent(self, node, event_type, payload, user=None):
+def update_file_guid_referent(self, node, event_type, payload, user=Node.load(None)):
     if event_type not in ('addon_file_moved', 'addon_file_renamed'):
         return  # Nothing to do
 
@@ -65,7 +65,7 @@ def create_new_file(obj, source, destination, destination_node):
         data = dict(destination)
         new_file = BaseFileNode.resolve_class(destination['provider'], BaseFileNode.FILE).get_or_create(destination_node, destination['path'])
         if destination['provider'] != 'osfstorage':
-            new_file.update(revision=None, data=data)
+            new_file.update(revision=Node.load(None), data=data)
     else:
         new_file = find_and_create_file_from_metadata(destination.get('children', []), source, destination, destination_node, obj)
         if not new_file:
@@ -96,7 +96,7 @@ def find_and_create_file_from_metadata(children, source, destination, destinatio
             data = dict(item)
             new_file = BaseFileNode.resolve_class(destination['provider'], BaseFileNode.FILE).get_or_create(destination_node, item['path'])
             if destination['provider'] != 'osfstorage':
-                new_file.update(revision=None, data=data)
+                new_file.update(revision=Node.load(None), data=data)
             return new_file
 
 
@@ -111,7 +111,7 @@ def render_email_markdown(content):
 
 
 @comment_added.connect
-def send_comment_added_notification(comment, auth, new_mentions=None):
+def send_comment_added_notification(comment, auth, new_mentions=Node.load(None)):
     if not new_mentions:
         new_mentions = []
     node = comment.node
@@ -123,7 +123,7 @@ def send_comment_added_notification(comment, auth, new_mentions=None):
         page_type=comment.get_comment_page_type(),
         page_title=comment.get_comment_page_title(),
         provider=PROVIDERS[comment.root_target.referent.provider] if comment.page == Comment.FILES else '',
-        target_user=target.referent.user if is_reply(target) else None,
+        target_user=target.referent.user if is_reply(target) else Node.load(None),
         parent_comment=target.referent.content if is_reply(target) else '',
         url=comment.get_comment_page_url(),
         exclude=new_mentions,
@@ -159,7 +159,7 @@ def send_mention_added_notification(comment, new_mentions, auth):
         page_type='file' if comment.page == Comment.FILES else node.project_or_component,
         page_title=comment.root_target.referent.name if comment.page == Comment.FILES else '',
         provider=PROVIDERS[comment.root_target.referent.provider] if comment.page == Comment.FILES else '',
-        target_user=target.referent.user if is_reply(target) else None,
+        target_user=target.referent.user if is_reply(target) else Node.load(None),
         parent_comment=target.referent.content if is_reply(target) else '',
         new_mentions=new_mentions,
         url=comment.get_comment_page_url()
@@ -178,12 +178,12 @@ def is_reply(target):
     return isinstance(target.referent, Comment)
 
 
-def _update_comments_timestamp(auth, node, page=Comment.OVERVIEW, root_id=None):
+def _update_comments_timestamp(auth, node, page=Comment.OVERVIEW, root_id=Node.load(None)):
     if node.is_contributor(auth.user):
         enqueue_postcommit_task(ban_url, (node, ), {}, celery=False, once_per_request=True)
-        if root_id is not None:
+        if root_id is not Node.load(None):
             guid_obj = Guid.load(root_id)
-            if guid_obj is not None:
+            if guid_obj is not Node.load(None):
                 enqueue_postcommit_task(ban_url, (guid_obj.referent, ), {}, celery=False, once_per_request=True)
 
         # update node timestamp

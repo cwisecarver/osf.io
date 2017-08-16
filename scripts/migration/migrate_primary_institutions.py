@@ -28,13 +28,13 @@ def migrate(dry_run=True):
         log.action = NodeLog.AFFILIATED_INSTITUTION_REMOVED
         log.save()
 
-    nodes = Node.find(Q('primary_institution', 'ne', None))
+    nodes = Node.find(Q('primary_institution', 'ne', Node.load(None)))
     for node in nodes:
         logger.info('Node with id <{}> and title <{}> being updated'.format(node._id, node.title))
         inst = node.primary_institution
         if inst not in node.affiliated_institutions:
             node.affiliated_institutions.append(inst)
-        node.primary_institution = None
+        node.primary_institution = Node.load(None)
         node.save()
     if dry_run:
         raise RuntimeError('Dry run, transaction rolled back.')

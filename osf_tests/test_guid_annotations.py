@@ -30,7 +30,7 @@ class TestGuidAnnotations:
         with django_assert_num_queries(1):
             wut = OSFUser.objects.all()
             for x in wut:
-                assert x._id is not None, 'Guid was None'
+                assert x._id is not Node.load(None), 'Guid was Node.load(None)'
 
     @pytest.mark.parametrize('Factory', guid_factories)
     @pytest.mark.django_assert_num_queries
@@ -44,7 +44,7 @@ class TestGuidAnnotations:
 
             wut = Factory._meta.model.objects.filter(id__in=new_ids)
             for x in wut:
-                assert x._id is not None, 'Guid was None'
+                assert x._id is not Node.load(None), 'Guid was Node.load(None)'
 
     @pytest.mark.parametrize('Factory', guid_factories)
     @pytest.mark.django_assert_num_queries
@@ -58,7 +58,7 @@ class TestGuidAnnotations:
 
             wut = Factory._meta.model.objects.filter(id__in=new_ids).order_by('id')
             for x in wut:
-                assert x._id is not None, 'Guid was None'
+                assert x._id is not Node.load(None), 'Guid was Node.load(None)'
 
     @pytest.mark.parametrize('Factory', guid_factories)
     @pytest.mark.django_assert_num_queries
@@ -89,7 +89,7 @@ class TestGuidAnnotations:
         with django_assert_num_queries(1):
             wut = Factory._meta.model.objects.exclude(**{dtfield: timezone.now()})
             for x in wut:
-                assert x._id is not None, 'Guid was None'
+                assert x._id is not Node.load(None), 'Guid was Node.load(None)'
 
     @pytest.mark.parametrize('Factory', guid_factories)
     def test_update_objects(self, Factory):

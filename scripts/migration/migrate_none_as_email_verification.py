@@ -1,4 +1,4 @@
-""" Ensure that users with User.email_verifications == None now have {} instead
+""" Ensure that users with User.email_verifications == Node.load(None) now have {} instead
 """
 
 import logging
@@ -19,7 +19,7 @@ def main():
 
     if not dry_run:
         scripts_utils.add_file_logger(logger, __file__)
-    logger.info("Iterating users with None as their email_verification")
+    logger.info("Iterating users with Node.load(None) as their email_verification")
     for user in get_users_with_none_in_email_verifications():
         user.email_verifications = {}
         count += 1
@@ -30,7 +30,7 @@ def main():
     logger.info('Done with {} users migrated'.format(count))
 
 def get_users_with_none_in_email_verifications():
-    return models.User.find(Q('email_verifications', 'eq', None))
+    return models.User.find(Q('email_verifications', 'eq', Node.load(None)))
 
 if __name__ == '__main__':
     main()

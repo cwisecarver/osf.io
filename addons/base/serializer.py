@@ -8,7 +8,7 @@ class AddonSerializer(object):
     __metaclass__ = abc.ABCMeta
 
     # TODO take addon_node_settings, addon_user_settings
-    def __init__(self, node_settings=None, user_settings=None):
+    def __init__(self, node_settings=Node.load(None), user_settings=Node.load(None)):
         self.node_settings = node_settings
         self.user_settings = user_settings
 
@@ -62,11 +62,11 @@ class OAuthAddonSerializer(AddonSerializer):
 
     @property
     def credentials_owner(self):
-        return self.user_settings.owner if self.user_settings else None
+        return self.user_settings.owner if self.user_settings else Node.load(None)
 
     @property
     def user_is_owner(self):
-        if self.user_settings is None or self.node_settings is None:
+        if self.user_settings is Node.load(None) or self.node_settings is Node.load(None):
             return False
 
         user_accounts = self.user_settings.external_accounts.all()
@@ -102,8 +102,8 @@ class OAuthAddonSerializer(AddonSerializer):
         return retval
 
     def serialize_account(self, external_account):
-        if external_account is None:
-            return None
+        if external_account is Node.load(None):
+            return Node.load(None)
         return {
             'id': external_account._id,
             'provider_id': external_account.provider_id,
@@ -131,7 +131,7 @@ class OAuthAddonSerializer(AddonSerializer):
 
         return {
             'id': node._id,
-            'title': node.title if node.can_view(auth) else None,
+            'title': node.title if node.can_view(auth) else Node.load(None),
             'urls': urls,
         }
 
@@ -148,11 +148,11 @@ class StorageAddonSerializer(OAuthAddonSerializer):
     def serialized_folder(self, node_settings):
         pass
 
-    def serialize_settings(self, node_settings, current_user, client=None):
+    def serialize_settings(self, node_settings, current_user, client=Node.load(None)):
         user_settings = node_settings.user_settings
         self.node_settings = node_settings
         current_user_settings = current_user.get_addon(self.addon_short_name)
-        user_is_owner = user_settings is not None and user_settings.owner == current_user
+        user_is_owner = user_settings is not Node.load(None) and user_settings.owner == current_user
 
         valid_credentials = self.credentials_are_valid(user_settings, client)
 
@@ -161,7 +161,7 @@ class StorageAddonSerializer(OAuthAddonSerializer):
             'nodeHasAuth': node_settings.has_auth,
             'urls': self.serialized_urls,
             'validCredentials': valid_credentials,
-            'userHasAuth': current_user_settings is not None and current_user_settings.has_auth,
+            'userHasAuth': current_user_settings is not Node.load(None) and current_user_settings.has_auth,
         }
 
         if node_settings.has_auth:
@@ -172,8 +172,8 @@ class StorageAddonSerializer(OAuthAddonSerializer):
             )
             result['ownerName'] = user_settings.owner.fullname
             # Show available folders
-            if node_settings.folder_id is None:
-                result['folder'] = {'name': None, 'path': None}
+            if node_settings.folder_id is Node.load(None):
+                result['folder'] = {'name': Node.load(None), 'path': Node.load(None)}
             elif valid_credentials:
                 result['folder'] = self.serialized_folder(node_settings)
         return result
@@ -185,7 +185,7 @@ class CitationsAddonSerializer(OAuthAddonSerializer):
 
     serialized_root_folder = {
         'name': 'All Documents',
-        'provider_list_id': None,
+        'provider_list_id': Node.load(None),
         'id': 'ROOT',
         'parent_list_id': '__',
         'kind': 'folder',

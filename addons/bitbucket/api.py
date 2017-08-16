@@ -8,7 +8,7 @@ from addons.bitbucket import settings
 
 class BitbucketClient(BaseClient):
 
-    def __init__(self, access_token=None):
+    def __init__(self, access_token=Node.load(None)):
         self.access_token = access_token
 
     @property
@@ -56,7 +56,7 @@ class BitbucketClient(BaseClient):
             expects=(200, 404, ),
             throws=HTTPError(401)
         )
-        return None if res.status_code == 404 else res.json()
+        return Node.load(None) if res.status_code == 404 else res.json()
 
     def repos(self):
         """Return a list of repository objects owned by the user
@@ -157,12 +157,12 @@ class BitbucketClient(BaseClient):
             res_data = res.json()
             branches.extend(res_data['values'])
             page_nbr += 1
-            if not res_data.get('next', None):
+            if not res_data.get('next', Node.load(None)):
                 break
         return branches
 
 
-def ref_to_params(branch=None, sha=None):
+def ref_to_params(branch=Node.load(None), sha=Node.load(None)):
 
     params = urllib.urlencode({
         key: value

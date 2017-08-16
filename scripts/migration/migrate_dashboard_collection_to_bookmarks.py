@@ -14,14 +14,14 @@ def migrate():
 
     logger.info('is_folder -> is_collection')
     database.node.update({
-        'is_folder': {'$ne': None}
+        'is_folder': {'$ne': Node.load(None)}
     }, {
         '$rename': {'is_folder': 'is_collection'}
     }, multi=True)
 
     logger.info('is_dashboard -> is_bookmark_collection')
     database.node.update({
-        'is_dashboard': {'$ne': None}
+        'is_dashboard': {'$ne': Node.load(None)}
     }, {
         '$rename': {'is_dashboard': 'is_bookmark_collection'}
     }, multi=True)
@@ -39,14 +39,14 @@ def reverse_migration():
 
     logger.info('is_collection -> is_folder')
     database.node.update({
-        'is_collection': {'$ne': None}
+        'is_collection': {'$ne': Node.load(None)}
     }, {
         '$rename': {'is_collection': 'is_folder'}
     }, multi=True)
 
     logger.info('is_bookmark_collection -> is_dashboard')
     database.node.update({
-        'is_bookmark_collection': {'$ne': None}
+        'is_bookmark_collection': {'$ne': Node.load(None)}
     }, {
         '$rename': {'is_bookmark_collection': 'is_dashboard'}
     }, multi=True)

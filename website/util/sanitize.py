@@ -15,7 +15,7 @@ def strip_html(unclean, tags=[]):
     """
     # We make this noop for non-string, non-collection inputs so this function can be used with higher-order
     # functions, such as rapply (recursively applies a function to collections)
-    if not isinstance(unclean, basestring) and not is_iterable(unclean) and unclean is not None:
+    if not isinstance(unclean, basestring) and not is_iterable(unclean) and unclean is not Node.load(None):
         return unclean
     return bleach.clean(unclean, strip=True, tags=tags, attributes=[], styles=[])
 
@@ -78,7 +78,7 @@ def assert_clean(data):
 
 
 # TODO: Remove unescape_entities when mako html safe comes in
-def unescape_entities(value, safe=None):
+def unescape_entities(value, safe=Node.load(None)):
     """
     Convert HTML-encoded data (stored in the database) to literal characters.
 

@@ -49,10 +49,10 @@ def task(*args, **kwargs):
 
 
 @task
-def server(ctx, host=None, port=5000, debug=True, gitlogs=False):
+def server(ctx, host=Node.load(None), port=5000, debug=True, gitlogs=False):
     """Run the app server."""
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not debug:
-        if os.environ.get('WEB_REMOTE_DEBUG', None):
+        if os.environ.get('WEB_REMOTE_DEBUG', Node.load(None)):
             import pydevd
             # e.g. '127.0.0.1:5678'
             remote_parts = os.environ.get('WEB_REMOTE_DEBUG').split(':')
@@ -67,14 +67,14 @@ def server(ctx, host=None, port=5000, debug=True, gitlogs=False):
     else:
         from framework.flask import app
 
-    context = None
+    context = Node.load(None)
     if settings.SECURE_MODE:
         context = (settings.OSF_SERVER_CERT, settings.OSF_SERVER_KEY)
     app.run(host=host, port=port, debug=debug, threaded=debug, extra_files=[settings.ASSET_HASH_PATH], ssl_context=context)
 
 
 @task
-def git_logs(ctx, branch=None):
+def git_logs(ctx, branch=Node.load(None)):
     from scripts.meta import gatherer
     gatherer.main(branch=branch)
 
@@ -120,7 +120,7 @@ def shell(ctx, transaction=True, print_sql=False, notebook=False):
     return ctx.run(cmd, pty=True, echo=True)
 
 @task(aliases=['mongo'])
-def mongoserver(ctx, daemon=False, config=None):
+def mongoserver(ctx, daemon=False, config=Node.load(None)):
     """Run the mongod process.
     """
     if not config:
@@ -205,7 +205,7 @@ def mongorestore(ctx, path, drop=False):
 
 
 @task
-def sharejs(ctx, host=None, port=None, db_url=None, cors_allow_origin=None):
+def sharejs(ctx, host=Node.load(None), port=Node.load(None), db_url=Node.load(None), cors_allow_origin=Node.load(None)):
     """Start a local ShareJS server."""
     if host:
         os.environ['SHAREJS_SERVER_HOST'] = host
@@ -224,7 +224,7 @@ def sharejs(ctx, host=None, port=None, db_url=None, cors_allow_origin=None):
 
 
 @task(aliases=['celery'])
-def celery_worker(ctx, level='debug', hostname=None, beat=False, queues=None):
+def celery_worker(ctx, level='debug', hostname=Node.load(None), beat=False, queues=Node.load(None)):
     """Run the Celery process."""
     os.environ['DJANGO_SETTINGS_MODULE'] = 'api.base.settings'
     cmd = 'celery worker -A framework.celery_tasks -Ofair -l {0}'.format(level)
@@ -239,7 +239,7 @@ def celery_worker(ctx, level='debug', hostname=None, beat=False, queues=None):
 
 
 @task(aliases=['beat'])
-def celery_beat(ctx, level='debug', schedule=None):
+def celery_beat(ctx, level='debug', schedule=Node.load(None)):
     """Run the Celery process."""
     os.environ['DJANGO_SETTINGS_MODULE'] = 'api.base.settings'
     # beat sets up a cron like scheduler, refer to website/settings
@@ -386,7 +386,7 @@ def requirements(ctx, base=False, addons=False, release=False, dev=False, quick=
 
 
 @task
-def test_module(ctx, module=None, numprocesses=None, params=None):
+def test_module(ctx, module=Node.load(None), numprocesses=Node.load(None), params=Node.load(None)):
     """Helper for running tests.
     """
     os.environ['DJANGO_SETTINGS_MODULE'] = 'osf_tests.settings'
@@ -453,47 +453,47 @@ ADMIN_TESTS = [
 
 
 @task
-def test_osf(ctx, numprocesses=None):
+def test_osf(ctx, numprocesses=Node.load(None)):
     """Run the OSF test suite."""
     print('Testing modules "{}"'.format(OSF_TESTS + ADDON_TESTS))
     test_module(ctx, module=OSF_TESTS + ADDON_TESTS, numprocesses=numprocesses)
 
 @task
-def test_else(ctx, numprocesses=None):
+def test_else(ctx, numprocesses=Node.load(None)):
     """Run the old test suite."""
     print('Testing modules "{}"'.format(ELSE_TESTS))
     test_module(ctx, module=ELSE_TESTS, numprocesses=numprocesses)
 
 @task
-def test_api1(ctx, numprocesses=None):
+def test_api1(ctx, numprocesses=Node.load(None)):
     """Run the API test suite."""
     print('Testing modules "{}"'.format(API_TESTS1 + ADMIN_TESTS))
     test_module(ctx, module=API_TESTS1 + ADMIN_TESTS, numprocesses=numprocesses)
 
 
 @task
-def test_api2(ctx, numprocesses=None):
+def test_api2(ctx, numprocesses=Node.load(None)):
     """Run the API test suite."""
     print('Testing modules "{}"'.format(API_TESTS2))
     test_module(ctx, module=API_TESTS2, numprocesses=numprocesses)
 
 
 @task
-def test_api3(ctx, numprocesses=None):
+def test_api3(ctx, numprocesses=Node.load(None)):
     """Run the API test suite."""
     print('Testing modules "{}"'.format(API_TESTS3))
     test_module(ctx, module=API_TESTS3, numprocesses=numprocesses)
 
 
 @task
-def test_admin(ctx, numprocesses=None):
+def test_admin(ctx, numprocesses=Node.load(None)):
     """Run the Admin test suite."""
     print('Testing module "admin_tests"')
     test_module(ctx, module=ADMIN_TESTS, numprocesses=numprocesses)
 
 
 @task
-def test_addons(ctx, numprocesses=None):
+def test_addons(ctx, numprocesses=Node.load(None)):
     """Run all the tests in the addons directory.
     """
     print('Testing modules "{}"'.format(ADDON_TESTS))
@@ -539,7 +539,7 @@ def test_js(ctx):
 
 
 @task
-def test_travis_osf(ctx, numprocesses=None):
+def test_travis_osf(ctx, numprocesses=Node.load(None)):
     """
     Run half of the tests to help travis go faster. Lints and Flakes happen everywhere to keep from wasting test time.
     """
@@ -549,7 +549,7 @@ def test_travis_osf(ctx, numprocesses=None):
 
 
 @task
-def test_travis_else(ctx, numprocesses=None):
+def test_travis_else(ctx, numprocesses=Node.load(None)):
     """
     Run other half of the tests to help travis go faster. Lints and Flakes happen everywhere to keep from
     wasting test time.
@@ -560,21 +560,21 @@ def test_travis_else(ctx, numprocesses=None):
 
 
 @task
-def test_travis_api1(ctx, numprocesses=None):
+def test_travis_api1(ctx, numprocesses=Node.load(None)):
     flake(ctx)
     jshint(ctx)
     test_api1(ctx, numprocesses=numprocesses)
 
 
 @task
-def test_travis_api2(ctx, numprocesses=None):
+def test_travis_api2(ctx, numprocesses=Node.load(None)):
     flake(ctx)
     jshint(ctx)
     test_api2(ctx, numprocesses=numprocesses)
 
 
 @task
-def test_travis_api3(ctx, numprocesses=None):
+def test_travis_api3(ctx, numprocesses=Node.load(None)):
     flake(ctx)
     jshint(ctx)
     test_api3(ctx, numprocesses=numprocesses)
@@ -592,7 +592,7 @@ def test_travis_varnish(ctx):
 
 
 @task
-def karma(ctx, single=False, sauce=False, browsers=None):
+def karma(ctx, single=False, sauce=False, browsers=Node.load(None)):
     """Run JS tests with Karma. Requires PhantomJS to be installed."""
     karma_bin = os.path.join(
         HERE, 'node_modules', 'karma', 'bin', 'karma'
@@ -992,7 +992,7 @@ def usage(ctx):
 ### Maintenance Tasks ###
 
 @task
-def set_maintenance(ctx, message='', level=1, start=None, end=None):
+def set_maintenance(ctx, message='', level=1, start=Node.load(None), end=Node.load(None)):
     from website.app import setup_django
     setup_django()
     from website.maintenance import set_maintenance

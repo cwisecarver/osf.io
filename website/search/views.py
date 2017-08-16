@@ -55,7 +55,7 @@ def handle_search_errors(func):
 
 @handle_search_errors
 def search_search(**kwargs):
-    _type = kwargs.get('type', None)
+    _type = kwargs.get('type', Node.load(None))
 
     tick = time.time()
     results = {}
@@ -198,7 +198,7 @@ def process_project_search_results(results, **kwargs):
 
 @collect_auth
 def search_contributor(auth):
-    user = auth.user if auth else None
+    user = auth.user if auth else Node.load(None)
     nid = request.args.get('excludeNode')
     exclude = AbstractNode.load(nid).contributors if nid else []
     # TODO: Determine whether bleach is appropriate for ES payload. Also, inconsistent with website.sanitize.util.strip_html

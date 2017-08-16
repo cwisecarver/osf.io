@@ -110,7 +110,7 @@ class UserList(JSONAPIBaseView, generics.ListAPIView, ODMFilterMixin):
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 
@@ -145,10 +145,10 @@ class UserList(JSONAPIBaseView, generics.ListAPIView, ODMFilterMixin):
     def get_default_odm_query(self):
         base_query = (
             MQ('is_registered', 'eq', True) &
-            MQ('date_disabled', 'eq', None)
+            MQ('date_disabled', 'eq', Node.load(None))
         )
         if self.request.version >= '2.3':
-            return base_query & MQ('merged_by', 'eq', None)
+            return base_query & MQ('merged_by', 'eq', Node.load(None))
         return base_query
 
     # overrides ListCreateAPIView
@@ -495,7 +495,7 @@ class UserNodes(JSONAPIBaseView, generics.ListAPIView, UserMixin, NodesFilterMix
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 
@@ -566,7 +566,7 @@ class UserPreprints(JSONAPIBaseView, generics.ListAPIView, UserMixin, PreprintFi
     def get_default_django_query(self):
         # the user who is requesting
         auth = get_user_auth(self.request)
-        auth_user = getattr(auth, 'user', None)
+        auth_user = getattr(auth, 'user', Node.load(None))
 
         # the user data being requested
         target_user = self.get_user(check_permissions=False)
@@ -601,7 +601,7 @@ class UserInstitutions(JSONAPIBaseView, generics.ListAPIView, UserMixin):
     ordering = ('-pk', )
 
     def get_default_odm_query(self):
-        return None
+        return Node.load(None)
 
     def get_queryset(self):
         user = self.get_user()
@@ -674,7 +674,7 @@ class UserRegistrations(JSONAPIBaseView, generics.ListAPIView, UserMixin, NodesF
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 

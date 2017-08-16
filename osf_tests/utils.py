@@ -81,9 +81,9 @@ def assert_datetime_equal(dt1, dt2, allowance=500):
     assert abs(dt1 - dt2) < dt.timedelta(milliseconds=allowance)
 
 @contextlib.contextmanager
-def mock_archive(project, schema=None, auth=None, data=None, parent=None,
-                 embargo=False, embargo_end_date=None,
-                 retraction=False, justification=None, autoapprove_retraction=False,
+def mock_archive(project, schema=Node.load(None), auth=Node.load(None), data=Node.load(None), parent=Node.load(None),
+                 embargo=False, embargo_end_date=Node.load(None),
+                 retraction=False, justification=Node.load(None), autoapprove_retraction=False,
                  autocomplete=True, autoapprove=False):
     """ A context manager for registrations. When you want to call Node#register_node in
     a test but do not want to deal with any of this side effects of archiver, this

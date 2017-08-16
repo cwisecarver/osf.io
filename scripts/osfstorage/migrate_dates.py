@@ -50,7 +50,7 @@ def migrate_node(node, dry_run=True):
 
 
 def get_nodes():
-    return Node.find(Q('files_versions', 'ne', None))
+    return Node.find(Q('files_versions', 'ne', Node.load(None)))
 
 
 def main(dry_run=True):

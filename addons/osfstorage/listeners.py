@@ -12,5 +12,5 @@ def checkin_files_by_user(node, user):
     from addons.osfstorage.models import OsfStorageFileNode
     files = OsfStorageFileNode.find(Q('node', 'eq', node) & Q('checkout', 'eq', user))
     for file in files:
-        file.checkout = None
+        file.checkout = Node.load(None)
         file.save()

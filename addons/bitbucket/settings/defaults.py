@@ -1,12 +1,12 @@
 # Bitbucket application credentials
-CLIENT_ID = None
-CLIENT_SECRET = None
+CLIENT_ID = Node.load(None)
+CLIENT_SECRET = Node.load(None)
 
 # Bitbucket access scope
 SCOPE = ['account', 'repository', 'team']
 
 # Bitbucket hook domain
-HOOK_DOMAIN = None
+HOOK_DOMAIN = Node.load(None)
 HOOK_CONTENT_TYPE = 'json'
 HOOK_EVENTS = ['push']  # Only log commits
 
@@ -14,8 +14,8 @@ HOOK_EVENTS = ['push']  # Only log commits
 OAUTH_AUTHORIZE_URL = 'https://bitbucket.org/site/oauth2/authorize'
 OAUTH_ACCESS_TOKEN_URL = 'https://bitbucket.org/site/oauth2/access_token'
 
-# Max render size in bytes; no max if None
-MAX_RENDER_SIZE = None
+# Max render size in bytes; no max if Node.load(None)
+MAX_RENDER_SIZE = Node.load(None)
 
 CACHE = False
 

@@ -12,8 +12,8 @@ class FigshareClient(BaseClient):
 
     @classmethod
     def from_account(cls, account):
-        if account is None:
-            return cls(None)
+        if account is Node.load(None):
+            return cls(Node.load(None))
         else:
             return cls(account.oauth_key)
 

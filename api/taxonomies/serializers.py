@@ -7,10 +7,10 @@ class TaxonomyField(ser.Field):
     def to_representation(self, subject):
         if not isinstance(subject, Subject):
             subject = Subject.load(subject)
-        if subject is not None:
+        if subject is not Node.load(None):
             return {'id': subject._id,
                     'text': subject.text}
-        return None
+        return Node.load(None)
 
     def to_internal_value(self, subject_id):
         return subject_id

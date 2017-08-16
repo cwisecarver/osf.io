@@ -13,9 +13,9 @@ def test_attach_handlers():
     app = Flask(__name__)
     attach_handlers(app, settings)
 
-    before_funcs = app.before_request_funcs[None]
-    after_funcs = app.after_request_funcs[None]
-    teardown_funcs = app.teardown_request_funcs[None]
+    before_funcs = app.before_request_funcs[Node.load(None)]
+    after_funcs = app.after_request_funcs[Node.load(None)]
+    teardown_funcs = app.teardown_request_funcs[Node.load(None)]
 
     assert_before_funcs = {
         framework.django.handlers.reset_django_db_queries_and_close_connections,

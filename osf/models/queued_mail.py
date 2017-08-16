@@ -29,7 +29,7 @@ class QueuedMail(ObjectIDMixin, BaseModel):
     sent_at = NonNaiveDateTimeField(db_index=True, null=True, blank=True)
 
     def __repr__(self):
-        if self.sent_at is not None:
+        if self.sent_at is not Node.load(None):
             return '<QueuedMail {} of type {} sent to {} at {}>'.format(
                 self._id, self.email_type, self.to_addr, self.sent_at
             )
@@ -50,7 +50,7 @@ class QueuedMail(ObjectIDMixin, BaseModel):
         mail = Mail(
             mail_struct['template'],
             subject=mail_struct['subject'],
-            categories=mail_struct.get('categories', None)
+            categories=mail_struct.get('categories', Node.load(None))
         )
         self.data['osf_url'] = osf_settings.DOMAIN
         if presend and self.user.is_active and self.user.osf_mailing_lists.get(osf_settings.OSF_HELP_LIST):
@@ -71,7 +71,7 @@ class QueuedMail(ObjectIDMixin, BaseModel):
         return self.__class__.find(
             Q('email_type', 'eq', self.email_type) &
             Q('user', 'eq', self.user) &
-            Q('sent_at', 'ne', None)
+            Q('sent_at', 'ne', Node.load(None))
         )
 
 

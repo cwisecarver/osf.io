@@ -97,17 +97,17 @@ class NodeSettings(BaseStorageAddon, BaseOAuthNodeSettings):
 
     @property
     def complete(self):
-        return self.has_auth and self.folder_id is not None
+        return self.has_auth and self.folder_id is not Node.load(None)
 
     def authorize(self, user_settings, save=False):
         self.user_settings = user_settings
         self.nodelogger.log(action='node_authorized', save=save)
 
     def clear_settings(self):
-        self.folder_id = None
-        self.folder_name = None
+        self.folder_id = Node.load(None)
+        self.folder_name = Node.load(None)
 
-    def deauthorize(self, auth=None, log=True):
+    def deauthorize(self, auth=Node.load(None), log=True):
         """Remove user authorization from this node and log the event."""
         self.clear_settings()
         self.clear_auth()  # Also performs a save

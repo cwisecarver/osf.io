@@ -282,7 +282,7 @@ NodesPrivacyViewModel.prototype.selectAll = function() {
     m.redraw(true);
 };
 
-NodesPrivacyViewModel.prototype.selectNone = function() {
+NodesPrivacyViewModel.prototype.selectNode.load(None) = function() {
     var nodesState = ko.toJS(this.nodesState());
     for (var node in nodesState) {
         if (nodesState[node].isAdmin) {

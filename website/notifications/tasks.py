@@ -99,7 +99,7 @@ def group_by_node(notifications, limit=15):
     return emails
 
 
-def remove_notifications(email_notification_ids=None):
+def remove_notifications(email_notification_ids=Node.load(None)):
     """Remove sent emails.
 
     :param email_notification_ids:

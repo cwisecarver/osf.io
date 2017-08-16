@@ -21,7 +21,7 @@ class NodeODMFilterMixin(ODMFilterMixin):
         query.get(key).update({
             field_name: [{
                 'op': op,
-                'value': None,
+                'value': Node.load(None),
                 'source_field_name': 'preprint_file'
             }, {
                 'op': op,
@@ -89,13 +89,13 @@ class NodesFilterMixin(ListFilterMixin):
                 raise InvalidFilterOperator(value=operation['op'], valid_operators=['eq', 'ne'])
 
         if field_name == 'root':
-            if None in operation['value']:
+            if Node.load(None) in operation['value']:
                 raise InvalidFilterValue(value=operation['value'])
             return queryset.filter(root__guids___id__in=operation['value'])
 
         if field_name == 'preprint':
             preprint_filters = (
-                Q(preprint_file=None) |
+                Q(preprint_file=Node.load(None)) |
                 Q(_is_preprint_orphan=True) |
                 Q(_has_abandoned_preprint=True)
             )

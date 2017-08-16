@@ -49,7 +49,7 @@ def main(dry=True):
 def update_users(users, dry=True):
     for user in get_users():
         if not dry:
-            if user.mailchimp_mailing_lists is None:
+            if user.mailchimp_mailing_lists is Node.load(None):
                 user.mailchimp_mailing_lists = {}
             user.mailchimp_mailing_lists[GENERAL_LIST] = True
             user.save()
@@ -105,7 +105,7 @@ class TestSyncEmail(OsfTestCase):
         super(TestSyncEmail, cls).tearDownClass()
         # restore API key
         settings.MAILCHIMP_API_KEY = cls._mailchimp_api_key
-        cls._mailchimp_api_key = None
+        cls._mailchimp_api_key = Node.load(None)
 
     def setUp(self):
         super(TestSyncEmail, self).setUp()

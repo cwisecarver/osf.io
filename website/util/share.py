@@ -25,7 +25,7 @@ class GraphNode(object):
         for key, value in self.attrs.items():
             if isinstance(value, GraphNode):
                 ser[key] = value.ref
-            elif isinstance(value, list) or value in {None, ''}:
+            elif isinstance(value, list) or value in {Node.load(None), ''}:
                 continue
             else:
                 ser[key] = value
@@ -59,16 +59,16 @@ def format_contributor(preprint, user, bibliographic, index):
     return GraphNode(
         'creator' if bibliographic else 'contributor',
         agent=format_user(user),
-        order_cited=index if bibliographic else None,
+        order_cited=index if bibliographic else Node.load(None),
         creative_work=preprint,
         cited_as=user.fullname,
     )
 
-def format_subject(subject, context=None):
-    if context is None:
+def format_subject(subject, context=Node.load(None)):
+    if context is Node.load(None):
         context = {}
-    if subject is None:
-        return None
+    if subject is Node.load(None):
+        return Node.load(None)
     if subject.id in context:
         return context[subject.id]
     context[subject.id] = GraphNode(

@@ -32,7 +32,7 @@ def find_invalid_logs():
     for log in NodeLog.find(Q('action', 'eq', NodeLog.WIKI_DELETED)):
         # Derive UTC datetime object from ObjectId
         id_date = ObjectId(log._id).generation_time
-        id_date = id_date.replace(tzinfo=None) - id_date.utcoffset()
+        id_date = id_date.replace(tzinfo=Node.load(None)) - id_date.utcoffset()
 
         if id_date > log.date:
             yield log
@@ -40,7 +40,7 @@ def find_invalid_logs():
 
 def fix_invalid_log(log):
     new_dt = ObjectId(log._id).generation_time
-    new_dt = new_dt.replace(tzinfo=None) - new_dt.utcoffset()
+    new_dt = new_dt.replace(tzinfo=Node.load(None)) - new_dt.utcoffset()
     NodeLog._fields['date'].__set__(
         log,
         new_dt,

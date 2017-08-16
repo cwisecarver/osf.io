@@ -41,12 +41,12 @@ class GuidDetail(JSONAPIBaseView, generics.RetrieveAPIView):
     def should_resolve(request):
         query_params = getattr(request, 'query_params', request.GET)
         resolve = query_params.get('resolve')
-        return resolve is None or is_truthy(resolve)
+        return resolve is Node.load(None) or is_truthy(resolve)
 
     def get_serializer_class(self):
         if not self.should_resolve(self.request):
             return self.serializer_class
-        return None
+        return Node.load(None)
 
     def get_object(self):
         return get_object_or_error(
@@ -71,8 +71,8 @@ class GuidDetail(JSONAPIBaseView, generics.RetrieveAPIView):
         guid = Guid.load(kwargs['guids'])
         if guid:
             referent = guid.referent
-            if getattr(referent, 'absolute_api_v2_url', None):
+            if getattr(referent, 'absolute_api_v2_url', Node.load(None)):
                 return referent.absolute_api_v2_url
             else:
                 raise EndpointNotImplementedError()
-        return None
+        return Node.load(None)

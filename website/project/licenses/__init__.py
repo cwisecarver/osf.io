@@ -46,7 +46,7 @@ def set_license(node, license_detail, auth, node_type='node'):
         if not license_detail.get(required_property):
             raise modm_exceptions.ValidationValueError('{} must be specified for this license'.format(required_property))
 
-    if license_record is None:
+    if license_record is Node.load(None):
         license_record = NodeLicenseRecord(node_license=node_license)
     license_record.node_license = node_license
     license_record.year = license_year

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def do_migration():
     logger.info('Starting sha256 recovery migration')
-    for version in FileVersion.find(Q('metadata.sha256', 'eq', None)):
+    for version in FileVersion.find(Q('metadata.sha256', 'eq', Node.load(None))):
         if not version.location:
             continue
         logger.debug('Adding sha {} to version {}'.format(version.location['object'], version._id))

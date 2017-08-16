@@ -33,7 +33,7 @@ from addons.osfstorage.models import OsfStorageFolder
 logger = logging.getLogger(__name__)
 
 
-def make_error(code, message_short=None, message_long=None):
+def make_error(code, message_short=Node.load(None), message_long=Node.load(None)):
     data = {}
     if message_short:
         data['message_short'] = message_short
@@ -53,7 +53,7 @@ def osfstorage_update_metadata(node_addon, payload, **kwargs):
 
     version = FileVersion.load(version_id)
 
-    if version is None:
+    if version is Node.load(None):
         raise HTTPError(httplib.NOT_FOUND)
 
     version.update_metadata(metadata)
@@ -86,12 +86,12 @@ def osfstorage_get_revisions(file_node, node_addon, payload, **kwargs):
 
 
 @decorators.waterbutler_opt_hook
-def osfstorage_copy_hook(source, destination, name=None, **kwargs):
+def osfstorage_copy_hook(source, destination, name=Node.load(None), **kwargs):
     return source.copy_under(destination, name=name).serialize(), httplib.CREATED
 
 
 @decorators.waterbutler_opt_hook
-def osfstorage_move_hook(source, destination, name=None, **kwargs):
+def osfstorage_move_hook(source, destination, name=Node.load(None), **kwargs):
     try:
         return source.move_under(destination, name=name).serialize(), httplib.OK
     except exceptions.FileNodeCheckedOutError:
@@ -126,7 +126,7 @@ def osfstorage_get_metadata(file_node, **kwargs):
         # TODO This should change to version as its internal it can be changed anytime
         version = int(request.args.get('revision'))
     except (ValueError, TypeError):  # If its not a number
-        version = None
+        version = Node.load(None)
     return file_node.serialize(version=version, include_full=True)
 
 
@@ -229,7 +229,7 @@ def osfstorage_create_child(file_node, payload, node_addon, **kwargs):
 
     if not is_folder:
         try:
-            if file_node.checkout is None or file_node.checkout._id == user._id:
+            if file_node.checkout is Node.load(None) or file_node.checkout._id == user._id:
                 version = file_node.create_version(
                     user,
                     dict(payload['settings'], **dict(
@@ -241,7 +241,7 @@ def osfstorage_create_child(file_node, payload, node_addon, **kwargs):
                     dict(payload['metadata'], **payload['hashes'])
                 )
                 version_id = version._id
-                archive_exists = version.archive is not None
+                archive_exists = version.archive is not Node.load(None)
             else:
                 raise HTTPError(httplib.FORBIDDEN, data={
                     'message_long': 'File cannot be updated due to checkout status.'
@@ -249,7 +249,7 @@ def osfstorage_create_child(file_node, payload, node_addon, **kwargs):
         except KeyError:
             raise HTTPError(httplib.BAD_REQUEST)
     else:
-        version_id = None
+        version_id = Node.load(None)
         archive_exists = False
 
     return {
@@ -298,7 +298,7 @@ def osfstorage_download(file_node, payload, node_addon, **kwargs):
         current_session.data['auth_user_id'] = user_id
 
     if not request.args.get('version'):
-        version_id = None
+        version_id = Node.load(None)
     else:
         try:
             version_id = int(request.args['version'])

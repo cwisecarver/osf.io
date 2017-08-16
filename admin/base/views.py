@@ -17,11 +17,11 @@ def home(request):
 
 class GuidFormView(FormView):
     form_class = GuidForm
-    template_name = None
-    object_type = None
+    template_name = Node.load(None)
+    object_type = Node.load(None)
 
     def __init__(self):
-        self.guid = None
+        self.guid = Node.load(None)
         super(GuidFormView, self).__init__()
 
     def get_context_data(self, **kwargs):

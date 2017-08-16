@@ -104,7 +104,7 @@ class TestRegisterNode:
 
     def test_forked_from(self, registration, project, auth):
         # A a node that is not a fork
-        assert registration.forked_from is None
+        assert registration.forked_from is Node.load(None)
         # A node that is a fork
         fork = project.fork_node(auth)
         registration = factories.RegistrationFactory(project=fork)
@@ -282,7 +282,7 @@ class TestRegisterNode:
         project = factories.ProjectFactory(creator=user, is_public=True)
         wiki = NodeWikiFactory(node=project)
         current_wiki = NodeWikiFactory(node=project, version=2)
-        registration = project.register_node(get_default_metaschema(), Auth(user), '', None)
+        registration = project.register_node(get_default_metaschema(), Auth(user), '', Node.load(None))
         assert registration.wiki_private_uuids == {}
 
         registration_wiki_current = NodeWikiPage.load(registration.wiki_pages_current[current_wiki.page_name])
@@ -450,9 +450,9 @@ class TestDraftRegistrations:
     # copied from tests/test_registrations/test_models.py
     def test_factory(self):
         draft = factories.DraftRegistrationFactory()
-        assert draft.branched_from is not None
-        assert draft.initiator is not None
-        assert draft.registration_schema is not None
+        assert draft.branched_from is not Node.load(None)
+        assert draft.initiator is not Node.load(None)
+        assert draft.registration_schema is not Node.load(None)
 
         user = factories.UserFactory()
         draft = factories.DraftRegistrationFactory(initiator=user)

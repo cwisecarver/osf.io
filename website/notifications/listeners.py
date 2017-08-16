@@ -9,16 +9,16 @@ logger = logging.getLogger(__name__)
 @project_created.connect
 def subscribe_creator(node):
     if node.is_collection or node.is_deleted:
-        return None
+        return Node.load(None)
     try:
         subscribe_user_to_notifications(node, node.creator)
     except InvalidSubscriptionError as err:
-        user = node.creator._id if node.creator else 'None'
+        user = node.creator._id if node.creator else 'Node.load(None)'
         logger.warn('Skipping subscription of user {} to node {}'.format(user, node._id))
         logger.warn('Reason: {}'.format(str(err)))
 
 @contributor_added.connect
-def subscribe_contributor(node, contributor, auth=None, *args, **kwargs):
+def subscribe_contributor(node, contributor, auth=Node.load(None), *args, **kwargs):
     try:
         subscribe_user_to_notifications(node, contributor)
     except InvalidSubscriptionError as err:

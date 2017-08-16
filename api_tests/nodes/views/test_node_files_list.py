@@ -20,9 +20,9 @@ from osf_tests.factories import (
 
 
 def prepare_mock_wb_response(
-        node=None,
+        node=Node.load(None),
         provider='github',
-        files=None,
+        files=Node.load(None),
         folder=True,
         path='/',
         method=httpretty.GET,
@@ -44,14 +44,14 @@ def prepare_mock_wb_response(
     wb_url = waterbutler_api_url_for(node._id, provider=provider, path=path, meta=True)
 
     default_file = {
-        u'contentType': None,
+        u'contentType': Node.load(None),
         u'extra': {u'downloads': 0, u'version': 1},
         u'kind': u'file',
-        u'modified': None,
+        u'modified': Node.load(None),
         u'name': u'NewFile',
         u'path': u'/NewFile',
         u'provider': provider,
-        u'size': None,
+        u'size': Node.load(None),
         u'materialized': '/',
     }
 
@@ -117,7 +117,7 @@ class TestNodeFilesList(ApiTestCase):
         addon.user_settings.oauth_grants[self.project._id] = {oauth_settings._id: []}
         addon.user_settings.save()
 
-    def _prepare_mock_wb_response(self, node=None, **kwargs):
+    def _prepare_mock_wb_response(self, node=Node.load(None), **kwargs):
         prepare_mock_wb_response(node=node or self.project, **kwargs)
 
     def test_returns_public_files_logged_out(self):

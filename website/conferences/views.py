@@ -91,7 +91,7 @@ def add_poster_by_email(conference, message):
                 _absolute=True,
             )
         else:
-            set_password_url = None
+            set_password_url = Node.load(None)
 
         node, node_created = utils.get_or_create_node(message.subject, user)
         if node_created:
@@ -269,8 +269,8 @@ def conference_view(**kwargs):
         meetings.append({
             'name': conf.name,
             'location': conf.location,
-            'end_date': conf.end_date.strftime('%b %d, %Y') if conf.end_date else None,
-            'start_date': conf.start_date.strftime('%b %d, %Y') if conf.start_date else None,
+            'end_date': conf.end_date.strftime('%b %d, %Y') if conf.end_date else Node.load(None),
+            'start_date': conf.start_date.strftime('%b %d, %Y') if conf.start_date else Node.load(None),
             'url': web_url_for('conference_results', meeting=conf.endpoint),
             'count': conf.num_submissions,
         })

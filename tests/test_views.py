@@ -170,7 +170,7 @@ class TestViewingProjectWithPrivateLink(OsfTestCase):
         assert_equal(res.status_code, 200)
 
     def test_not_logged_in_no_key(self):
-        res = self.app.get(self.project_url, {'view_only': None})
+        res = self.app.get(self.project_url, {'view_only': Node.load(None)})
         assert_is_redirect(res)
         res = res.follow(expect_errors=True)
         assert_equal(res.status_code, 301)
@@ -180,7 +180,7 @@ class TestViewingProjectWithPrivateLink(OsfTestCase):
         )
 
     def test_logged_in_no_private_key(self):
-        res = self.app.get(self.project_url, {'view_only': None}, auth=self.user.auth,
+        res = self.app.get(self.project_url, {'view_only': Node.load(None)}, auth=self.user.auth,
                            expect_errors=True)
         assert_equal(res.status_code, http.FORBIDDEN)
 
@@ -245,8 +245,8 @@ class TestViewingProjectWithPrivateLink(OsfTestCase):
         with assert_raises(HTTPError):
             check_can_access(self.project, noncontrib)
 
-    def test_check_user_access_if_user_is_None(self):
-        assert_false(check_can_access(self.project, None))
+    def test_check_user_access_if_user_is_Node.load(None)(self):
+        assert_false(check_can_access(self.project, Node.load(None)))
 
 
 class TestProjectViews(OsfTestCase):
@@ -994,7 +994,7 @@ class TestUserProfile(OsfTestCase):
         self.user.reload()
         for key, value in payload.iteritems():
             assert_equal(self.user.social[key], value)
-        assert_true(self.user.social['researcherId'] is None)
+        assert_true(self.user.social['researcherId'] is Node.load(None))
 
     # Regression test for help-desk ticket
     def test_making_email_primary_is_not_case_sensitive(self):
@@ -1039,7 +1039,7 @@ class TestUserProfile(OsfTestCase):
         )
         assert_equal(res.json.get('twitter'), 'howtopizza')
         assert_equal(res.json.get('profileWebsites'), ['http://www.cos.io', 'http://www.osf.io', 'http://www.wordup.com'])
-        assert_true(res.json.get('github') is None)
+        assert_true(res.json.get('github') is Node.load(None))
         assert_true(res.json['editable'])
 
     def test_serialize_social_not_editable(self):
@@ -1054,7 +1054,7 @@ class TestUserProfile(OsfTestCase):
         )
         assert_equal(res.json.get('twitter'), 'howtopizza')
         assert_equal(res.json.get('profileWebsites'), ['http://www.cos.io', 'http://www.osf.io', 'http://www.wordup.com'])
-        assert_true(res.json.get('github') is None)
+        assert_true(res.json.get('github') is Node.load(None))
         assert_false(res.json['editable'])
 
     def test_serialize_social_addons_editable(self):
@@ -1099,12 +1099,12 @@ class TestUserProfile(OsfTestCase):
             'ongoing': False,
         }, {
             'institution': 'another institution',
-            'department': None,
-            'title': None,
+            'department': Node.load(None),
+            'title': Node.load(None),
             'startMonth': 'May',
             'startYear': '2001',
-            'endMonth': None,
-            'endYear': None,
+            'endMonth': Node.load(None),
+            'endYear': Node.load(None),
             'ongoing': True,
         }]
         payload = {'contents': jobs}
@@ -1132,12 +1132,12 @@ class TestUserProfile(OsfTestCase):
             'ongoing': False,
         }, {
             'institution': 'another institution',
-            'department': None,
-            'degree': None,
+            'department': Node.load(None),
+            'degree': Node.load(None),
             'startMonth': 5,
             'startYear': '2001',
-            'endMonth': None,
-            'endYear': None,
+            'endMonth': Node.load(None),
+            'endYear': Node.load(None),
             'ongoing': True,
         }]
         payload = {'contents': schools}
@@ -1251,7 +1251,7 @@ class TestUserProfile(OsfTestCase):
 
     def test_update_user_locale_none(self):
         assert_equal(self.user.locale, 'en_US')
-        payload = {'locale': None, 'id': self.user._id}
+        payload = {'locale': Node.load(None), 'id': self.user._id}
         url = api_url_for('update_user', uid=self.user._id)
         self.app.put_json(url, payload, auth=self.user.auth)
         self.user.reload()
@@ -1597,7 +1597,7 @@ class TestAddingContributorViews(OsfTestCase):
         res = serialize_unregistered(fullname=name, email=email)
         assert_equal(res['fullname'], name)
         assert_equal(res['email'], email)
-        assert_equal(res['id'], None)
+        assert_equal(res['id'], Node.load(None))
         assert_false(res['registered'])
         assert_true(res['gravatar'])
         assert_false(res['active'])
@@ -1682,7 +1682,7 @@ class TestAddingContributorViews(OsfTestCase):
         reg_user = UserFactory()
         name, email = fake.name(), fake.email()
         pseudouser = {
-            'id': None,
+            'id': Node.load(None),
             'registered': False,
             'fullname': name,
             'email': email,
@@ -1723,7 +1723,7 @@ class TestAddingContributorViews(OsfTestCase):
 
         # An unreg user is added to the project AND its components
         unreg_user = {  # dict because user has not previous unreg record
-            'id': None,
+            'id': Node.load(None),
             'registered': False,
             'fullname': fake.name(),
             'email': fake.email(),
@@ -1803,7 +1803,7 @@ class TestAddingContributorViews(OsfTestCase):
     def test_email_sent_when_unreg_user_is_added(self, send_mail):
         name, email = fake.name(), fake.email()
         pseudouser = {
-            'id': None,
+            'id': Node.load(None),
             'registered': False,
             'fullname': name,
             'email': email,
@@ -1838,7 +1838,7 @@ class TestAddingContributorViews(OsfTestCase):
             node=project,
             referrer_name=self.auth.user.fullname,
             all_global_subscriptions_none=False,
-            branded_service=None,
+            branded_service=Node.load(None),
         )
         assert_almost_equal(contributor.contributor_added_email_records[project._id]['last_sent'], int(time.time()), delta=1)
 
@@ -1866,7 +1866,7 @@ class TestAddingContributorViews(OsfTestCase):
     @mock.patch('website.mails.send_mail')
     def test_registering_project_does_not_send_contributor_added_email(self, send_mail, mock_archive):
         project = ProjectFactory()
-        project.register_node(get_default_metaschema(), Auth(user=project.creator), '', None)
+        project.register_node(get_default_metaschema(), Auth(user=project.creator), '', Node.load(None))
         assert_false(send_mail.called)
 
     @mock.patch('website.mails.send_mail')
@@ -1930,7 +1930,7 @@ class TestAddingContributorViews(OsfTestCase):
         reg_user = UserFactory()
         name = fake.name()
         pseudouser = {
-            'id': None,
+            'id': Node.load(None),
             'registered': False,
             'fullname': name,
             'email': fake.email(),
@@ -1955,7 +1955,7 @@ class TestAddingContributorViews(OsfTestCase):
         reg_user = UserFactory()
         name, email = fake.name(), fake.email()
         pseudouser = {
-            'id': None,
+            'id': Node.load(None),
             'registered': False,
             'fullname': name,
             'email': email,
@@ -1997,7 +1997,7 @@ class TestUserInviteViews(OsfTestCase):
             auth=self.user.auth,
         )
         contrib = res.json['contributor']
-        assert_true(contrib['id'] is None)
+        assert_true(contrib['id'] is Node.load(None))
         assert_equal(contrib['fullname'], name)
         assert_equal(contrib['email'], email)
 
@@ -2038,12 +2038,12 @@ class TestUserInviteViews(OsfTestCase):
     def test_invite_contributor_with_no_email(self):
         name = fake.name()
         res = self.app.post_json(self.invite_url,
-                                 {'fullname': name, 'email': None}, auth=self.user.auth)
+                                 {'fullname': name, 'email': Node.load(None)}, auth=self.user.auth)
         assert_equal(res.status_code, http.OK)
         data = res.json
         assert_equal(data['status'], 'success')
         assert_equal(data['contributor']['fullname'], name)
-        assert_true(data['contributor']['email'] is None)
+        assert_true(data['contributor']['email'] is Node.load(None))
         assert_false(data['contributor']['registered'])
 
     def test_invite_contributor_requires_fullname(self):
@@ -2093,7 +2093,7 @@ class TestUserInviteViews(OsfTestCase):
             email=real_email.lower().strip(),
             fullname=unreg_user.get_unclaimed_record(project._id)['name'],
             node=project,
-            branded_service=None
+            branded_service=Node.load(None)
         )
 
     @mock.patch('website.project.views.contributor.mails.send_mail')
@@ -2137,7 +2137,7 @@ class TestClaimViews(OsfTestCase):
         # project contributor adds an unregistered contributor (without an email) on public project
         unregistered_user = self.project.add_unregistered_contributor(
             fullname=name,
-            email=None,
+            email=Node.load(None),
             auth=Auth(user=self.referrer)
         )
         assert_in(unregistered_user, self.project.contributors)
@@ -2185,7 +2185,7 @@ class TestClaimViews(OsfTestCase):
         # project contributor adds an unregistered contributor (without an email) on public project
         unregistered_user = self.project.add_unregistered_contributor(
             fullname=name,
-            email=None,
+            email=Node.load(None),
             auth=Auth(user=self.referrer)
         )
         assert_in(unregistered_user, self.project.contributors)
@@ -2230,7 +2230,7 @@ class TestClaimViews(OsfTestCase):
         given_name = fake.name()
         invited_user = self.project.add_unregistered_contributor(
             fullname=given_name,
-            email=None,
+            email=Node.load(None),
             auth=Auth(user=self.referrer)
         )
         self.project.save()
@@ -2641,7 +2641,7 @@ class TestPointerViews(OsfTestCase):
         res = self.app.post_json(
             url,
             {'nodeIds': node_ids},
-            auth=None,
+            auth=Node.load(None),
             expect_errors=True
         )
 
@@ -2719,7 +2719,7 @@ class TestPointerViews(OsfTestCase):
         url = self.project.api_url + 'pointer/'
         res = self.app.delete_json(
             url,
-            {'pointerId': None},
+            {'pointerId': Node.load(None)},
             auth=self.user.auth,
             expect_errors=True
         )
@@ -2755,7 +2755,7 @@ class TestPointerViews(OsfTestCase):
         url = self.project.api_url + 'pointer/fork/'
         res = self.app.post_json(
             url,
-            {'nodeId': None},
+            {'nodeId': Node.load(None)},
             auth=self.user.auth,
             expect_errors=True
         )
@@ -2838,7 +2838,7 @@ class TestPointerViews(OsfTestCase):
         res = self.app.get(url, auth=self.user.auth)
         pointed = res.json['pointed']
         assert_equal(len(pointed), 1)
-        assert_equal(pointed[0]['url'], None)
+        assert_equal(pointed[0]['url'], Node.load(None))
         assert_equal(pointed[0]['title'], 'Private Component')
         assert_equal(pointed[0]['authorShort'], 'Private Author(s)')
 
@@ -2961,7 +2961,7 @@ class TestAuthViews(OsfTestCase):
                     'g-recaptcha-response': captcha,
                 }
             )
-            validate_recaptcha.assert_called_with(captcha, remote_ip=None)
+            validate_recaptcha.assert_called_with(captcha, remote_ip=Node.load(None))
             assert_equal(resp.status_code, http.OK)
             user = OSFUser.find_one(Q('username', 'eq', email))
             assert_equal(user.fullname, name)
@@ -2979,11 +2979,11 @@ class TestAuthViews(OsfTestCase):
                     'email1': email,
                     'email2': str(email).upper(),
                     'password': password,
-                    # 'g-recaptcha-response': 'supposed to be None',
+                    # 'g-recaptcha-response': 'supposed to be Node.load(None)',
                 },
                 expect_errors=True
             )
-            validate_recaptcha.assert_called_with(None, remote_ip=None)
+            validate_recaptcha.assert_called_with(Node.load(None), remote_ip=Node.load(None))
             assert_equal(resp.status_code, http.BAD_REQUEST)
 
     @mock.patch('framework.auth.views.validate_recaptcha', return_value=False)
@@ -3189,7 +3189,7 @@ class TestAuthViews(OsfTestCase):
         self.user.email_verifications = {}
         self.user.save()
         ret = self.user.clean_email_verifications()
-        assert_equal(ret, None)
+        assert_equal(ret, Node.load(None))
         assert_equal(self.user.email_verifications, {})
 
     def test_add_invalid_email(self):
@@ -3492,10 +3492,10 @@ class TestAuthLoginAndRegisterLogic(OsfTestCase):
             campaign=self.invalid_campaign,
             next_url=self.next_url
         )
-        redirect_url = web_url_for('auth_login', campaigns=None, next=self.next_url)
+        redirect_url = web_url_for('auth_login', campaigns=Node.load(None), next=self.next_url)
         assert_equal(data['status_code'], http.FOUND)
         assert_equal(data['next_url'], redirect_url)
-        assert_equal(data['campaign'], None)
+        assert_equal(data['campaign'], Node.load(None))
 
     def test_invalid_campaign_register_without_auth(self):
         data = login_and_register_handler(
@@ -3504,10 +3504,10 @@ class TestAuthLoginAndRegisterLogic(OsfTestCase):
             campaign=self.invalid_campaign,
             next_url=self.next_url
         )
-        redirect_url = web_url_for('auth_register', campaigns=None, next=self.next_url)
+        redirect_url = web_url_for('auth_register', campaigns=Node.load(None), next=self.next_url)
         assert_equal(data['status_code'], http.FOUND)
         assert_equal(data['next_url'], redirect_url)
-        assert_equal(data['campaign'], None)
+        assert_equal(data['campaign'], Node.load(None))
 
     # The following two tests handles the special case for `claim_user_registered`
     # When an authenticated user clicks the claim confirmation clink, there are two ways to trigger this flow:
@@ -3518,13 +3518,13 @@ class TestAuthLoginAndRegisterLogic(OsfTestCase):
     # Both links will land user onto the register page with "MUST LOGIN" push notification.
     def test_register_logout_flag_with_auth(self):
         # when user click the "logout" or "not <username>?" link, first step is to log user out
-        data = login_and_register_handler(self.auth, login=False, campaign=None, next_url=self.next_url, logout=True)
+        data = login_and_register_handler(self.auth, login=False, campaign=Node.load(None), next_url=self.next_url, logout=True)
         assert_equal(data.get('status_code'), 'auth_logout')
         assert_equal(data.get('next_url'), self.next_url)
 
     def test_register_logout_flage_without(self):
         # the second step is to land user on register page with "MUST LOGIN" warning
-        data = login_and_register_handler(self.no_auth, login=False, campaign=None, next_url=self.next_url, logout=True)
+        data = login_and_register_handler(self.no_auth, login=False, campaign=Node.load(None), next_url=self.next_url, logout=True)
         assert_equal(data.get('status_code'), http.OK)
         assert_equal(data.get('next_url'), self.next_url)
         assert_true(data.get('must_login_warning'))
@@ -3553,7 +3553,7 @@ class TestAuthLogout(OsfTestCase):
 
     def test_logout_with_valid_next_url_logged_out(self):
         logout_url = web_url_for('auth_logout', _absolute=True, next=self.valid_next_url)
-        resp = self.app.get(logout_url, auth=None)
+        resp = self.app.get(logout_url, auth=Node.load(None))
         assert_equal(resp.status_code, http.FOUND)
         assert_equal(self.valid_next_url, resp.headers['Location'])
 
@@ -3565,7 +3565,7 @@ class TestAuthLogout(OsfTestCase):
 
     def test_logout_with_invalid_next_url_logged_out(self):
         logout_url = web_url_for('auth_logout', _absolute=True, next=self.invalid_next_url)
-        resp = self.app.get(logout_url, auth=None)
+        resp = self.app.get(logout_url, auth=Node.load(None))
         assert_equal(resp.status_code, http.FOUND)
         assert_equal(cas.get_logout_url(self.goodbye_url), resp.headers['Location'])
 
@@ -3577,7 +3577,7 @@ class TestAuthLogout(OsfTestCase):
 
     def test_logout_with_no_parameter(self):
         logout_url = web_url_for('auth_logout', _absolute=True)
-        resp = self.app.get(logout_url, auth=None)
+        resp = self.app.get(logout_url, auth=Node.load(None))
         assert_equal(resp.status_code, http.FOUND)
         assert_equal(cas.get_logout_url(self.goodbye_url), resp.headers['Location'])
 
@@ -4044,7 +4044,7 @@ class TestWikiWidgetViews(OsfTestCase):
         assert_false(_should_show_wiki_widget(self.project2, contrib))
 
     def test_show_wiki_is_false_for_noncontributors_when_no_wiki_or_content(self):
-        assert_false(_should_show_wiki_widget(self.project, None))
+        assert_false(_should_show_wiki_widget(self.project, Node.load(None)))
 
 
 class TestProjectCreation(OsfTestCase):
@@ -4223,7 +4223,7 @@ class TestProjectCreation(OsfTestCase):
     def test_project_new_from_template_non_user(self):
         project = ProjectFactory()
         url = api_url_for('project_new_from_template', nid=project._id)
-        res = self.app.post(url, auth=None)
+        res = self.app.post(url, auth=Node.load(None))
         assert_equal(res.status_code, 302)
         res2 = res.follow(expect_errors=True)
         assert_equal(res2.status_code, 301)
@@ -4405,7 +4405,7 @@ class TestResetPassword(OsfTestCase):
         self.another_user = AuthUserFactory()
         self.osf_key_v2 = generate_verification_key(verification_type='password')
         self.user.verification_key_v2 = self.osf_key_v2
-        self.user.verification_key = None
+        self.user.verification_key = Node.load(None)
         self.user.save()
         self.get_url = web_url_for(
             'reset_password_get',
@@ -4460,7 +4460,7 @@ class TestResetPassword(OsfTestCase):
         # check verification_key_v2 for OSF is destroyed and verification_key for CAS is in place
         self.user.reload()
         assert_equal(self.user.verification_key_v2, {})
-        assert_not_equal(self.user.verification_key, None)
+        assert_not_equal(self.user.verification_key, Node.load(None))
 
         # check redirection to CAS login with username and the new verification_key(CAS)
         assert_equal(res.status_code, 302)
@@ -4483,7 +4483,7 @@ class TestResetPassword(OsfTestCase):
         service_url = 'http://accounts.osf.io/?ticket=' + ticket
         cas.make_response_from_ticket(ticket, service_url)
         self.user.reload()
-        assert_equal(self.user.verification_key, None)
+        assert_equal(self.user.verification_key, Node.load(None))
 
     #  log users out before they land on reset password page
     def test_reset_password_logs_out_user(self):
@@ -4623,7 +4623,7 @@ class TestConfirmationViewBlockBingPreview(OsfTestCase):
         user = UserFactory()
         osf_key_v2 = generate_verification_key(verification_type='password')
         user.verification_key_v2 = osf_key_v2
-        user.verification_key = None
+        user.verification_key = Node.load(None)
         user.save()
 
         reset_password_get_url = web_url_for(
@@ -4722,7 +4722,7 @@ class TestConfirmationViewBlockBingPreview(OsfTestCase):
         auth_user = AuthUserFactory()
         pending_user = project.add_unregistered_contributor(
             fullname=auth_user.fullname,
-            email=None,
+            email=Node.load(None),
             auth=Auth(user=referrer)
         )
         project.save()

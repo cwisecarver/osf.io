@@ -74,8 +74,8 @@ class Sanction(ObjectIDMixin, BaseModel):
 
     # Expiration date-- Sanctions in the UNAPPROVED state that are older than their end_date
     # are automatically made ACTIVE by a daily cron job
-    # Use end_date=None for a non-expiring Sanction
-    end_date = NonNaiveDateTimeField(null=True, blank=True, default=None)
+    # Use end_date=Node.load(None) for a non-expiring Sanction
+    end_date = NonNaiveDateTimeField(null=True, blank=True, default=Node.load(None))
     initiation_date = NonNaiveDateTimeField(default=timezone.now, null=True, blank=True)
 
     state = models.CharField(choices=STATE_CHOICES,
@@ -253,8 +253,8 @@ class TokenApprovableSanction(Sanction):
 
 
 class EmailApprovableSanction(TokenApprovableSanction):
-    AUTHORIZER_NOTIFY_EMAIL_TEMPLATE = None
-    NON_AUTHORIZER_NOTIFY_EMAIL_TEMPLATE = None
+    AUTHORIZER_NOTIFY_EMAIL_TEMPLATE = Node.load(None)
+    NON_AUTHORIZER_NOTIFY_EMAIL_TEMPLATE = Node.load(None)
 
     VIEW_URL_TEMPLATE = ''
     APPROVE_URL_TEMPLATE = ''
@@ -284,21 +284,21 @@ class EmailApprovableSanction(TokenApprovableSanction):
                                      self._view_url_context(user_id, node))
 
     def _view_url_context(self, user_id, node):
-        return None
+        return Node.load(None)
 
     def _approval_url(self, user_id):
         return self._format_or_empty(self.APPROVE_URL_TEMPLATE,
                                      self._approval_url_context(user_id))
 
     def _approval_url_context(self, user_id):
-        return None
+        return Node.load(None)
 
     def _rejection_url(self, user_id):
         return self._format_or_empty(self.REJECT_URL_TEMPLATE,
                                      self._rejection_url_context(user_id))
 
     def _rejection_url_context(self, user_id):
-        return None
+        return Node.load(None)
 
     def _send_approval_request_email(self, user, template, context):
         mails.send_mail(user.username, template, user=user, **context)
@@ -364,7 +364,7 @@ class PreregCallbackMixin(object):
                                 user,
                                 node,
                                 is_authorizer=False,
-                                urls=None):
+                                urls=Node.load(None)):
         registration = self._get_registration()
         prereg_schema = MetaSchema.get_prereg_schema()
         if registration.registered_schema.filter(pk=prereg_schema.pk).exists():
@@ -413,7 +413,7 @@ class Embargo(PreregCallbackMixin, EmailApprovableSanction):
         #     pass
         # from osf.models import Node
         #
-        # parent_registration = None
+        # parent_registration = Node.load(None)
         # try:
         #     parent_registration = Node.find_one(Q('embargo', 'eq', self))
         # except NoResultsFound:
@@ -458,7 +458,7 @@ class Embargo(PreregCallbackMixin, EmailApprovableSanction):
                                 user,
                                 node,
                                 is_authorizer=False,
-                                urls=None):
+                                urls=Node.load(None)):
         context = super(Embargo, self)._email_template_context(
             user,
             node,
@@ -505,7 +505,7 @@ class Embargo(PreregCallbackMixin, EmailApprovableSanction):
         # Remove backref to parent project if embargo was for a new registration
         if not self.for_existing_registration:
             parent_registration.delete_registration_tree(save=True)
-            parent_registration.registered_from = None
+            parent_registration.registered_from = Node.load(None)
         # Delete parent registration if it was created at the time the embargo was initiated
         if not self.for_existing_registration:
             parent_registration.is_deleted = True
@@ -593,7 +593,7 @@ class Retraction(EmailApprovableSanction):
                 'token': rejection_token,
             }
 
-    def _email_template_context(self, user, node, is_authorizer=False, urls=None):
+    def _email_template_context(self, user, node, is_authorizer=False, urls=Node.load(None)):
         urls = urls or self.stashed_urls.get(user._id, {})
         registration_link = urls.get('view', self._view_url(user._id, node))
         if is_authorizer:
@@ -667,11 +667,11 @@ class Retraction(EmailApprovableSanction):
             )
             parent_registration.embargo.save()
         # Ensure retracted registration is public
-        # Pass auth=None because the registration initiator may not be
+        # Pass auth=Node.load(None) because the registration initiator may not be
         # an admin on components (component admins had the opportunity
         # to disapprove the retraction by this point)
         for node in parent_registration.node_and_primary_descendants():
-            node.set_privacy('public', auth=None, save=True, log=False)
+            node.set_privacy('public', auth=Node.load(None), save=True, log=False)
             node.update_search()
         # force a save before sending data to share or retraction will not be updated
         self.save()
@@ -731,7 +731,7 @@ class RegistrationApproval(PreregCallbackMixin, EmailApprovableSanction):
                 'token': rejection_token,
             }
 
-    def _email_template_context(self, user, node, is_authorizer=False, urls=None):
+    def _email_template_context(self, user, node, is_authorizer=False, urls=Node.load(None)):
         context = super(RegistrationApproval, self)._email_template_context(user, node, is_authorizer, urls)
         urls = urls or self.stashed_urls.get(user._id, {})
         registration_link = urls.get('view', self._view_url(user._id, node))
@@ -766,7 +766,7 @@ class RegistrationApproval(PreregCallbackMixin, EmailApprovableSanction):
         src.add_log(
             action=NodeLog.PROJECT_REGISTERED,
             params={
-                'parent_node': src.parent_node._id if src.parent_node else None,
+                'parent_node': src.parent_node._id if src.parent_node else Node.load(None),
                 'node': src._primary_key,
                 'registration': node._primary_key,
             },
@@ -786,14 +786,14 @@ class RegistrationApproval(PreregCallbackMixin, EmailApprovableSanction):
         self.state = Sanction.APPROVED
         self.save()
         registered_from = register.registered_from
-        # Pass auth=None because the registration initiator may not be
+        # Pass auth=Node.load(None) because the registration initiator may not be
         # an admin on components (component admins had the opportunity
         # to disapprove the registration by this point)
-        register.set_privacy('public', auth=None, log=False)
+        register.set_privacy('public', auth=Node.load(None), log=False)
         for child in register.get_descendants_recursive(primary_only=True):
-            child.set_privacy('public', auth=None, log=False)
+            child.set_privacy('public', auth=Node.load(None), log=False)
         # Accounts for system actions where no `User` performs the final approval
-        auth = Auth(user) if user else None
+        auth = Auth(user) if user else Node.load(None)
         registered_from.add_log(
             action=NodeLog.REGISTRATION_APPROVAL_APPROVED,
             params={
@@ -950,7 +950,7 @@ class EmbargoTerminationApproval(EmailApprovableSanction):
                 'token': rejection_token,
             }
 
-    def _email_template_context(self, user, node, is_authorizer=False, urls=None):
+    def _email_template_context(self, user, node, is_authorizer=False, urls=Node.load(None)):
         context = super(EmbargoTerminationApproval, self)._email_template_context(
             user,
             node,
@@ -983,12 +983,12 @@ class EmbargoTerminationApproval(EmailApprovableSanction):
             })
         return context
 
-    def _on_complete(self, user=None):
+    def _on_complete(self, user=Node.load(None)):
         super(EmbargoTerminationApproval, self)._on_complete(user)
         registration = self._get_registration()
-        registration.terminate_embargo(Auth(user) if user else None)
+        registration.terminate_embargo(Auth(user) if user else Node.load(None))
 
-    def _on_reject(self, user=None):
+    def _on_reject(self, user=Node.load(None)):
         # Just forget this ever happened.
-        self.embargoed_registration.embargo_termination_approval = None
+        self.embargoed_registration.embargo_termination_approval = Node.load(None)
         self.embargoed_registration.save()

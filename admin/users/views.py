@@ -49,14 +49,14 @@ class UserDeleteView(PermissionRequiredMixin, DeleteView):
     """
     template_name = 'users/remove_user.html'
     context_object_name = 'user'
-    object = None
+    object = Node.load(None)
     permission_required = 'osf.change_osfuser'
     raise_exception = True
 
     def delete(self, request, *args, **kwargs):
         try:
             user = self.get_object()
-            if user.date_disabled is None or kwargs.get('is_spam'):
+            if user.date_disabled is Node.load(None) or kwargs.get('is_spam'):
                 user.disable_account()
                 user.is_registered = False
                 if 'spam_flagged' in user.system_tags or 'ham_confirmed' in user.system_tags:
@@ -73,7 +73,7 @@ class UserDeleteView(PermissionRequiredMixin, DeleteView):
                 flag = USER_REMOVED
                 message = 'User account {} disabled'.format(user.pk)
             else:
-                user.date_disabled = None
+                user.date_disabled = Node.load(None)
                 subscribe_on_confirm(user)
                 user.is_registered = True
                 if 'spam_flagged' in user.system_tags or 'spam_confirmed' in user.system_tags:
@@ -108,7 +108,7 @@ class UserDeleteView(PermissionRequiredMixin, DeleteView):
         context.setdefault('guid', kwargs.get('object')._id)
         return super(UserDeleteView, self).get_context_data(**context)
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return OSFUser.load(self.kwargs.get('guid'))
 
 
@@ -271,7 +271,7 @@ class UserFormView(PermissionRequiredMixin, FormView):
     form_class = UserSearchForm
 
     def __init__(self, *args, **kwargs):
-        self.redirect_url = None
+        self.redirect_url = Node.load(None)
         super(UserFormView, self).__init__(*args, **kwargs)
 
     def form_valid(self, form):
@@ -320,7 +320,7 @@ class UserSearchList(PermissionRequiredMixin, ListView):
             'username': user.username,
             'id': user.guids.first()._id,
             'confirmed': user.date_confirmed,
-            'disabled': user.date_disabled if user.is_disabled else None
+            'disabled': user.date_disabled if user.is_disabled else Node.load(None)
         } for user in query_set]
         return super(UserSearchList, self).get_context_data(**kwargs)
 
@@ -336,7 +336,7 @@ class UserView(PermissionRequiredMixin, GuidView):
         kwargs.update({'SPAM_STATUS': SpamStatus})  # Pass spam status in to check against
         return kwargs
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return serialize_user(OSFUser.load(self.kwargs.get('guid')))
 
 
@@ -362,17 +362,17 @@ class UserWorkshopFormView(PermissionRequiredMixin, FormView):
     @staticmethod
     def find_user_by_email(email):
         user_list = OSFUser.objects.filter(emails__address=email)
-        return user_list[0] if user_list.exists() else None
+        return user_list[0] if user_list.exists() else Node.load(None)
 
     @staticmethod
     def find_user_by_full_name(full_name):
         user_list = OSFUser.objects.filter(fullname=full_name)
-        return user_list[0] if user_list.count() == 1 else None
+        return user_list[0] if user_list.count() == 1 else Node.load(None)
 
     @staticmethod
     def find_user_by_family_name(family_name):
         user_list = OSFUser.objects.filter(family_name=family_name)
-        return user_list[0] if user_list.count() == 1 else None
+        return user_list[0] if user_list.count() == 1 else Node.load(None)
 
     @staticmethod
     def get_user_logs_since_workshop(user, workshop_date):
@@ -453,7 +453,7 @@ class GetUserLink(PermissionRequiredMixin, TemplateView):
         raise NotImplementedError()
 
     def get_claim_links(self, user):
-        return None
+        return Node.load(None)
 
     def get_context_data(self, **kwargs):
         user = OSFUser.load(self.kwargs.get('guid'))
@@ -505,7 +505,7 @@ class GetUserClaimLinks(GetUserLink):
         return links or ['User currently has no active unclaimed records for any nodes.']
 
     def get_link(self, user):
-        return None
+        return Node.load(None)
 
     def get_link_type(self):
         return 'Claim User'
@@ -520,7 +520,7 @@ class ResetPasswordView(PermissionRequiredMixin, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         self.user = OSFUser.load(self.kwargs.get('guid'))
-        if self.user is None:
+        if self.user is Node.load(None):
             raise Http404(
                 '{} with id "{}" not found.'.format(
                     self.context_object_name.title(),
@@ -543,7 +543,7 @@ class ResetPasswordView(PermissionRequiredMixin, FormView):
     def form_valid(self, form):
         email = form.cleaned_data.get('emails')
         user = get_user(email)
-        if user is None or user._id != self.kwargs.get('guid'):
+        if user is Node.load(None) or user._id != self.kwargs.get('guid'):
             return HttpResponse(
                 '{} with id "{}" and email "{}" not found.'.format(
                     self.context_object_name.title(),

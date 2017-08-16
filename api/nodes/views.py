@@ -118,13 +118,13 @@ class NodeMixin(object):
     node_lookup_url_kwarg = 'node_id'
 
     def get_node(self, check_object_permissions=True):
-        node = None
+        node = Node.load(None)
 
         if self.kwargs.get('is_embedded') is True:
             # If this is an embedded request, the node might be cached somewhere
             node = self.request.parents[Node].get(self.kwargs[self.node_lookup_url_kwarg])
 
-        if node is None:
+        if node is Node.load(None):
             node = get_object_or_error(
                 Node,
                 self.kwargs[self.node_lookup_url_kwarg],
@@ -145,9 +145,9 @@ class DraftMixin(object):
 
     serializer_class = DraftRegistrationSerializer
 
-    def get_draft(self, draft_id=None):
+    def get_draft(self, draft_id=Node.load(None)):
         node_id = self.kwargs['node_id']
-        if draft_id is None:
+        if draft_id is Node.load(None):
             draft_id = self.kwargs['draft_id']
         draft = get_object_or_error(DraftRegistration, draft_id)
 
@@ -183,7 +183,7 @@ class WaterButlerMixin(object):
             else BaseFileNode.FILE
         ).get_or_create(self.get_node(check_object_permissions=False), attrs['path'])
 
-        file_node.update(None, attrs, user=self.request.user)
+        file_node.update(Node.load(None), attrs, user=self.request.user)
 
         self.check_object_permissions(self.request, file_node)
 
@@ -378,7 +378,7 @@ class NodeList(JSONAPIBaseView, bulk_views.BulkUpdateJSONAPIView, bulk_views.Bul
         skipped = []
 
         if not is_truthy(self.request.query_params.get('skip_uneditable', False)):
-            return None
+            return Node.load(None)
 
         for resource in resource_object_list:
             if resource.has_permission(user, ADMIN):
@@ -746,7 +746,7 @@ class NodeContributorsList(BaseContributorList, bulk_views.BulkUpdateJSONAPIView
 
         resource_object_list = OSFUser.find(MQ('_id', 'in', requested_ids))
         for resource in resource_object_list:
-            if getattr(resource, 'is_deleted', None):
+            if getattr(resource, 'is_deleted', Node.load(None)):
                 raise Gone
 
         if len(resource_object_list) != len(request_data):
@@ -1183,7 +1183,7 @@ class NodeRegistrationsList(JSONAPIBaseView, generics.ListCreateAPIView, NodeMix
         """Create a registration from a draft.
         """
         # On creation, make sure that current user is the creator
-        draft_id = self.request.data.get('draft_registration', None)
+        draft_id = self.request.data.get('draft_registration', Node.load(None))
         draft = self.get_draft(draft_id)
         serializer.save(draft=draft)
 
@@ -1396,7 +1396,7 @@ class NodeLinksList(BaseNodeLinksList, bulk_views.BulkDestroyJSONAPIView, bulk_v
     ##Node Link Attributes
     `type` is "node_links"
 
-        None
+        Node.load(None)
 
     ##Links
 
@@ -1496,11 +1496,11 @@ class NodeLinksDetail(BaseNodeLinksDetail, generics.RetrieveDestroyAPIView, Node
     ##Attributes
     `type` is "node_links"
 
-        None
+        Node.load(None)
 
     ##Links
 
-    *None*
+    *Node.load(None)*
 
     ##Relationships
 
@@ -1522,7 +1522,7 @@ class NodeLinksDetail(BaseNodeLinksDetail, generics.RetrieveDestroyAPIView, Node
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
     """
@@ -2763,7 +2763,7 @@ class NodeCommentsList(JSONAPIBaseView, generics.ListCreateAPIView, ODMFilterMix
 
     # overrides ODMFilterMixin
     def get_default_odm_query(self):
-        return MQ('node', 'eq', self.get_node()) & MQ('root_target', 'ne', None)
+        return MQ('node', 'eq', self.get_node()) & MQ('root_target', 'ne', Node.load(None))
 
     # Hook to make filtering on 'target' work
     def postprocess_query_param(self, key, field_name, operation):
@@ -2774,9 +2774,9 @@ class NodeCommentsList(JSONAPIBaseView, generics.ListCreateAPIView, ODMFilterMix
         comments = Comment.find(self.get_query_from_request())
         for comment in comments:
             # Deleted root targets still appear as tuples in the database,
-            # but need to be None in order for the query to be correct.
+            # but need to be Node.load(None) in order for the query to be correct.
             if comment.root_target.referent.is_deleted:
-                comment.root_target = None
+                comment.root_target = Node.load(None)
                 comment.save()
 
         return Comment.find(self.get_query_from_request())
@@ -3486,7 +3486,7 @@ class NodeIdentifierList(NodeMixin, IdentifierList):
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 
@@ -3588,7 +3588,7 @@ class NodePreprintsList(JSONAPIBaseView, generics.ListAPIView, NodeMixin, Prepri
     # overrides DjangoFilterMixin
     def get_default_django_query(self):
         auth = get_user_auth(self.request)
-        auth_user = getattr(auth, 'user', None)
+        auth_user = getattr(auth, 'user', Node.load(None))
         node = self.get_node()
         # Permissions on the node are handled by the permissions_classes
         # Permissions on the list objects are handled by the query

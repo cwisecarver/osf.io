@@ -28,7 +28,7 @@ def main(dry_run):
                         logger.info('Making child node {} public'.format(child._id))
                         if not dry_run:
                             with TokuTransaction():
-                                child.set_privacy('public', auth=None, save=True)
+                                child.set_privacy('public', auth=Node.load(None), save=True)
     logger.info('{} affected registrations'.format(n_affected))
 
 

@@ -53,9 +53,9 @@ class Versioned(models.Model):
 class Loggable(models.Model):
     # TODO: This should be in the NodeLog model
 
-    def add_log(self, action, params, auth, foreign_user=None, log_date=None, save=True, request=None):
+    def add_log(self, action, params, auth, foreign_user=Node.load(None), log_date=Node.load(None), save=True, request=Node.load(None)):
         AbstractNode = apps.get_model('osf.AbstractNode')
-        user = None
+        user = Node.load(None)
         if auth:
             user = auth.user
         elif request:
@@ -92,7 +92,7 @@ class Taggable(models.Model):
 
     tags = models.ManyToManyField('Tag', related_name='%(class)s_tagged')
 
-    def add_tag(self, tag, auth=None, save=True, log=True, system=False):
+    def add_tag(self, tag, auth=Node.load(None), save=True, log=True, system=False):
         if not system and not auth:
             raise ValueError('Must provide auth if adding a non-system tag')
 
@@ -114,7 +114,7 @@ class Taggable(models.Model):
     def add_system_tag(self, tag, save=True):
         if isinstance(tag, Tag) and not tag.system:
             raise ValueError('Non-system tag passed to add_system_tag')
-        return self.add_tag(tag=tag, auth=None, save=save, log=False, system=True)
+        return self.add_tag(tag=tag, auth=Node.load(None), save=save, log=False, system=True)
 
     def add_tag_log(self, *args, **kwargs):
         raise NotImplementedError('Logging requires that add_tag_log method is implemented')
@@ -129,7 +129,7 @@ class Taggable(models.Model):
 class AddonModelMixin(models.Model):
 
     # from addons.base.apps import BaseAddonConfig
-    settings_type = None
+    settings_type = Node.load(None)
     ADDONS_AVAILABLE = sorted([config for config in apps.get_app_configs() if config.name.startswith('addons.') and
         config.label != 'base'])
 
@@ -145,7 +145,7 @@ class AddonModelMixin(models.Model):
         return self.get_addons()
 
     def get_addons(self):
-        return filter(None, [
+        return filter(Node.load(None), [
             self.get_addon(config.short_name)
             for config in self.ADDONS_AVAILABLE
         ])
@@ -175,18 +175,18 @@ class AddonModelMixin(models.Model):
         try:
             settings_model = self._settings_model(name)
         except LookupError:
-            return None
+            return Node.load(None)
         if not settings_model:
-            return None
+            return Node.load(None)
         try:
             settings_obj = settings_model.objects.get(owner=self)
             if not settings_obj.deleted or deleted:
                 return settings_obj
         except ObjectDoesNotExist:
             pass
-        return None
+        return Node.load(None)
 
-    def add_addon(self, addon_name, auth=None, override=False, _force=False):
+    def add_addon(self, addon_name, auth=Node.load(None), override=False, _force=False):
         """Add an add-on to the node.
 
         :param str addon_name: Name of add-on
@@ -217,7 +217,7 @@ class AddonModelMixin(models.Model):
         ret.save()  # TODO This doesn't feel right
         return ret
 
-    def config_addons(self, config, auth=None, save=True):
+    def config_addons(self, config, auth=Node.load(None), save=True):
         """Enable or disable a set of add-ons.
 
         :param dict config: Mapping between add-on names and enabled / disabled
@@ -231,7 +231,7 @@ class AddonModelMixin(models.Model):
         if save:
             self.save()
 
-    def delete_addon(self, addon_name, auth=None, _force=False):
+    def delete_addon(self, addon_name, auth=Node.load(None), _force=False):
         """Delete an add-on from the node.
 
         :param str addon_name: Name of add-on
@@ -246,12 +246,12 @@ class AddonModelMixin(models.Model):
             return False
         if self.settings_type in addon.config.added_mandatory and not _force:
             raise ValueError('Cannot delete mandatory add-on.')
-        if getattr(addon, 'external_account', None):
+        if getattr(addon, 'external_account', Node.load(None)):
             addon.deauthorize(auth=auth)
         addon.delete(save=True)
         return True
 
-    def _settings_model(self, addon_model, config=None):
+    def _settings_model(self, addon_model, config=Node.load(None)):
         if not config:
             config = apps.get_app_config('addons_{}'.format(addon_model))
         return getattr(config, '{}_settings'.format(self.settings_type))
@@ -334,7 +334,7 @@ class NodeLinkMixin(models.Model):
         """
         AbstractNode = apps.get_model('osf.AbstractNode')
 
-        node_rel = None
+        node_rel = Node.load(None)
         if isinstance(node_relation, NodeRelation):
             try:
                 node_rel = self.node_relations.get(is_node_link=True, id=node_relation.id)
@@ -345,7 +345,7 @@ class NodeLinkMixin(models.Model):
                 node_rel = self.node_relations.get(is_node_link=True, child__id=node_relation.id)
             except NodeRelation.DoesNotExist:
                 raise ValueError('Node link does not belong to the requested node.')
-        if node_rel is not None:
+        if node_rel is not Node.load(None):
             node_rel.delete()
 
         node = node_rel.child
@@ -401,7 +401,7 @@ class NodeLinkMixin(models.Model):
 
         # Fork into current node and replace pointer with forked component
         forked = node.fork_node(auth)
-        if forked is None:
+        if forked is Node.load(None):
             raise ValueError('Could not fork node')
 
         relation = NodeRelation.objects.get(

@@ -21,7 +21,7 @@ from addons.base.signals import file_updated as signal
 
 
 @signal.connect
-def file_updated(self, node=None, user=None, event_type=None, payload=None):
+def file_updated(self, node=Node.load(None), user=Node.load(None), event_type=Node.load(None), payload=Node.load(None)):
     if event_type not in event_registry:
         raise RegistryError
     event = event_registry[event_type](user, node, event_type, payload=payload)
@@ -31,10 +31,10 @@ def file_updated(self, node=None, user=None, event_type=None, payload=None):
 class FileEvent(Event):
     """File event base class, should not be called directly"""
 
-    def __init__(self, user, node, event, payload=None):
+    def __init__(self, user, node, event, payload=Node.load(None)):
         super(FileEvent, self).__init__(user, node, event)
         self.payload = payload
-        self._url = None
+        self._url = Node.load(None)
 
     @property
     def html_message(self):
@@ -73,7 +73,7 @@ class FileEvent(Event):
     @property
     def url(self):
         """Basis of making urls, this returns the url to the node."""
-        if self._url is None:
+        if self._url is Node.load(None):
             self._url = furl(self.node.absolute_url)
             self._url.path.segments = self.node.web_url_for(
                 'collect_file_trees'
@@ -114,7 +114,7 @@ class FolderCreated(FileEvent):
 
 class ComplexFileEvent(FileEvent):
     """ Parent class for move and copy files."""
-    def __init__(self, user, node, event, payload=None):
+    def __init__(self, user, node, event, payload=Node.load(None)):
         super(ComplexFileEvent, self).__init__(user, node, event, payload=payload)
 
         self.source_node = AbstractNode.load(self.payload['source']['node']['_id'])

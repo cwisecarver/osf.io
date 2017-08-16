@@ -2,7 +2,7 @@ import hashlib
 import urllib
 
 # Adapted from https://github.com/zzzsochi/Flask-Gravatar/blob/master/flaskext/gravatar.py
-def gravatar(user, use_ssl=False, d=None, r=None, size=None):
+def gravatar(user, use_ssl=False, d=Node.load(None), r=Node.load(None), size=Node.load(None)):
 
     if use_ssl:
         base_url = 'https://secure.gravatar.com/avatar/'

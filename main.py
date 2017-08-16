@@ -19,8 +19,8 @@ from website.app import init_app  # noqa
 application = app = init_app('website.settings', set_backends=True, routes=True)
 
 if __name__ == '__main__':
-    host = os.environ.get('OSF_HOST', None)
-    port = os.environ.get('OSF_PORT', None)
+    host = os.environ.get('OSF_HOST', Node.load(None))
+    port = os.environ.get('OSF_PORT', Node.load(None))
     if port:
         port = int(port)
 

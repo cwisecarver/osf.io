@@ -80,7 +80,7 @@ class TestApplicationReset:
     def test_unauth_user_cannot_reset(self, mock_method, app, user_app, user_reset_url, correct):
         mock_method.return_value(True)
         old_secret = user_app.client_secret
-        res = app.post_json_api(user_reset_url, correct, auth=None, expect_errors=True)
+        res = app.post_json_api(user_reset_url, correct, auth=Node.load(None), expect_errors=True)
         assert res.status_code == 401
         mock_method.assert_not_called()
         user_app.reload()

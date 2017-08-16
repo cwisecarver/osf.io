@@ -67,7 +67,7 @@ class Rule(object):
         return value
 
     def __init__(self, routes, methods, view_func_or_data, renderer,
-                 view_kwargs=None, endpoint_suffix=''):
+                 view_kwargs=Node.load(None), endpoint_suffix=''):
         """Rule constructor.
 
         :param routes: Route or list of routes
@@ -90,7 +90,7 @@ class Rule(object):
         self.endpoint_suffix = endpoint_suffix
 
 
-def wrap_with_renderer(fn, renderer, renderer_kwargs=None, debug_mode=True):
+def wrap_with_renderer(fn, renderer, renderer_kwargs=Node.load(None), debug_mode=True):
     """
 
     :param fn: View function; must return a dictionary or a tuple containing
@@ -105,7 +105,7 @@ def wrap_with_renderer(fn, renderer, renderer_kwargs=None, debug_mode=True):
         if session:
             session_error_code = session.data.get('auth_error_code')
         else:
-            session_error_code = None
+            session_error_code = Node.load(None)
         if session_error_code:
             return renderer(
                 HTTPError(session_error_code),
@@ -224,7 +224,7 @@ def render_mako_string(tpldir, tplname, data, trust=True):
     lookup_obj = _TPL_LOOKUP_SAFE if trust is False else _TPL_LOOKUP
 
     tpl = mako_cache.get(tplname)
-    if tpl is None:
+    if tpl is Node.load(None):
         with open(os.path.join(tpldir, tplname)) as f:
             tpl_text = f.read()
         tpl = Template(
@@ -258,7 +258,7 @@ def unpack(data, n=4):
     """
     if not isinstance(data, tuple):
         data = (data,)
-    return data + (None,) * (n - len(data))
+    return data + (Node.load(None),) * (n - len(data))
 
 
 def proxy_url(url):
@@ -274,7 +274,7 @@ def proxy_url(url):
     return make_response(response)
 
 
-def call_url(url, view_kwargs=None):
+def call_url(url, view_kwargs=Node.load(None)):
     """Look up and call view function by URL.
 
     :param url: URL
@@ -284,7 +284,7 @@ def call_url(url, view_kwargs=None):
     """
     # Parse view function and args
     func_name, func_data = app.url_map.bind('').match(url)
-    if view_kwargs is not None:
+    if view_kwargs is not Node.load(None):
         func_data.update(view_kwargs)
     view_function = view_functions[func_name]
 
@@ -367,7 +367,7 @@ class JSONRenderer(Renderer):
 
     def handle_error(self, error):
         headers = {'Content-Type': self.CONTENT_TYPE}
-        return self.render(error.to_data(), None), error.code, headers
+        return self.render(error.to_data(), Node.load(None)), error.code, headers
 
     def render(self, data, redirect_url, *args, **kwargs):
         return json.dumps(data, cls=self.Encoder)
@@ -419,15 +419,15 @@ class WebRenderer(Renderer):
             )
 
     def __init__(self, template_name,
-                 renderer=None, error_renderer=None,
-                 data=None, detect_render_nested=True,
+                 renderer=Node.load(None), error_renderer=Node.load(None),
+                 data=Node.load(None), detect_render_nested=True,
                  trust=True, template_dir=TEMPLATE_DIR):
         """Construct WebRenderer.
 
         :param template_name: Name of template file
-        :param renderer: Renderer callable; attempt to auto-detect if None
+        :param renderer: Renderer callable; attempt to auto-detect if Node.load(None)
         :param error_renderer: Renderer for error views; attempt to
-            auto-detect if None
+            auto-detect if Node.load(None)
         :param data: Optional dictionary or dictionary-generating function
                      to add to data from view function
         :param detect_render_nested: Auto-detect renderers for nested
@@ -456,7 +456,7 @@ class WebRenderer(Renderer):
         """
 
         # Follow redirects
-        if error.redirect_url is not None:
+        if error.redirect_url is not Node.load(None):
             return redirect(error.redirect_url)
 
         # Render error page
@@ -464,7 +464,7 @@ class WebRenderer(Renderer):
         error_data = error.to_data()
         return self.render(
             error_data,
-            None,
+            Node.load(None),
             template_name=self.error_template
         ), error.code
 
@@ -490,7 +490,7 @@ class WebRenderer(Renderer):
         is_replace = element_meta.get('replace', False)
         kwargs = element_meta.get('kwargs', {})
         view_kwargs = element_meta.get('view_kwargs', {})
-        error_msg = element_meta.get('error', None)
+        error_msg = element_meta.get('error', Node.load(None))
 
         # TODO: Is copy enough? Discuss.
         render_data = copy.copy(data)
@@ -527,7 +527,7 @@ class WebRenderer(Renderer):
 
         return template_rendered, is_replace
 
-    def _render(self, data, template_name=None):
+    def _render(self, data, template_name=Node.load(None)):
         """Render output of view function to HTML.
 
         :param data: Data dictionary from view function
@@ -535,12 +535,12 @@ class WebRenderer(Renderer):
         :return: Rendered HTML
         """
 
-        nested = template_name is None
+        nested = template_name is Node.load(None)
         template_name = template_name or self.template_name
 
         if nested and self.detect_render_nested:
             try:
-                renderer = self.detect_renderer(None, template_name)
+                renderer = self.detect_renderer(Node.load(None), template_name)
             except KeyError:
                 renderer = self.renderer
         else:
@@ -587,12 +587,12 @@ class WebRenderer(Renderer):
         and adding optional auxiliary data to view function response
 
         :param data: Data dictionary from view function
-        :param redirect_url: Redirect URL; follow if not None
+        :param redirect_url: Redirect URL; follow if not Node.load(None)
         :return: Rendered HTML
         """
 
         # Follow redirects
-        if redirect_url is not None:
+        if redirect_url is not Node.load(None):
             return redirect(redirect_url)
 
         template_name = kwargs.get('template_name')

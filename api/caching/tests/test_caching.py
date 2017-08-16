@@ -49,7 +49,7 @@ class TestVarnish(DbTestCase):
             name = ''
             create_fake_project(cls.user, number_of_users,
                                 random.choice(['public', 'private']),
-                                components, name, number_of_tags, None, False)
+                                components, name, number_of_tags, Node.load(None), False)
 
     @unittest.skipIf(not django_settings.ENABLE_VARNISH, 'Varnish is disabled')
     def test_compare_python_responses_to_varnish_responses(self):
@@ -145,7 +145,7 @@ class TestVarnish(DbTestCase):
         """
         validate_keys confirms that the correct keys are in embeds and relationships.
         """
-        if embed_keys is None:
+        if embed_keys is Node.load(None):
             embed_keys = list()
 
         if 'errors' in data.keys():

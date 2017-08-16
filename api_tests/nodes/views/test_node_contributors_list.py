@@ -232,7 +232,7 @@ class TestNodeContributorList(NodeCRUDTestCase):
         res = app.get(url, auth=user.auth, expect_errors=True)
         assert res.status_code == 200
         assert len(res.json['data']) == 1
-        assert res.json['data'][0]['attributes'].get('unregistered_contributor') is None
+        assert res.json['data'][0]['attributes'].get('unregistered_contributor') is Node.load(None)
 
     def test_unregistered_contributors_show_up_as_name_associated_with_project(self, app, user):
         project = ProjectFactory(creator=user, is_public=True)
@@ -733,7 +733,7 @@ class TestNodeContributorAdd(NodeCRUDTestCase):
                     'type': 'contributors',
                     'attributes': {
                         'bibliographic': True,
-                        'permission': None
+                        'permission': Node.load(None)
                     },
                     'relationships': {
                         'users': {
@@ -822,7 +822,7 @@ class TestNodeContributorAdd(NodeCRUDTestCase):
             project_public.reload()
             assert res.status_code == 201
             assert res.json['data']['attributes']['unregistered_contributor'] == 'John Doe'
-            assert res.json['data']['attributes']['email'] is None
+            assert res.json['data']['attributes']['email'] is Node.load(None)
             assert res.json['data']['embeds']['users']['data']['id'] in project_public.contributors.values_list('guids___id', flat=True)
 
     def test_add_contributor_with_fullname_and_email_unregistered_user(self, app, user, project_public, url_public):
@@ -882,7 +882,7 @@ class TestNodeContributorAdd(NodeCRUDTestCase):
             res = app.post_json_api(url_public, payload, auth=user.auth)
             project_public.reload()
             assert res.status_code == 201
-            assert res.json['data']['attributes']['unregistered_contributor'] is None
+            assert res.json['data']['attributes']['unregistered_contributor'] is Node.load(None)
             assert res.json['data']['attributes']['email'] == user_contrib.username
             assert res.json['data']['embeds']['users']['data']['id'] in project_public.contributors.values_list('guids___id', flat=True)
 
@@ -2260,7 +2260,7 @@ class TestNodeContributorFiltering:
         res = app.get(url, auth=user.auth)
         assert res.status_code == 200
         assert len(res.json['data']) == 1
-        assert res.json['data'][0]['attributes'].get('bibliographic', None)
+        assert res.json['data'][0]['attributes'].get('bibliographic', Node.load(None))
 
         # filter for non-bibliographic contributors
         url = base_url + '?filter[bibliographic]=False'
@@ -2291,11 +2291,11 @@ class TestNodeContributorFiltering:
         url = base_url + '?filter[bibliographic]=True'
         res = app.get(url, auth=user.auth)
         assert len(res.json['data']) == 1
-        assert res.json['data'][0]['attributes'].get('bibliographic', None)
+        assert res.json['data'][0]['attributes'].get('bibliographic', Node.load(None))
 
         # filter for non-bibliographic contributors
         url = base_url + '?filter[bibliographic]=False'
         res = app.get(url, auth=user.auth)
         assert len(res.json['data']) == 1
-        assert not res.json['data'][0]['attributes'].get('bibliographic', None)
+        assert not res.json['data'][0]['attributes'].get('bibliographic', Node.load(None))
 

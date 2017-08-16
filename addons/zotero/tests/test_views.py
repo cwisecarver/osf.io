@@ -32,8 +32,8 @@ class TestConfigViews(ZoteroTestCase, views.OAuthCitationAddonConfigViewsTestCas
     Serializer = ZoteroSerializer
     client = Zotero
     citationsProvider = ZoteroCitationsProvider
-    foldersApiUrl = None
-    documentsApiUrl = None
+    foldersApiUrl = Node.load(None)
+    documentsApiUrl = Node.load(None)
     mockResponses = mock_responses
 
     def setUp(self):

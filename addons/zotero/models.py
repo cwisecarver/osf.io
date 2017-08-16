@@ -56,7 +56,7 @@ class Zotero(CitationsOauthProvider):
         try:
             self._client.collections()
         except zotero_errors.PyZoteroError as err:
-            self._client = None
+            self._client = Node.load(None)
             if isinstance(err, zotero_errors.UserNotAuthorised):
                 raise HTTPError(403)
             else:
@@ -111,7 +111,7 @@ class NodeSettings(BaseCitationsNodeSettings):
     user_settings = models.ForeignKey(UserSettings, null=True, blank=True)
 
     list_id = models.TextField(blank=True, null=True)
-    _api = None
+    _api = Node.load(None)
 
     @property
     def _fetch_folder_name(self):

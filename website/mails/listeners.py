@@ -32,7 +32,7 @@ def queue_first_public_project_email(user, node, meeting_creation):
     """
     from osf.models.queued_mail import queue_mail, QueuedMail, NEW_PUBLIC_PROJECT_TYPE, NEW_PUBLIC_PROJECT
     if not meeting_creation:
-        sent_mail = QueuedMail.find(Q('user', 'eq', user) & Q('sent_at', 'ne', None) &
+        sent_mail = QueuedMail.find(Q('user', 'eq', user) & Q('sent_at', 'ne', Node.load(None)) &
                                           Q('email_type', 'eq', NEW_PUBLIC_PROJECT_TYPE))
         if not sent_mail.count():
             queue_mail(
@@ -58,5 +58,5 @@ def queue_osf4m_welcome_email(user, conference, node):
         user=user,
         conference=conference.name,
         fullname=user.fullname,
-        fid=root_children[0]._id if len(root_children) else None
+        fid=root_children[0]._id if len(root_children) else Node.load(None)
     )

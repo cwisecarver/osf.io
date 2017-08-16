@@ -29,16 +29,16 @@ def find_by_email(email):
     try:
         return OSFUser.find_one(Q('username', 'iexact', email))
     except ModularOdmException:
-        return None
+        return Node.load(None)
 
 
 def find_by_name(name):
     try:
         parts = re.split(r'\s+', name.strip())
     except:
-        return None
+        return Node.load(None)
     if len(parts) < 2:
-        return None
+        return Node.load(None)
     users = OSFUser.find(
         reduce(
             lambda acc, value: acc & value,
@@ -49,7 +49,7 @@ def find_by_name(name):
         )
     ).sort('-date_created')
     if not users:
-        return None
+        return Node.load(None)
     if len(users) > 1:
         logger.warn('Multiple users found for name {}'.format(name))
     return users[0]

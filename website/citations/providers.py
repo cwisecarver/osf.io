@@ -10,7 +10,7 @@ from osf.models.external import ExternalAccount, ExternalProvider
 
 class CitationsOauthProvider(ExternalProvider):
 
-    _client = None
+    _client = Node.load(None)
 
     @abc.abstractproperty
     def serializer(self):
@@ -62,7 +62,7 @@ class CitationsOauthProvider(ExternalProvider):
         ]
         return [all_documents] + serialized_folders
 
-    def get_list(self, list_id=None):
+    def get_list(self, list_id=Node.load(None)):
         """Get a single CitationList
         :param str list_id: ID for a folder. Optional.
         :return CitationList: CitationList for the folder, or for all documents
@@ -103,7 +103,7 @@ class CitationsProvider(object):
         return {
             'accounts': [
                 self.serializer(
-                    user_settings=user.get_addon(self.provider_name) if user else None
+                    user_settings=user.get_addon(self.provider_name) if user else Node.load(None)
                 ).serialize_account(each)
                 for each in user.external_accounts.filter(provider=self.provider_name)
             ]
@@ -182,7 +182,7 @@ class CitationsProvider(object):
             'name': folder['name'],
             'provider_list_id': folder['list_id'],
             'id': folder['id'],
-            'parent_list_id': folder.get('parent_id', None)
+            'parent_list_id': folder.get('parent_id', Node.load(None))
         }
 
     @abc.abstractmethod
@@ -197,7 +197,7 @@ class CitationsProvider(object):
         attached_list_id = self._folder_id(node_addon)
         account_folders = node_addon.api.citation_lists(self._extract_folder)
 
-        # Folders with 'parent_list_id'==None are children of 'All Documents'
+        # Folders with 'parent_list_id'==Node.load(None) are children of 'All Documents'
         for folder in account_folders:
             if not folder.get('parent_list_id'):
                 folder['parent_list_id'] = 'ROOT'
@@ -209,12 +209,12 @@ class CitationsProvider(object):
             user_is_owner = False
 
         # verify this list is the attached list or its descendant
-        if not user_is_owner and (list_id != attached_list_id and attached_list_id is not None):
+        if not user_is_owner and (list_id != attached_list_id and attached_list_id is not Node.load(None)):
             folders = {
                 (each['provider_list_id'] or 'ROOT'): each
                 for each in account_folders
             }
-            if list_id is None:
+            if list_id is Node.load(None):
                 ancestor_id = 'ROOT'
             else:
                 ancestor_id = folders[list_id].get('parent_list_id')
@@ -225,10 +225,10 @@ class CitationsProvider(object):
                 ancestor_id = folders[ancestor_id].get('parent_list_id')
 
         contents = []
-        if list_id is None:
+        if list_id is Node.load(None):
             contents = [node_addon.root_folder]
         else:
-            user_settings = user.get_addon(self.provider_name) if user else None
+            user_settings = user.get_addon(self.provider_name) if user else Node.load(None)
             if show in ('all', 'folders'):
                 contents += [
                     self.serializer(

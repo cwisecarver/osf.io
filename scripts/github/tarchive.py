@@ -23,7 +23,7 @@ TMP_PATH = tempfile.mkdtemp()
 TAR_PATH = '{}/repo.tar.gz'.format(TMP_PATH)
 EXTRACTED_PATH = '{}/extracted/'.format(TMP_PATH)
 
-def recursive_upload(dst, fs_path, parent, name=None):
+def recursive_upload(dst, fs_path, parent, name=Node.load(None)):
     is_folder = os.path.isdir(fs_path)
     name = name or fs_path.rstrip('/')[-1]
     params = {

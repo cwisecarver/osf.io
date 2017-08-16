@@ -699,7 +699,7 @@ class RegistrationNodeLinksList(BaseNodeLinksList, RegistrationMixin):
     ##Node Link Attributes
     `type` is "node_links"
 
-        None
+        Node.load(None)
 
     ##Links
 
@@ -772,11 +772,11 @@ class RegistrationNodeLinksDetail(BaseNodeLinksDetail, RegistrationMixin):
     ##Attributes
     `type` is "node_links"
 
-        None
+        Node.load(None)
 
     ##Links
 
-    *None*
+    *Node.load(None)*
 
     ##Relationships
 
@@ -798,7 +798,7 @@ class RegistrationNodeLinksDetail(BaseNodeLinksDetail, RegistrationMixin):
 
     ##Query Params
 
-    *None*.
+    *Node.load(None)*.
 
     #This Request/Response
     """
@@ -1065,7 +1065,7 @@ class RegistrationIdentifierList(RegistrationMixin, NodeIdentifierList):
 
     ##Actions
 
-    *None*.
+    *Node.load(None)*.
 
     ##Query Params
 

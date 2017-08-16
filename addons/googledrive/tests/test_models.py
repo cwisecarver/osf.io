@@ -87,7 +87,7 @@ class TestNodeSettings(OAuthAddonNodeSettingsTestSuiteMixin, unittest.TestCase):
         )
 
     def test_selected_folder_name_empty(self):
-        self.node_settings.folder_id = None
+        self.node_settings.folder_id = Node.load(None)
 
         assert_equal(
             self.node_settings.selected_folder_name,

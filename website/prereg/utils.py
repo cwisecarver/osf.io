@@ -12,8 +12,8 @@ def drafts_for_user(user, campaign):
     PREREG_CHALLENGE_METASCHEMA = get_prereg_schema(campaign)
     return DraftRegistration.objects.filter(
         registration_schema=PREREG_CHALLENGE_METASCHEMA,
-        approval=None,
-        registered_node=None,
+        approval=Node.load(None),
+        registered_node=Node.load(None),
         branched_from__in=Node.objects.filter(
             is_deleted=False,
             contributor__admin=True,

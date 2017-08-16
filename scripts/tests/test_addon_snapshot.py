@@ -193,7 +193,7 @@ class TestAddonCount(OsfTestCase):
         node = ProjectFactory(creator=self.user)
         node.add_addon('github', Auth(self.user))
         node_addon = node.get_addon('github')
-        node_addon.external_account = None
+        node_addon.external_account = Node.load(None)
         node_addon.save()
 
         results = AddonSnapshot().get_events()
@@ -219,7 +219,7 @@ class TestAddonCount(OsfTestCase):
         assert_equal(wiki_res['nodes']['deleted'], 1)
 
     def test_node_settings_has_no_owner_not_connected(self):
-        self.node_addon.owner = None
+        self.node_addon.owner = Node.load(None)
         self.node_addon.save()
 
         results = AddonSnapshot().get_events()

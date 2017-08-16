@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 def do_migration():
-    for node_addon in GoogleDriveNodeSettings.find(Q('foreign_user_settings', 'ne', None)):
-        f_id = None
+    for node_addon in GoogleDriveNodeSettings.find(Q('foreign_user_settings', 'ne', Node.load(None))):
+        f_id = Node.load(None)
         user_addon = node_addon.foreign_user_settings
         user = user_addon.owner
         if not user_addon.external_accounts:

@@ -13,7 +13,7 @@ from website.project.decorators import (
 )
 
 def list_citation_styles():
-    query = None
+    query = Node.load(None)
 
     term = request.args.get('q')
     if term:
@@ -57,8 +57,8 @@ class GenericCitationViews(object):
     ),
     """
 
-    addon_short_name = None
-    Provider = None
+    addon_short_name = Node.load(None)
+    Provider = Node.load(None)
 
     def __init__(self, addon_short_name, Provider):
         self.addon_short_name = addon_short_name
@@ -176,7 +176,7 @@ class GenericCitationViews(object):
         Provider = self.Provider
         @must_be_contributor_or_public
         @must_have_addon(addon_short_name, 'node')
-        def _citation_list(auth, node_addon, list_id=None, **kwargs):
+        def _citation_list(auth, node_addon, list_id=Node.load(None), **kwargs):
             """ Returns a list of citations
             """
             show = request.args.get('view', 'all')

@@ -22,12 +22,12 @@ class AddonNodeLogger(object):
             'folder': node_settings.folder_path
         }
 
-    def __init__(self, node, auth, path=None):
+    def __init__(self, node, auth, path=Node.load(None)):
         self.node = node
         self.auth = auth
         self.path = path
 
-    def log(self, action, extra=None, save=False):
+    def log(self, action, extra=Node.load(None), save=False):
         """Log an event. Wraps the Node#add_log method, automatically adding
         relevant parameters and prefixing log events with addon_short_name.
 

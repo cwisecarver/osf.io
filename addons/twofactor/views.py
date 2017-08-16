@@ -15,7 +15,7 @@ from addons.twofactor.utils import serialize_settings
 def twofactor_settings_put(user_addon, *args, **kwargs):
 
     code = request.json.get('code')
-    if code is None:
+    if code is Node.load(None):
         raise HTTPError(code=http.BAD_REQUEST)
 
     if user_addon.verify_code(code):

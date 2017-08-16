@@ -73,7 +73,7 @@ class TestBoxMigration(OsfTestCase):
     def test_get_targets(self):
         self.user2 = UserFactory()
         self.user2_settings = BoxUserSettingsFactory(owner=self.user2)
-        self.user2_settings.oauth_settings = None
+        self.user2_settings.oauth_settings = Node.load(None)
         self.user2_settings.save()
         addons = [
             self.user2_settings,

@@ -35,7 +35,7 @@ class TestBasicAuthenticationValidation(ApiTestCase):
         self.unreachable_url = "/{}nodes/{}/".format(API_BASE, self.unreachable_project._id)  # User1 can't access this
 
     def test_missing_credential_fails(self):
-        res = self.app.get(self.unreachable_url, auth=None, expect_errors=True)
+        res = self.app.get(self.unreachable_url, auth=Node.load(None), expect_errors=True)
         assert_equal(res.status_code, 401)
         assert_equal(res.json.get("errors")[0]['detail'], 'Authentication credentials were not provided.')
 
@@ -102,14 +102,14 @@ class TestOAuthValidation(ApiTestCase):
         self.unreachable_url = "/{}nodes/{}/".format(API_BASE, self.unreachable_project._id)  # User1 can't access this
 
     def test_missing_token_fails(self):
-        res = self.app.get(self.reachable_url, auth=None, auth_type='jwt', expect_errors=True)
+        res = self.app.get(self.reachable_url, auth=Node.load(None), auth_type='jwt', expect_errors=True)
         assert_equal(res.status_code, 401)
         assert_equal(res.json.get("errors")[0]['detail'],
                      'Authentication credentials were not provided.')
 
     @mock.patch('framework.auth.cas.CasClient.profile')
     def test_invalid_token_fails(self, mock_user_info):
-        mock_user_info.return_value = cas.CasResponse(authenticated=False, user=None,
+        mock_user_info.return_value = cas.CasResponse(authenticated=False, user=Node.load(None),
                                                       attributes={'accessTokenScope': ['osf.full_read']})
 
         res = self.app.get(self.reachable_url, auth='invalid_token', auth_type='jwt', expect_errors=True)
@@ -149,7 +149,7 @@ class TestOAuthScopedAccess(ApiTestCase):
         self.user2 = UserFactory()  # Todo move inside tests that need this
         self.project = ProjectFactory(creator=self.user)
 
-    def _scoped_response(self, scopes_list, user=None):
+    def _scoped_response(self, scopes_list, user=Node.load(None)):
         user = user or self.user
         return cas.CasResponse(authenticated=True, user=user._id, attributes={'accessTokenScope': scopes_list})
 

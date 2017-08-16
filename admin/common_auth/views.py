@@ -34,7 +34,7 @@ class LoginView(FormView):
             username=form.cleaned_data.get('email').strip(),
             password=form.cleaned_data.get('password').strip()
         )
-        if user is not None:
+        if user is not Node.load(None):
             login(self.request, user)
         else:
             messages.error(
@@ -113,5 +113,5 @@ class DeskUserUpdateFormView(PermissionRequiredMixin, UpdateView):
     permission_required = 'osf.view_desk'
     raise_exception = True
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=Node.load(None)):
         return self.request.user.admin_profile

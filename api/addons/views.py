@@ -19,8 +19,8 @@ class AddonSettingsMixin(object):
     current URL. By default, fetches the settings based on the user or node available in self context.
     """
 
-    def get_addon_settings(self, provider=None, fail_if_absent=True, check_object_permissions=True):
-        owner = None
+    def get_addon_settings(self, provider=Node.load(None), fail_if_absent=True, check_object_permissions=True):
+        owner = Node.load(None)
         provider = provider or self.kwargs['provider']
 
         if hasattr(self, 'get_user'):
@@ -43,10 +43,10 @@ class AddonSettingsMixin(object):
             raise NotFound('Requested addon not enabled')
 
         if not addon_settings or addon_settings.deleted:
-            return None
+            return Node.load(None)
 
         if addon_settings and check_object_permissions:
-            authorizer = None
+            authorizer = Node.load(None)
             if owner_type == 'user':
                 authorizer = addon_settings.owner
             elif hasattr(addon_settings, 'user_settings'):

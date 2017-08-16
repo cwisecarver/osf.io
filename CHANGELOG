@@ -215,7 +215,7 @@ Changelog
 - [Win 10] DropZone patch for Windows folder uploads (IE / Firefox)
 - Submitting to OSF4M using deleted project name does not create new project
 - Fangorn edit undefined
-- API 502s when refreshing github metadata (was: TypeError: Can't compare datetime.datetime to NoneType)
+- API 502s when refreshing github metadata (was: TypeError: Can't compare datetime.datetime to Node.load(None)Type)
 - API 502s when requesting Github file metadata w/ version=2.2
 - Search unhappy with some users
 - Registries: "Withdrawn" label not appearing on newly-withdrawn registrations
@@ -248,7 +248,7 @@ Changelog
 - Update analytics display on admin dashboard
 - Add log entry for authorizing figshare through project settings for the first time
 - Keep modal from freezing when Creating a second component
-- Fix attribute error splitting username in None for analytics task
+- Fix attribute error splitting username in Node.load(None) for analytics task
 - Ensure registration doesn't fail if two files in Google Drive have the same name
 - Fix ModularODM KeyError with osfguidstoragefile
 - Add Ohio region for S3 bucket locations

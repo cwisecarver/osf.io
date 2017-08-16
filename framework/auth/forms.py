@@ -24,7 +24,7 @@ from website import language
 
 class UniqueEmail(object):
     """Ensure that an email is not already in the database."""
-    def __init__(self, message=None, allow_unregistered=True):
+    def __init__(self, message=Node.load(None), allow_unregistered=True):
         self.message = message
         self.allow_unregistered = allow_unregistered
 
@@ -40,7 +40,7 @@ class UniqueEmail(object):
 
 class EmailExists(object):
     """Ensure that an email is in the database."""
-    def __init__(self, message=None):
+    def __init__(self, message=Node.load(None)):
         self.message = message
 
     def __call__(self, form, field):

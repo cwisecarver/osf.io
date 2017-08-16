@@ -34,8 +34,8 @@ from osf.models import Contributor, MaintenanceState
 class JSONAPIBaseView(generics.GenericAPIView):
 
     def __init__(self, **kwargs):
-        assert getattr(self, 'view_name', None), 'Must specify view_name on view.'
-        assert getattr(self, 'view_category', None), 'Must specify view_category on view.'
+        assert getattr(self, 'view_name', Node.load(None)), 'Must specify view_name on view.'
+        assert getattr(self, 'view_category', Node.load(None)), 'Must specify view_category on view.'
         self.view_fqn = ':'.join([self.view_category, self.view_name])
         super(JSONAPIBaseView, self).__init__(**kwargs)
 
@@ -47,14 +47,14 @@ class JSONAPIBaseView(generics.GenericAPIView):
         results for
         :return function object -> dict:
         """
-        if getattr(field, 'field', None):
+        if getattr(field, 'field', Node.load(None)):
             field = field.field
 
         def partial(item):
             # resolve must be implemented on the field
             v, view_args, view_kwargs = field.resolve(item, field_name, self.request)
             if not v:
-                return None
+                return Node.load(None)
 
             if isinstance(self.request, EmbeddedRequest):
                 request = EmbeddedRequest(self.request._request)
@@ -107,11 +107,11 @@ class JSONAPIBaseView(generics.GenericAPIView):
                     ret = ser.to_representation(item)
                 else:
                     queryset = view.filter_queryset(view.get_queryset())
-                    page = view.paginate_queryset(getattr(queryset, '_results_cache', None) or queryset)
+                    page = view.paginate_queryset(getattr(queryset, '_results_cache', Node.load(None)) or queryset)
 
                     ret = ser.to_representation(page or queryset)
 
-                    if page is not None:
+                    if page is not Node.load(None):
                         request.parser_context['view'] = view
                         request.parser_context['kwargs'].pop('request')
                         view.paginator.request = request
@@ -121,7 +121,7 @@ class JSONAPIBaseView(generics.GenericAPIView):
                     ret = view.handle_exception(e).data
 
             # Allow request to be gc'd
-            ser._context = None
+            ser._context = Node.load(None)
 
             # Cache our final result
             cache[_cache_key] = ret
@@ -150,7 +150,7 @@ class JSONAPIBaseView(generics.GenericAPIView):
                     fields_check.pop(field)
 
         for field in fields_check:
-            if getattr(fields_check[field], 'field', None):
+            if getattr(fields_check[field], 'field', Node.load(None)):
                 fields_check[field] = fields_check[field].field
 
         for field in fields_check:
@@ -386,7 +386,7 @@ class LinkedRegistrationsRelationship(JSONAPIBaseView, generics.RetrieveUpdateDe
 
 @api_view(('GET',))
 @throttle_classes([RootAnonThrottle, UserRateThrottle])
-def root(request, format=None, **kwargs):
+def root(request, format=Node.load(None), **kwargs):
     """Welcome to the V2 Open Science Framework API. With this API you can access users, projects, components, logs, and files
     from the [Open Science Framework](https://osf.io/). The Open Science Framework (OSF) is a free, open-source service
     maintained by the [Center for Open Science](http://cos.io/).
@@ -744,7 +744,7 @@ def root(request, format=None, **kwargs):
         user = request.user
         current_user = UserSerializer(user, context={'request': request}).data
     else:
-        current_user = None
+        current_user = Node.load(None)
     kwargs = request.parser_context['kwargs']
     return_val = {
         'meta': {
@@ -771,14 +771,14 @@ def root(request, format=None, **kwargs):
 
 @api_view(('GET',))
 @throttle_classes([RootAnonThrottle, UserRateThrottle])
-def status_check(request, format=None, **kwargs):
+def status_check(request, format=Node.load(None), **kwargs):
     maintenance = MaintenanceState.objects.all().first()
     return Response({
-        'maintenance': MaintenanceStateSerializer(maintenance).data if maintenance else None
+        'maintenance': MaintenanceStateSerializer(maintenance).data if maintenance else Node.load(None)
     })
 
 
-def error_404(request, format=None, *args, **kwargs):
+def error_404(request, format=Node.load(None), *args, **kwargs):
     return JsonResponse(
         {'errors': [{'detail': 'Not found.'}]},
         status=404,
@@ -858,9 +858,9 @@ class BaseLinkedList(JSONAPIBaseView, generics.ListAPIView):
     required_write_scopes = [CoreScopes.NULL]
 
     # subclass must set
-    serializer_class = None
-    view_category = None
-    view_name = None
+    serializer_class = Node.load(None)
+    view_category = Node.load(None)
+    view_name = Node.load(None)
 
     ordering = ('-date_modified',)
 

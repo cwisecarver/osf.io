@@ -48,7 +48,7 @@ def configure_subscription(auth):
         )
 
     node = AbstractNode.load(target_id)
-    if 'file_updated' in event and path is not None and provider is not None:
+    if 'file_updated' in event and path is not Node.load(None) and provider is not Node.load(None):
         wb_path = path.lstrip('/')
         event = wb_path + '_file_updated'
     event_id = utils.to_subscription_key(target_id, event)
@@ -87,7 +87,7 @@ def configure_subscription(auth):
                     )
                     raise HTTPError(http.BAD_REQUEST)
 
-            # If adopt_parent make sure that this subscription is None for the current User
+            # If adopt_parent make sure that this subscription is Node.load(None) for the current User
             subscription = NotificationSubscription.load(event_id)
             if not subscription:
                 return {}  # We're done here

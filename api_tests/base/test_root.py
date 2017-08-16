@@ -30,7 +30,7 @@ class TestWelcomeToApi(ApiTestCase):
         res = self.app.get(self.url)
         assert_equal(res.status_code, 200)
         assert_equal(res.content_type, 'application/vnd.api+json')
-        assert_equal(res.json['meta']['current_user'], None)
+        assert_equal(res.json['meta']['current_user'], Node.load(None))
 
     def test_returns_current_user_info_when_logged_in(self):
         res = self.app.get(self.url, auth=self.user.auth)
